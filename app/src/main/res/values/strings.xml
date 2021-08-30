@@ -1,0 +1,85 @@
+<resources>
+    <string name="app_name">Pokemon Type Calculator</string>
+    <string name="pokemon_type_calculator">Pokemon Type Calculator</string>
+    <string name="initial_prompt">Please select a POV.</string>
+    <string name="attacking_prompt">What type is the attack?</string>
+    <string name="defending_prompt">What type is the defender?</string>
+    <string name="table_header_attacking_part_1">When\u0020</string>
+    <string name="table_header_attacking_part_2">\u0020attacks ______:</string>
+    <string name="table_header_defending_part_1">When ______ attacks\u0020</string>
+    <string name="table_header_defending_part_2">/</string>
+    <string name="table_header_defending_part_3">:</string>
+    <string name="table_header_defending">When %1$s attacks %2$s:</string>
+    <string name="move_type">Move type</string>
+    <string name="first_type">First type</string>
+    <string name="second_type">Second type</string>
+    <string name="bug">Bug</string>
+    <string name="dark">Dark</string>
+    <string name="dragon">Dragon</string>
+    <string name="electric">Electric</string>
+    <string name="fairy">Fairy</string>
+    <string name="fighting">Fighting</string>
+    <string name="fire">Fire</string>
+    <string name="flying">Flying</string>
+    <string name="ghost">Ghost</string>
+    <string name="grass">Grass</string>
+    <string name="ground">Ground</string>
+    <string name="ice">Ice</string>
+    <string name="normal">Normal</string>
+    <string name="poison">Poison</string>
+    <string name="psychic">Psychic</string>
+    <string name="rock">Rock</string>
+    <string name="steel">Steel</string>
+    <string name="water">Water</string>
+    <string name="pov">POV:</string>
+    <string name="multiplier">x\u0020</string>
+    <string name="x">x ?</string>
+    <string name="does_not_exist_disclaimer">Just as a heads up, there is currently no Pokémon with this type combination.</string>
+    <string-array name="pov_spinner_options">
+        <item>Attacking or defending?</item>
+        <item>Attacking (1 type)</item>
+        <item>Defending (1 or 2 types)</item>
+    </string-array>
+    <string-array name="spinner_type_options_1">
+        <item>(choose)</item>
+        <item>Bug</item>
+        <item>Dark</item>
+        <item>Dragon</item>
+        <item>Electric</item>
+        <item>Fairy</item>
+        <item>Fighting</item>
+        <item>Fire</item>
+        <item>Flying</item>
+        <item>Ghost</item>
+        <item>Grass</item>
+        <item>Ground</item>
+        <item>Ice</item>
+        <item>Normal</item>
+        <item>Poison</item>
+        <item>Psychic</item>
+        <item>Rock</item>
+        <item>Steel</item>
+        <item>Water</item>
+    </string-array>
+    <string-array name="spinner_type_options_2">
+        <item>[none]</item>
+        <item>Bug</item>
+        <item>Dark</item>
+        <item>Dragon</item>
+        <item>Electric</item>
+        <item>Fairy</item>
+        <item>Fighting</item>
+        <item>Fire</item>
+        <item>Flying</item>
+        <item>Ghost</item>
+        <item>Grass</item>
+        <item>Ground</item>
+        <item>Ice</item>
+        <item>Normal</item>
+        <item>Poison</item>
+        <item>Psychic</item>
+        <item>Rock</item>
+        <item>Steel</item>
+        <item>Water</item>
+    </string-array>
+</resources>
