@@ -1,13 +1,10 @@
 package com.example.pokemontypecalculator
 
-import android.graphics.Color
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -29,6 +26,10 @@ class MainActivity : AppCompatActivity() {
     // And also see if you have lateinit vars after that refactor, see if you can get rid of the lateinit property
     // of any remaining class-level variables
     private lateinit var typeMatchups: TypeMatchups
+    // private lateinit var pokemonType: PokemonType
+
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    private lateinit var gameSwitch: Switch
 
     private lateinit var povSpinnerOptions: Array<String>
 
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     var spinnerTypeOptions1 = arrayOf<String>()
 
     // @@@ktg break this out into several smaller functions that get called from onCreate
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide()
         super.onCreate(savedInstanceState)
@@ -48,8 +50,8 @@ class MainActivity : AppCompatActivity() {
         val spinnerTypeOptions2 = resources.getStringArray(R.array.spinner_type_options_2)
         // Gathering spinners via bindings
         val povSpinner = binding.povSpinner
-        val type1Spinner = binding.type1Spinner
-        val type2Spinner = binding.type2Spinner
+        val defendingType1Spinner = binding.type1Spinner
+        val defendingType2Spinner = binding.type2Spinner
         // Gathering strings (prompts, headers, labels) via bindings
         val initialPrompt = binding.initialPrompt
         val typeSelectionPrompt = binding.secondPrompt
@@ -60,6 +62,12 @@ class MainActivity : AppCompatActivity() {
         val type1SpinnerAndLabel = binding.type1SpinnerAndLabel
         val type2SpinnerAndLabel = binding.type2SpinnerAndLabel
 
+        // Retrieve .json files
+        fetchJson()
+
+
+        // Gathering switch via bindings
+        gameSwitch = binding.gameSwitch
 
         //@@@ktg convert your TableView to a GridLayout
         // You'll have to do the enum conversion first
@@ -86,18 +94,21 @@ class MainActivity : AppCompatActivity() {
 
         // Gives the spinners their options
         setupSpinner(povSpinnerOptions, povSpinner)
-        setupSpinner(spinnerTypeOptions1, type1Spinner)
-        setupSpinner(spinnerTypeOptions2, type2Spinner)
+        setupSpinner(spinnerTypeOptions1, defendingType1Spinner)
+        setupSpinner(spinnerTypeOptions2, defendingType2Spinner)
 
         var povSpinnerSelectedValue = 0
         var type1SelectedValue = 0
         var type2SelectedValue = 0
         var listOfInteractions: MutableList<Double>
+        var stringListOfInteractions: MutableList<String> = doubleListToStringList(ones())
 
         // When the user selects an option in the povSpinner, onItemSelectedListener calls this object
         povSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 povSpinnerSelectedValue = p2
+                tableHeader.visibility = View.INVISIBLE
+                doesNotExistDisclaimer.visibility = View.INVISIBLE
                 // When the app starts, povSpinner is at p2 == 0 by default
                 if (povSpinnerSelectedValue == 0) {
                     // Makes initialPrompt visible
@@ -116,8 +127,8 @@ class MainActivity : AppCompatActivity() {
                     // The spinner and label for the first type become visible
                     type1SpinnerAndLabel.visibility = View.VISIBLE
                     // Resets the values for the type spinners
-                    type1Spinner.setSelection(0)
-                    type2Spinner.setSelection(0)
+                    defendingType1Spinner.setSelection(0)
+                    defendingType2Spinner.setSelection(0)
                     // Hides the heading for the table
                     tableHeader.visibility = View.INVISIBLE
                 }
@@ -150,67 +161,78 @@ class MainActivity : AppCompatActivity() {
             //onNothingSelected will never be called, but onItemSelectedListener will call an error if it does not exist
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+        
+        gameSwitch.setOnCheckedChangeListener { compoundButton, onSwitch ->
+            if (povSpinnerSelectedValue == 1) {
+                listOfInteractions = attackingEffectivenessCalculator(type1SelectedValue)
+                stringListOfInteractions = doubleListToStringList(listOfInteractions)
+            }
+            if (povSpinnerSelectedValue == 2) {
+                if (type2SelectedValue == 0 || type1SelectedValue == type2SelectedValue) {
+                    listOfInteractions = defendingEffectivenessCalculator(type1SelectedValue)
+                    stringListOfInteractions = doubleListToStringList(listOfInteractions)
+                }
+                if (type2SelectedValue != 0 && type1SelectedValue != type2SelectedValue) {
+                    stringListOfInteractions =
+                        defendingWithTwoTypesCalculator(type1SelectedValue, type2SelectedValue)
+                }
+            }
+            changeCellColors(stringListOfInteractions)
+            changeCellValues(stringListOfInteractions)
+            if (onSwitch) {
+                gameSwitch.text = resources.getString((R.string.pogo))
+            } else {
+                gameSwitch.text = resources.getString((R.string.mainGame))
+            }
+        }
 
         // When the user selects an option in the first type spinner, onItemSelectedListener calls this object
-        type1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        defendingType1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             //@@@ktg duplidate code = function-ize
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 type1SelectedValue = p2
-                // Makes the table header invisible
+
+                // Table header visibility
                 if (type1SelectedValue == 0 && type2SelectedValue == 0) {
                     tableHeader.visibility = View.INVISIBLE
                 }
-                // Makes the table header visible
                 if (type1SelectedValue != 0 || type2SelectedValue != 0) {
                     tableHeader.visibility = View.VISIBLE
                 }
+
                 // If attacking
                 if (povSpinnerSelectedValue == 1) {
                     // Changes the tableHeader text to the attacking prompt if povSpinner is set to "Attacking (1 type)"
                     (resources.getString(R.string.table_header_attacking_part_1) + spinnerTypeOptions1[p2] + resources.getString(
                         R.string.table_header_attacking_part_2
                     )).also { tableHeader.text = it }
-                    // Gets the list of type interactions
-                    listOfInteractions = attackingEffectivenessCalculator(p2)
-                    // Places the list into the graph
-                    for (i in 0 until 18) {
-                        arrayWithCellID[i].text = listOfInteractions[i].toString()
-                        when (listOfInteractions[i]) {
-                            1.0 -> makeCellEffective(i)
-                            1.6 -> makeCellSuperEffective(i)
-                            0.625 -> makeCellNotVeryEffective(i)
-                            0.390625 -> makeCellDoesNotEffect(i)
-                        }
-                    }
+
+                    listOfInteractions = attackingEffectivenessCalculator(type1SelectedValue)
+                    stringListOfInteractions = doubleListToStringList(listOfInteractions)
+                    changeCellValues(stringListOfInteractions)
+                    changeCellColors(stringListOfInteractions)
                 }
+
                 // If defending
                 if (povSpinnerSelectedValue == 2) {
                     if (type2SelectedValue == 0 || type1SelectedValue == type2SelectedValue) {
-                            doesNotExistDisclaimer.visibility = View.INVISIBLE
+                        doesNotExistDisclaimer.visibility = View.INVISIBLE
                         // Adjusts table heading
                         (resources.getString(R.string.table_header_defending_part_1) +
                                 spinnerTypeOptions1[type1SelectedValue] +
                                 resources.getString(R.string.table_header_defending_part_3)).also {
                             tableHeader.text = it
                         }
-                        // Gets the coefficients for the matchup
-                        listOfInteractions = defendingEffectivenessCalculator(p2)
-                        // Places the coefficients in the table
-                        for (i in 0 until 18) {
-                            arrayWithCellID[i].text = listOfInteractions[i].toString()
-                            when (listOfInteractions[i]) {
-                                1.0 -> makeCellEffective(i)
-                                1.6 -> makeCellSuperEffective(i)
-                                0.625 -> makeCellNotVeryEffective(i)
-                                0.390625 -> makeCellDoesNotEffect(i)
-                            }
-                        }
-                        // Updates the tableHeader text to reflect a second type
+                        listOfInteractions = defendingEffectivenessCalculator(type1SelectedValue)
+                        stringListOfInteractions = doubleListToStringList(listOfInteractions)
+                        changeCellValues(stringListOfInteractions)
+                        changeCellColors(stringListOfInteractions)
                     }
+
                     if (type2SelectedValue != 0 && type1SelectedValue != type2SelectedValue) {
-                            if (checkIfTypingExists(type1SelectedValue, type2SelectedValue)) {
-                                doesNotExistDisclaimer.visibility = View.VISIBLE
-                            }
+                        if (checkIfTypingExists(type1SelectedValue, type2SelectedValue)) {
+                            doesNotExistDisclaimer.visibility = View.VISIBLE
+                        } else {doesNotExistDisclaimer.visibility = View.INVISIBLE}
                         // Adjusts table heading
                         (resources.getString(R.string.table_header_defending_part_1) +
                                 spinnerTypeOptions1[type1SelectedValue] +
@@ -219,49 +241,10 @@ class MainActivity : AppCompatActivity() {
                                 resources.getString(R.string.table_header_defending_part_3)).also {
                             tableHeader.text = it
                         }
-                        // Gets the coefficients for the matchup
-                        var listOfInteractionsType1 = defendingEffectivenessCalculator(type1SelectedValue)
-                        var listOfInteractionsType2 = defendingEffectivenessCalculator(type2SelectedValue)
-
-                        var listOfInteractions: MutableList<Double> = arrayListOf()
-                        for (i in 0 until 18) {
-                            // Determines the net coefficient from both types
-                            when (listOfInteractionsType1[i]) {
-                                1.0 -> listOfInteractions.add(listOfInteractionsType2[i])
-                                1.6 -> when (listOfInteractionsType2[i]) {
-                                    0.390625 -> listOfInteractions.add(0.625)
-                                    0.625 -> listOfInteractions.add(1.0)
-                                    1.0 -> listOfInteractions.add(1.6)
-                                    1.6 -> listOfInteractions.add(2.56)
-                                }
-                                0.625 -> when (listOfInteractionsType2[i]) {
-                                    0.390625 -> listOfInteractions.add(0.244140625)
-                                    // The value below is changed to reflect the main game.
-                                    // In PoGo, 2 types that are not very effective combined yield 1/4 damage, not zero damage.
-                                    0.625 -> listOfInteractions.add(.40)
-                                    1.0 -> listOfInteractions.add(0.625)
-                                    1.6 -> listOfInteractions.add(1.0)
-                                }
-                                0.390625 -> when (listOfInteractionsType2[i]) {
-                                    0.390625 -> listOfInteractions.add(.15258789062) // This permutation cannot exist
-                                    0.625 -> listOfInteractions.add(.244140625)
-                                    1.0 -> listOfInteractions.add(0.390625)
-                                    1.6 -> listOfInteractions.add(0.625)
-                                }
-                            }
-                            // Places the coefficients in the table
-                            arrayWithCellID[i].text = listOfInteractions[i].toString()
-                            when (listOfInteractions[i]) {
-                                1.0 -> makeCellEffective(i)
-                                1.6 -> makeCellSuperEffective(i)
-                                2.56 -> makeCellUltraSuperEffective(i)
-                                0.625 -> makeCellNotVeryEffective(i)
-                                0.40 -> makeCellUltraNotVeryEffective(i)
-                                0.390625 -> makeCellDoesNotEffect(i)
-                                0.224140625 -> makeCellDoesNotEffect(i)
-                                0.15258789062 -> makeCellDoesNotEffect(i) // This permutation cannot exist
-                            }
-                        }
+                        stringListOfInteractions =
+                            defendingWithTwoTypesCalculator(type1SelectedValue, type2SelectedValue)
+                        changeCellValues(stringListOfInteractions)
+                        changeCellColors(stringListOfInteractions)
                     }
                 }
             }
@@ -269,15 +252,22 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-        // When the user selects an option in the second type spinner, onItemSelectedListener calls this object
-        type2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        // Called when user selects an option in the second type spinner
+        defendingType2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             // When an option is selected
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 type2SelectedValue = p2
-                // If the second type is [none] or if both types are the same
+                if (checkIfTypingExists(type1SelectedValue, type2SelectedValue)) {
+                    doesNotExistDisclaimer.visibility = View.VISIBLE
+                } else {doesNotExistDisclaimer.visibility = View.INVISIBLE}
+                // Table header formatting
                 if (type2SelectedValue != 0 && type1SelectedValue == 0) {
                     // Changes the tableHeader text to the attacking prompt if povSpinner is set to "Attacking (1 type)"
-                    tableHeader.text = resources.getString(R.string.table_header_defending, "_____", spinnerTypeOptions2[type2SelectedValue])
+                    tableHeader.text = resources.getString(
+                        R.string.table_header_defending,
+                        "_____",
+                        spinnerTypeOptions2[type2SelectedValue]
+                    )
                 }
                 if (type2SelectedValue == 0 || type1SelectedValue == type2SelectedValue) {
                     // Updates the table header so that there is no "/" to separate the dual typing, since there is only the first type
@@ -288,19 +278,11 @@ class MainActivity : AppCompatActivity() {
                             spinnerTypeOptions1[type1SelectedValue]
                         )
                     // Gets the coefficients for the matchup
-                    listOfInteractions = defendingEffectivenessCalculator(p2)
-                    // Places the coefficients in the table
-                    for (i in 0 until 18) {
-                        arrayWithCellID[i].text = listOfInteractions[i].toString()
-                        when (listOfInteractions[i]) {
-                            1.0 -> makeCellEffective(i)
-                            1.6 -> makeCellSuperEffective(i)
-                            0.625 -> makeCellNotVeryEffective(i)
-                            0.390625 -> makeCellDoesNotEffect(i)
-                        }
-                    }
+                    listOfInteractions = defendingEffectivenessCalculator(type2SelectedValue)
+                    stringListOfInteractions = doubleListToStringList(listOfInteractions)
+                    changeCellColors(stringListOfInteractions)
+                    changeCellValues(stringListOfInteractions)
                 }
-                //attackEffectivenessCalculator(type1SelectedValue,type2SelectedValue)
                 if (type2SelectedValue != 0 && type1SelectedValue != type2SelectedValue) {
                     // Updates the table header by adding a "/" to separate the dual types
                     (resources.getString(R.string.table_header_defending_part_1) +
@@ -310,78 +292,173 @@ class MainActivity : AppCompatActivity() {
                             resources.getString(R.string.table_header_defending_part_3)).also {
                         tableHeader.text = it
                     }
-                    var listOfInteractionsType1 = defendingEffectivenessCalculator(type1SelectedValue)
-                    var listOfInteractionsType2 = defendingEffectivenessCalculator(type2SelectedValue)
-                    var listOfInteractions: MutableList<Double> = arrayListOf()
-                    // @@@ktg find a way to simplify this
-                    // Just use PoGo numbers
-                    for (i in 0 until 18) {
-                        // Determines the net coefficient from both types
-                        when (listOfInteractionsType1[i]) {
-                            1.0 -> listOfInteractions.add(listOfInteractionsType2[i])
-                            1.6 -> when (listOfInteractionsType2[i]) {
-                                0.390625 -> listOfInteractions.add(0.625)
-                                0.625 -> listOfInteractions.add(1.0)
-                                1.0 -> listOfInteractions.add(1.6)
-                                1.6 -> listOfInteractions.add(2.56)
-                            }
-                            0.625 -> when (listOfInteractionsType2[i]) {
-                                0.390625 -> listOfInteractions.add(0.244140625)
-                                // The value below is changed to reflect the main game.
-                                // In PoGo, 2 types that are not very effective combined yield 1/4 damage, not zero damage.
-                                0.625 -> listOfInteractions.add(.40)
-                                1.0 -> listOfInteractions.add(0.625)
-                                1.6 -> listOfInteractions.add(1.0)
-                            }
-                            0.390625 -> when (listOfInteractionsType2[i]) {
-                                0.390625 -> listOfInteractions.add(.15258789062) // This permutation cannot exist
-                                0.625 -> listOfInteractions.add(.244140625)
-                                1.0 -> listOfInteractions.add(0.390625)
-                                1.6 -> listOfInteractions.add(0.625)
-                            }
-                        }
-                        // Places the coefficients in the table
-                        arrayWithCellID[i].text = listOfInteractions[i].toString()
-                        when (listOfInteractions[i]) {
-                            1.0 -> makeCellEffective(i)
-                            1.6 -> makeCellSuperEffective(i)
-                            2.56 -> makeCellUltraSuperEffective(i)
-                            0.625 -> makeCellNotVeryEffective(i)
-                            0.40 -> makeCellUltraNotVeryEffective(i)
-                            0.390625 -> makeCellDoesNotEffect(i)
-                            0.244140625 -> makeCellDoesNotEffect(i)
-                            0.15258789062 -> makeCellDoesNotEffect(i) // This permutation cannot exist
-                        }
-                    }
+                    stringListOfInteractions =
+                        defendingWithTwoTypesCalculator(type1SelectedValue, type2SelectedValue)
+                    changeCellColors(stringListOfInteractions)
+                    changeCellValues(stringListOfInteractions)
                 }
-
             }
-
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
+    } // End of onCreate
 
-        fetchJson()
+    //This function is in onCreate because it uses gameSwitch, which is bound (via .binding) in onCreate
+    fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<String> {
+        val defenderType1List = defendingEffectivenessCalculator(type1)
+        val defenderType2List = defendingEffectivenessCalculator(type2)
+        val defenderNetList: MutableList<String> = arrayListOf()
+        // @@@ktg find a way to simplify this
+        // Just use PoGo numbers
+        for (i in 0 until 18) {
+
+            // Ultra super effective
+            // (4x or 2.56x)
+            // (1 possible permutation)
+            if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 1.6)) {
+                defenderNetList.add(Effectiveness.USE.impact)
+            }
+
+            // Super effective
+            // (2x or 1.6x)
+            // (2 possible permutations)
+            if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 1.0)
+                || (defenderType1List[i] == 1.0) && (defenderType2List[i] == 1.6)
+            ) {
+                defenderNetList.add(Effectiveness.SE.impact)
+            }
+
+            // Effective
+            // (1x or 1x)
+            // (3 possible permutations)
+            if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 0.625)
+                || (defenderType1List[i] == 1.0) && (defenderType2List[i] == 1.0)
+                || (defenderType1List[i] == 0.625) && (defenderType2List[i] == 1.6)
+            ) {
+                defenderNetList.add(Effectiveness.E.impact)
+            }
+
+            // Not very effective
+            // (.5x or .625x)
+            // (2 possible permutations)
+            if (((defenderType1List[i] == 1.6) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
+                || ((defenderType1List[i] == 1.0) && (defenderType2List[i] == 0.625))
+                || ((defenderType1List[i] == 0.625) && (defenderType2List[i] == 1.0))
+                || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 1.6) && (!gameSwitch.isChecked))
+            ) {
+                defenderNetList.add(Effectiveness.NVE.impact)
+            }
+
+            // Type interactions lower than .5x are different in Pokemon Go than the main game
+
+            // Ultra not very effective
+            // (.25x or .390625x)
+            // (1 permutation in main game, 2 in PoGo)
+            if (((defenderType1List[i] == 0.625) && (defenderType2List[i] == 0.625))
+                || ((defenderType1List[i] == 1.0) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
+                || ((defenderType1List[i] == .390625) && (defenderType2List[i] == 1.0) && (gameSwitch.isChecked))
+            ) {
+                defenderNetList.add(Effectiveness.UNVE.impact)
+            }
+
+            // Does not effect
+            // (0x in main game, not possible in PoGo)
+            // (7 permutations for main game, 0 in PoGo)
+            if (((defenderType1List[i] == 0.390625) && (!gameSwitch.isChecked))
+                || ((defenderType2List[i] == 0.390625) && (!gameSwitch.isChecked))
+            ) {
+                defenderNetList.add(Effectiveness.DNE.impact)
+            }
+
+            // Ultra does not effect
+            // (Not possible in main game, .244x in PoGo)
+            // (0 permutations in main game, 2 in PoGo)
+            if (((defenderType1List[i] == 0.625) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
+                || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 0.625) && (gameSwitch.isChecked))
+            ) {
+                defenderNetList.add(Effectiveness.UDNE.impact)
+            }
+        }
+        return (defenderNetList)
+    }
+
+    //This function is in onCreate because it uses gameSwitch, which is bound (via .binding) in onCreate
+    fun doubleListToStringList(mutableList: MutableList<Double>): MutableList<String> {
+        val stringList: MutableList<String> = mutableListOf()
+        for (i in 0 until 18) {
+            when (mutableList[i]) {
+                1.6 -> stringList.add(Effectiveness.SE.impact)
+                1.0 -> stringList.add(Effectiveness.E.impact)
+                0.625 -> stringList.add(Effectiveness.NVE.impact)
+            }
+            if (gameSwitch.isChecked) {
+                when (mutableList[i]) {
+                    0.390625 -> stringList.add(Effectiveness.UNVE.impact)
+                }
+            } else {
+                when (mutableList[i]) {
+                    0.390625 -> stringList.add(Effectiveness.DNE.impact)
+                }
+            }
+        }
+        return stringList
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun changeCellValues(mutableList: MutableList<String>) {
+        for (i in 0 until 18) {
+            val textView = arrayWithCellID[i]
+            if (gameSwitch.isChecked == false) {
+                when (mutableList[i]) {
+                    "E" -> textView.text = "1.0"
+                    "SE" -> textView.text = "2.0"
+                    "USE" -> textView.text = "4.0"
+                    "NVE" -> textView.text = "0.5"
+                    "UNVE" -> textView.text = "0.25"
+                    "DNE" -> textView.text = "0"
+                }
+            } else {
+                when (mutableList[i]) {
+                    "E" -> textView.text = "1.0"
+                    "SE" -> textView.text = "1.6"
+                    "USE" -> textView.text = "2.56"
+                    "NVE" -> textView.text = "0.625"
+                    "UNVE" -> textView.text = "0.39"
+                    "UDNE" -> textView.text = "0.244"
+                }
+            }
+        }
+
 
         // End of onCreate
     }
 
-    private fun setupSpinner(spinnerOptions: Array<String>, spinner: Spinner) {
-        // Assigning the povSpinner options to an adapter value, which is then assigned to the povSpinner
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerOptions)
-        spinner.adapter = adapter
+    private fun ones(): MutableList<Double> {
+        val table = mutableListOf<Double>()
+        for (i in 0 until 18) {
+            table.add(1.0)
+        }
+        return table
     }
 
-    fun fetchJson() {
+    private fun setupSpinner(spinnerOptions: Array<String>, spinner: Spinner) {
+        // Assigning the povSpinner options to an adapter value, which is then assigned to the povSpinner
+        val spinnerAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerOptions)
+        spinner.adapter = spinnerAdapter
+    }
+
+    private fun fetchJson() {
         val url = "https://pogoapi.net/api/v1/type_effectiveness.json"
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient()
         client.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
-                val body = response?.body?.string()
+                val body = response.body?.string()
                 val gson = GsonBuilder().create()
                 typeMatchups = gson.fromJson(body, TypeMatchups::class.java)
             }
+
             override fun onFailure(call: Call, e: IOException) {
                 println("Failed to call request")
             }
@@ -391,53 +468,36 @@ class MainActivity : AppCompatActivity() {
     // Functions for changing the text in the table cells
     // @@@ktg all these functions look ~eerily~ similar - can we make one function that does all these things?
     // Probably need to add a couple parameters to do so
-    fun makeCellEffective(typeIndex: Int) {
-        val textView = arrayWithCellID[typeIndex]
-        textView.background = ContextCompat.getDrawable(this, R.color.x1color)
-        textView.setTextColor(getColor(R.color.black))
-        //textView.setTextColor(Color.parseColor("#000000")) //@@@ktg move colors to colors.xml
-    }
 
-    fun makeCellSuperEffective(typeIndex: Int) {
-        val textView = arrayWithCellID[typeIndex]
-        textView.text = "x 2" //@@@ktg move strings to strings.xml
-        textView.background = ContextCompat.getDrawable(this, R.color.x2color)
-        textView.setTextColor(Color.parseColor("#000000"))
-    }
-
-    fun makeCellUltraSuperEffective(typeIndex: Int) {
-        val textView = arrayWithCellID[typeIndex]
-        textView.text = "x 4"
-        textView.background = ContextCompat.getDrawable(this, R.color.x4color)
-        textView.setTextColor(Color.parseColor("#000000"))
-    }
-
-    fun makeCellNotVeryEffective(typeIndex: Int) {
-        val textView = arrayWithCellID[typeIndex]
-        textView.text = "x .5"
-        textView.background = ContextCompat.getDrawable(this, R.color.x_5color)
-        textView.setTextColor(Color.parseColor("#000000"))
-    }
-
-    fun makeCellUltraNotVeryEffective(typeIndex: Int) {
-        val textView = arrayWithCellID[typeIndex]
-        textView.text = "x .25"
-        textView.background = ContextCompat.getDrawable(this, R.color.x_25color)
-        textView.setTextColor(Color.parseColor("#000000"))
-    }
-
-    fun makeCellDoesNotEffect(typeIndex: Int) {
-        val textView = arrayWithCellID[typeIndex]
-        textView.text = "x 0"
-        textView.background = ContextCompat.getDrawable(this, R.color.x0color)
-        textView.setTextColor(Color.parseColor("#FFFFFF"))
+    // Turned six functions into two
+    // Added the mutable list as a parameter
+    fun changeCellColors(mutableList: MutableList<String>) {
+        for (i in 0 until 18) {
+            val textView = arrayWithCellID[i]
+            when (mutableList[i]) {
+                "E" -> textView.background = ContextCompat.getDrawable(this, R.color.x1color)
+                "SE" -> textView.background = ContextCompat.getDrawable(this, R.color.x2color)
+                "USE" -> textView.background = ContextCompat.getDrawable(this, R.color.x4color)
+                "NVE" -> textView.background = ContextCompat.getDrawable(this, R.color.x_5color)
+                "UNVE" -> textView.background = ContextCompat.getDrawable(this, R.color.x_25color)
+                "DNE" -> textView.background = ContextCompat.getDrawable(this, R.color.x0color)
+                "UDNE" -> textView.background = ContextCompat.getDrawable(this, R.color.UDNEColor)
+            }
+            if ((mutableList[i] == "DNE") || (mutableList[i] == "UDNE")) {
+                textView.setTextColor(getColor(R.color.white))
+            } else {
+                textView.setTextColor(getColor(R.color.black))
+            }
+        }
     }
 
     // @@@ktg yah nah
     // I would shoot you if you submitted this to PR
     // instantly
-    fun checkIfTypingExists (type1: Int, type2: Int): Boolean {
-        return (   (type1 == 13 && type2 == 12)
+
+    // @@@nap I will address this later; not a priority issue
+    fun checkIfTypingExists(type1: Int, type2: Int): Boolean {
+        return ((type1 == 13 && type2 == 12)
                 || (type1 == 13 && type2 == 14)
                 || (type1 == 13 && type2 == 1)
                 || (type1 == 13 && type2 == 16)
@@ -475,34 +535,21 @@ class MainActivity : AppCompatActivity() {
 
     // Functions for retrieving the matchup interactions
     // Returns a mutable list for how one type attacks all other types
+    // @@@ktg there's an easier way to instantiate a list of the same value
+    // hint: loops/in-line functions
     fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
         if (attacker == 0) {
-            // @@@ktg there's an easier way to instantiate a list of the same value
-                // hint: loops/in-line functions
-            return mutableListOf(
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            )
+            return ones()
         }
+        var dictOfSelectedTypes: Map<String, Double> = typeMatchups.Bug
+        // @@@ktg do some research into Enums - the whole project can be refactored (change how this works in code) a fair bit to use a Type enum
+        //use enum values as keys, so that when you loop through them
         val attackerType: String = spinnerTypeOptions1[attacker]
-        var dictOfSelectedTypes = typeMatchups.Bug
-        // @@@ktg do some research into Enums - the whole project can be refactored a fair bit to use a Type enum
+        /*for (type in pokemonType.type) {
+            if (attackerType == pokemonType.type) {
+                dictOfSelectedTypes = typeMatchups.TODO(Fix this)//
+            }
+        }*/
         if (attackerType == "Bug") {
             dictOfSelectedTypes = typeMatchups.Bug
         }
@@ -557,39 +604,30 @@ class MainActivity : AppCompatActivity() {
         if (attackerType == "Water") {
             dictOfSelectedTypes = typeMatchups.Water
         }
-        val listOfAttackingMatchupCoefficients: MutableList<Double> =
-            dictOfSelectedTypes.values.toMutableList()
-        return listOfAttackingMatchupCoefficients
+        return dictOfSelectedTypes.values.toMutableList()
     }
 
     // Returns a mutable list for how one type defends against all other types
     fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
         if (defender == 0) {
-            return mutableListOf(
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            )
+            return ones()
         }
-        var listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
+        val listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
         val defendingType: String = spinnerTypeOptions1[defender]
 
+        /*
+        // These lines of code simplify the ones following it, but I don't know how to
+        // restructure my data so that I can pull from it more effectively
+
+        for (type in pokemonType.type) {
+            listOfDefendingMatchupCoefficients.add(typeMatchups.type.getValue(defendingType))
+        }
+        TODO(Think on how to structure data to appropriately cut code down)
+
+        */
+
         // @@@ktg :thinking-face: enum eyah
+
         listOfDefendingMatchupCoefficients.add(typeMatchups.Bug.getValue(defendingType))
         listOfDefendingMatchupCoefficients.add(typeMatchups.Dark.getValue(defendingType))
         listOfDefendingMatchupCoefficients.add(typeMatchups.Dragon.getValue(defendingType))
@@ -610,7 +648,7 @@ class MainActivity : AppCompatActivity() {
         listOfDefendingMatchupCoefficients.add(typeMatchups.Water.getValue(defendingType))
         return listOfDefendingMatchupCoefficients
     }
-
+}
 //kevin's scratch
 /*
     enum class Types(name: String) {
@@ -659,5 +697,3 @@ data class DictEffectiveness(
         normalView.value = typeEffectiveness.normal
         poisonView.value = typeEffectiveness.poison
     }*/
-}
-
