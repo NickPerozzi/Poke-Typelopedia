@@ -34,7 +34,9 @@
     <string name="pov">POV:</string>
     <string name="multiplier">x\u0020</string>
     <string name="x">x ?</string>
-    <string name="does_not_exist_disclaimer">Just as a heads up, there is currently no Pokémon with this type combination.</string>
+    <string name="does_not_exist_disclaimer">Just as a heads up, there are currently no Pokémon with this type combination.</string>
+    <string name="pogo">Pokémon Go</string>
+    <string name="mainGame">Main Game</string>
     <string-array name="pov_spinner_options">
         <item>Attacking or defending?</item>
         <item>Attacking (1 type)</item>

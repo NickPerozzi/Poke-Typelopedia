@@ -4,16 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@drawable/main_header_selector">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="160dp"
         android:id="@+id/applogo"
-        android:src="@drawable/pokemon_type_calculator_take_1"/>
+        android:layout_width="wrap_content"
+        android:layout_height="130dp"
+        android:src="@drawable/pokemon_type_calculator_take_1" />
+
     <TextView
         android:id="@+id/initialPrompt"
         android:text="@string/initial_prompt"
@@ -136,9 +137,18 @@
         android:textStyle="bold"
         android:visibility="invisible" />
 
-
+    <Switch
+        android:id="@+id/gameSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:text="@string/mainGame"
+        android:textSize="20sp"
+        android:visibility="visible"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <!--Type table-->
+
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
