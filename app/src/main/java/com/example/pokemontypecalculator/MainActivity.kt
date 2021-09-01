@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var typeMatchups: TypeMatchups
     // private lateinit var pokemonType: PokemonType
 
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    @SuppressLint("UseSwitchCompatOrMaterialCode") //fvghcdfgh
     private lateinit var gameSwitch: Switch
 
     private lateinit var povSpinnerOptions: Array<String>
