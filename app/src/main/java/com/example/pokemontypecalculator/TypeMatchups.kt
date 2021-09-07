@@ -65,11 +65,11 @@ enum class PokemonType(val type: String) {
 }
 
 enum class Effectiveness (val impact: String) {
-    DNE("DNE"),
-    UNVE("UNVE"),
-    NVE("NVE"),
-    E("E"),
-    SE("SE"),
-    USE("USE"),
-    UDNE("UDNE")
+    DOES_NOT_EFFECT("DNE"),
+    ULTRA_NOT_VERY_EFFECTIVE("UNVE"),
+    NOT_VERY_EFFECTIVE("NVE"),
+    EFFECTIVE("E"),
+    SUPER_EFFECTIVE("SE"),
+    ULTRA_SUPER_EFFECTIVE("USE"),
+    ULTRA_DOES_NOT_EFFECT("UDNE")
 }

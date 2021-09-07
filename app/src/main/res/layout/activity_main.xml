@@ -11,11 +11,20 @@
     android:id="@+id/mainLinearLayout"
     tools:ignore="InvalidId">
 
-    <ImageView
-        android:id="@+id/applogo"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:src="@drawable/pokemon_type_calculator_take_1" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/applogo"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_weight="3"
+            android:contentDescription="@string/pok_mon_type_calculator_app_logo"
+            android:src="@drawable/pokemon_type_calculator_take_1" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/initialPrompt"
@@ -71,7 +80,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="invisible">
 
             <TextView
                 android:id="@+id/type1Label"
@@ -96,7 +106,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
-            android:visibility="visible">
+            android:visibility="invisible">
 
             <TextView
                 android:id="@+id/type2Label"
@@ -120,7 +130,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="invisible">
 
             <TextView
                 android:id="@+id/attackingTypeLabel"
@@ -150,7 +161,18 @@
         android:textAlignment="center"
         android:gravity="bottom"
         android:textStyle="italic"
-        android:visibility="invisible" />
+        android:visibility="gone"
+        tools:ignore="RtlCompat" />
+
+    <Switch
+        android:id="@+id/gameSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/mainGame"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <TextView
         android:id="@+id/tableHeader"
@@ -162,25 +184,17 @@
         android:textStyle="bold"
         android:visibility="invisible" />
 
-    <Switch
-        android:id="@+id/gameSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:text="@string/mainGame"
-        android:textSize="20sp"
-        android:visibility="visible"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <!--Type table-->
 
     <TableLayout
         android:id="@+id/typeTable"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="20dp"
         android:textSize="14sp"
-        android:gravity="bottom"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
         >
 
         <TableRow
@@ -547,7 +561,13 @@
 
     </TableLayout>
 
-
+    <ImageView
+        android:id="@+id/infoButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_weight="1"
+        android:layout_gravity="bottom"
+        android:src="@drawable/info_button_transparent"/>
 
 
 </LinearLayout>
