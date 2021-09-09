@@ -18,11 +18,12 @@
 
         <ImageView
             android:id="@+id/applogo"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_weight="3"
+            android:paddingTop="5dp"
             android:contentDescription="@string/pok_mon_type_calculator_app_logo"
-            android:src="@drawable/pokemon_type_calculator_take_1" />
+            android:src="@drawable/pokemon_typelopedia_logo" />
 
     </LinearLayout>
 
@@ -565,7 +566,6 @@
         android:id="@+id/infoButton"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_weight="1"
         android:layout_gravity="bottom"
         android:src="@drawable/info_button_transparent"/>
 

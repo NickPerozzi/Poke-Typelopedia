@@ -41,17 +41,30 @@
     <string name="pogo">Pokémon Go</string>
     <string name="mainGame">Main Game</string>
     <string name="pok_mon_type_calculator_app_logo">Pokémon Type Calculator app logo</string>
-
-    <string name="dark_steel_fun_fact">Dark and Steel types were introduced in 2000 with Generation II (Gold/Silver/Crystal).</string>
-    <string name="fairy_fun_fact">Fairy type was introduced in 2013 with Generation VI (X/Y).</string>
-    <string name="gen_i_first_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic-type Pokémon, but due to a coding error they instead did not effect them.</string>
-    <string name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the Pokémon would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</string>
-    <string name="gen_i_third_error_fun_fact">In Generation I, if an attack was super effective or not very effective against one type but did no damage against another type (eg. Dig against Charizard), the Pokémon would never receive any damage but the game will erroneously state that the attack "missed".</string>
-    <string name="bug_poison_fun_fact">In Generation I, Bug-type moves were super effective against Poison-type Pokémon and vice versa. Starting in Generation II, Bug-type moves were not very effective, and Poison-type moves would do neutral damage in return.</string>
-    <string name="fire_ice_fun_fact">In Generation I, Ice-type moves were neutral against Fire-type Pokémon. In Generation II onwards, they were not very effective.</string>
-    <string name="ghost_dark_steel_fun_fact">In Generations II through V, Ghost-type and Dark-type moves were not very effective against Steel-type Pokémon. From Generation VI onward, these types do neutral damage.</string>
-    <string name="credits_yeah">This app was created by Nick Perozzi. This is his first coding endeavor and is open to ways to improve the app. Thanks for your time, and I hope this app can be useful to you!</string>
-
+    
+    <string-array name="fun_fact_contents">
+        <item name="gen_i_ghost_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic-type Pokémon, but due to a coding error they instead did not effect them.</item>
+        <item name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the Pokémon would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</item>
+        <item name="gen_i_third_error_fun_fact">In Generation I, if an attack was super effective or not very effective against one type but did no damage against another type (eg. Dig against Charizard), the Pokémon would never receive any damage but the game will erroneously state that the attack "missed".</item>
+        <item name="dark_steel_fun_fact">Dark and Steel types were introduced in 2000 with Generation II (Gold/Silver/Crystal).</item>
+        <item name="bug_poison_fun_fact">In Generation I, Bug-type moves were super effective against Poison-type Pokémon and vice versa. Starting in Generation II, Bug-type moves were not very effective, and Poison-type moves would do neutral damage in return.</item>
+        <item name="fire_ice_fun_fact">In Generation I, Ice-type moves were neutral against Fire-type Pokémon. In Generation II onwards, they were not very effective.</item>
+        <item name="fairy_fun_fact">Fairy type was introduced in 2013 with Generation VI (X/Y).</item>
+        <item name="ghost_dark_steel_fun_fact">In Generations II through V, Ghost-type and Dark-type moves were not very effective against Steel-type Pokémon. From Generation VI onward, these types do neutral damage.</item>
+        <item name="credits_yeah">This app was created by Nick Perozzi. This is my first coding endeavor, and I am open to ways to improve the app. If you have any questions or concerns feel free to reach out to me at perozzi.n@gmail.com. Thanks for your time, and I hope this app can be useful to you!</item>
+    </string-array>
+    
+    <string-array name="fun_fact_titles">
+        <item>Gen I: Ghost-type coding error</item>
+        <item>Gen I: Displayed text error 1</item>
+        <item>Gen I: Displayed text error 2</item>
+        <item>Gen II: Dark and Steel types added</item>
+        <item>Gen II: Bug-Poison interactions changed</item>
+        <item>Gen II: Fire-Ice interactions changed</item>
+        <item>Gen VI: Fairy type added</item>
+        <item>Gen VI: Ghost-Steel and Dark-Steel interactions changed</item>
+        <item>About this app</item>
+    </string-array>
 
     <string-array name="pov_spinner_options">
         <item>Attacking or defending?</item>

@@ -581,13 +581,21 @@ class MainActivity : AppCompatActivity() {
                 defendingSpinnerType1Options[type2]
             )
         }
-        if (type1 != 0 && type2 != 0) {
+        if (type1 != 0 && type2 != 0 && type1 != type2) {
             adjustVisibility(tableHeader, 0)
             tableHeader.text = resources.getString(
                 R.string.table_header_two_types,
                 "_____",
                 defendingSpinnerType1Options[type1],
                 defendingSpinnerType1Options[type2]
+            )
+        }
+        if (type1 != 0 && type1 == type2) {
+            adjustVisibility(tableHeader, 0)
+            tableHeader.text = resources.getString(
+                R.string.table_header_one_type,
+                "_____",
+                defendingSpinnerType1Options[type1]
             )
         }
     }
@@ -609,7 +617,7 @@ class MainActivity : AppCompatActivity() {
                 || (type1 == 4 && type2 == 6)
                 || (type1 == 12 && type2 == 14)
                 || (type1 == 6 && type2 == 11)
-                || (type1 == 6 && type2 == 8)
+                || (type1 == 6 && type2 == 5)
                 || (type1 == 14 && type2 == 17)
                 || (type1 == 11 && type2 == 8)
                 || (type1 == 1 && type2 == 3)
@@ -626,7 +634,7 @@ class MainActivity : AppCompatActivity() {
                 || (type1 == 6 && type2 == 4)
                 || (type1 == 14 && type2 == 12)
                 || (type1 == 11 && type2 == 6)
-                || (type1 == 8 && type2 == 6)
+                || (type1 == 5 && type2 == 6)
                 || (type1 == 17 && type2 == 14)
                 || (type1 == 8 && type2 == 11)
                 || (type1 == 3 && type2 == 1)
