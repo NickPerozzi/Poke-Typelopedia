@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/main_header_selector"
-    app:cardCornerRadius="60dp"
+    app:cardCornerRadius="25dp"
     app:cardBackgroundColor="@color/deep_purple"
     app:cardElevation="3dp"
-    app:contentPadding="4dp"
+    app:contentPadding="6dp"
     android:padding="5dp"
     android:id="@+id/triviaCardView"
+    android:layout_marginBottom="10dp"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,8 +24,8 @@
         <TextView
             android:id="@+id/funFactTitle"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginStart="6dp"
             android:fontFamily="serif"
             android:textSize="18sp"
             android:textStyle="italic"
@@ -36,8 +37,8 @@
         <TextView
             android:id="@+id/funFactText"
             app:layout_constraintTop_toBottomOf="@+id/funFactTitle"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginStart="6dp"
             android:textColor="@color/white"
             android:textSize="12sp"
             android:fontFamily="serif"

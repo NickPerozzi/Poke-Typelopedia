@@ -12,8 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.pokemontypecalculator.databinding.ActivityMainBinding
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
+import java.lang.reflect.Type
 
 //class MainActivity(val TypeMatchups: TypeMatchupsClass) : AppCompatActivity() {
 @RequiresApi(Build.VERSION_CODES.M)
@@ -28,10 +30,7 @@ class MainActivity : AppCompatActivity() {
     // of any remaining class-level variables
 
     // attackingEffectivenessCalculator() function uses typeMatchups, which is out of onCreate    // Functions outside onCreate use this line
-    private lateinit var typeMatchups: TypeMatchups
-
-    // Have not utilized yet
-    // private lateinit var pokemonType: PokemonType
+    private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>>
 
     // defendingWithTwoTypes() function uses gameSwitch, which is out of onCreate
     @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -155,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 adjustVisibility(tableHeader, 1)
                 adjustVisibility(doesNotExistDisclaimer, 1)
 
-                // Resets types on spinners
+                // Resets spinner values
                 attackingTypeSpinner.setSelection(0)
                 defendingType1Spinner.setSelection(0)
                 defendingType2Spinner.setSelection(0)
@@ -249,7 +248,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (defendingType2SelectedValue == 0 || defendingType1SelectedValue == defendingType2SelectedValue) {
-                    doesNotExistDisclaimer.visibility = View.INVISIBLE
+                    adjustVisibility(doesNotExistDisclaimer, 1)
                     // Adjusts table heading
                     listOfInteractions =
                         defendingEffectivenessCalculator(defendingType1SelectedValue)
@@ -264,9 +263,9 @@ class MainActivity : AppCompatActivity() {
                             defendingType2SelectedValue
                         )
                     ) {
-                        doesNotExistDisclaimer.visibility = View.VISIBLE
+                        adjustVisibility(doesNotExistDisclaimer, 0)
                     } else {
-                        doesNotExistDisclaimer.visibility = View.INVISIBLE
+                        adjustVisibility(doesNotExistDisclaimer, 1)
                     }
                     // Adjusts table heading
                     stringListOfInteractions =
@@ -295,13 +294,12 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 if (checkIfTypingExists(defendingType1SelectedValue, defendingType2SelectedValue)) {
-                    doesNotExistDisclaimer.visibility = View.VISIBLE
+                    adjustVisibility(doesNotExistDisclaimer, 0)
                 } else {
-                    doesNotExistDisclaimer.visibility = View.INVISIBLE
+                    adjustVisibility(doesNotExistDisclaimer, 1)
                 }
                 // Table header formatting
                 if (defendingType2SelectedValue == 0 || defendingType1SelectedValue == defendingType2SelectedValue) {
-                    // Gets the coefficients for the matchup
                     listOfInteractions =
                         defendingEffectivenessCalculator(defendingType1SelectedValue)
                     stringListOfInteractions = doubleListToStringList(listOfInteractions)
@@ -309,12 +307,10 @@ class MainActivity : AppCompatActivity() {
                     changeCellValues(stringListOfInteractions)
                 }
                 if (defendingType2SelectedValue != 0 && defendingType1SelectedValue != defendingType2SelectedValue) {
-                    // Updates the table header by adding a "/" to separate the dual types
-                    stringListOfInteractions =
-                        defendingWithTwoTypesCalculator(
-                            defendingType1SelectedValue,
-                            defendingType2SelectedValue
-                        )
+                    stringListOfInteractions = defendingWithTwoTypesCalculator(
+                        defendingType1SelectedValue,
+                        defendingType2SelectedValue
+                    )
                     changeCellColors(stringListOfInteractions)
                     changeCellValues(stringListOfInteractions)
                 }
@@ -358,6 +354,18 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, TypeTriviaActivity::class.java)
             startActivity(intent)
         }
+
+        /*val types = PokemonType.values()
+        var listOfKeys: MutableList<String> = mutableListOf()
+        for (type in PokemonType.values()) {
+            var j = PokemonType.type
+            var str: String? = PokemonType.i
+            listOfKeys.add(i)
+        }
+        var keys = arrayOf(TypeMatchups)
+
+        val mapBetweenStringsAndMaps: Map<String,Map<String,Double>> =
+            keys.zip(values).toMap()*/
 
     } // End of onCreate
 
@@ -518,7 +526,9 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 val body = response.body?.string()
                 val gson = GsonBuilder().create()
-                typeMatchups = gson.fromJson(body, TypeMatchups::class.java)
+                val typeToken: Type =
+                    object : TypeToken<Map<PokemonType, Map<String, Double>>>() {}.type
+                typeMatchups = gson.fromJson(body, typeToken)
             }
 
             override fun onFailure(call: Call, e: IOException) {
@@ -527,11 +537,10 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Functions for changing the text in the table cells
     // @@@ktg all these functions look ~eerily~ similar - can we make one function that does all these things?
     // Probably need to add a couple parameters to do so
 
-    // Turned six functions into two
+    // @@@nap Turned six functions into two
     // Added the mutable list as a parameter
     fun changeCellColors(mutableList: MutableList<String>) {
         for (i in 0 until 18) {
@@ -559,7 +568,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     fun adjustTableHeader(tableHeader: TextView, type1: Int, type2: Int) {
         if (type1 == 0 && type2 == 0) {
@@ -604,7 +612,7 @@ class MainActivity : AppCompatActivity() {
     // I would shoot you if you submitted this to PR
     // instantly
 
-    // @@@nap I will address this later; not a priority issue
+    // @@@nap bet
     fun checkIfTypingExists(type1: Int, type2: Int): Boolean {
         return ((type1 == 13 && type2 == 12)
                 || (type1 == 13 && type2 == 14)
@@ -642,76 +650,23 @@ class MainActivity : AppCompatActivity() {
                 || (type1 == 9 && type2 == 16))
     }
 
-    // Functions for retrieving the matchup interactions
-    // Returns a mutable list for how one type attacks all other types
     // @@@ktg there's an easier way to instantiate a list of the same value
     // hint: loops/in-line functions
+
     fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
         if (attacker == 0) {
             return ones()
         }
-        var dictOfSelectedTypes: Map<String, Double> = typeMatchups.Bug
-        // @@@ktg do some research into Enums - the whole project can be refactored (change how this works in code) a fair bit to use a Type enum
-        //use enum values as keys, so that when you loop through them
+        var dictOfSelectedTypes: Map<String, Double> = emptyMap()
+
+        // @@@nap LFG
+
         val attackerType: String = defendingSpinnerType1Options[attacker]
-        /*for (type in pokemonType.type) {
-            if (attackerType == pokemonType.type) {
-                dictOfSelectedTypes = typeMatchups.TODO(Fix this aka redo all your data structuring gg)//
+
+        for (moveType in PokemonType.values()) {
+            if (attackerType == moveType.type) {
+                dictOfSelectedTypes = typeMatchups.getValue(moveType)
             }
-        }*/
-        if (attackerType == "Bug") {
-            dictOfSelectedTypes = typeMatchups.Bug
-        }
-        if (attackerType == "Dark") {
-            dictOfSelectedTypes = typeMatchups.Dark
-        }
-        if (attackerType == "Dragon") {
-            dictOfSelectedTypes = typeMatchups.Dragon
-        }
-        if (attackerType == "Electric") {
-            dictOfSelectedTypes = typeMatchups.Electric
-        }
-        if (attackerType == "Fairy") {
-            dictOfSelectedTypes = typeMatchups.Fairy
-        }
-        if (attackerType == "Fighting") {
-            dictOfSelectedTypes = typeMatchups.Fighting
-        }
-        if (attackerType == "Fire") {
-            dictOfSelectedTypes = typeMatchups.Fire
-        }
-        if (attackerType == "Flying") {
-            dictOfSelectedTypes = typeMatchups.Flying
-        }
-        if (attackerType == "Ghost") {
-            dictOfSelectedTypes = typeMatchups.Ghost
-        }
-        if (attackerType == "Grass") {
-            dictOfSelectedTypes = typeMatchups.Grass
-        }
-        if (attackerType == "Ground") {
-            dictOfSelectedTypes = typeMatchups.Ground
-        }
-        if (attackerType == "Ice") {
-            dictOfSelectedTypes = typeMatchups.Ice
-        }
-        if (attackerType == "Normal") {
-            dictOfSelectedTypes = typeMatchups.Normal
-        }
-        if (attackerType == "Poison") {
-            dictOfSelectedTypes = typeMatchups.Poison
-        }
-        if (attackerType == "Psychic") {
-            dictOfSelectedTypes = typeMatchups.Psychic
-        }
-        if (attackerType == "Rock") {
-            dictOfSelectedTypes = typeMatchups.Rock
-        }
-        if (attackerType == "Steel") {
-            dictOfSelectedTypes = typeMatchups.Steel
-        }
-        if (attackerType == "Water") {
-            dictOfSelectedTypes = typeMatchups.Water
         }
         return dictOfSelectedTypes.values.toMutableList()
     }
@@ -721,84 +676,13 @@ class MainActivity : AppCompatActivity() {
         if (defender == 0) {
             return ones()
         }
+        var dictOfSelectedTypes: Map<String, Double>
         val listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
         val defendingType: String = defendingSpinnerType1Options[defender]
-
-        /*
-        // These lines of code simplify the ones following it, but I don't know how to
-        // restructure my data so that I can pull from it more effectively
-
-        for (type in pokemonType.type) {
-            listOfDefendingMatchupCoefficients.add(typeMatchups.type.getValue(defendingType))
+        for (moveType in PokemonType.values()) {
+            dictOfSelectedTypes = typeMatchups.getValue(moveType)
+            dictOfSelectedTypes[defendingType]?.let { listOfDefendingMatchupCoefficients.add(it) }
         }
-        TODO(Think on how to structure data to appropriately cut code down)
-
-        */
-
-        // @@@ktg :thinking-face: loop over enum yeah
-
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Bug.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Dark.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Dragon.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Electric.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Fairy.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Fighting.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Fire.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Flying.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Ghost.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Grass.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Ground.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Ice.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Normal.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Poison.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Psychic.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Rock.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Steel.getValue(defendingType))
-        listOfDefendingMatchupCoefficients.add(typeMatchups.Water.getValue(defendingType))
         return listOfDefendingMatchupCoefficients
     }
 }
-//kevin's scratch
-/*
-
-data class DictEffectiveness(
-        val typeDict: Map<String, Float>
-    )
-
-    //dictionary approach
-    fun fillMyChartThing() {
-        val typeEffectivenessDict = mapOf(Pair("normal", 1.0), Pair("poison", 1.0)) // typeEffectivenessDict = { "normal" : 1.0 }
-        for (type in typeEffectivenessDict) {
-            val chartId = resources.getIdentifier(type.key, "id", packageName)
-            val chartCell = findViewById<>(chartId)
-            chartCell.value = type.value //1.0
-        }
-    }
-*/
-/*
-
-
-
-
-
-
-
-
-
-    //discrete properties approach
-    data class EffectivenessMatrix(
-        val normal: Float,
-        val poison: Float,
-        //...etc
-    )
-
-    fun fillMyChart() {
-        val typeEffectiveness = getEffectivenessMatrix() // EffectivenessMatrix(normal: 1.0, poison 1.0)
-
-        val normalView = findViewById<>(R.id.normalThing)
-        val poisonView = findViewById<>(R.id.poisonThing)
-
-        normalView.value = typeEffectiveness.normal
-        poisonView.value = typeEffectiveness.poison
-    }*/
-// TODO(about fragment)
