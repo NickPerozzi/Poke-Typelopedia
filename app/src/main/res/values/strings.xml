@@ -27,6 +27,7 @@
     <string name="grass">Grass</string>
     <string name="ground">Ground</string>
     <string name="ice">Ice</string>
+    <string name="jice">Jice</string>
     <string name="normal">Normal</string>
     <string name="poison">Poison</string>
     <string name="psychic">Psychic</string>

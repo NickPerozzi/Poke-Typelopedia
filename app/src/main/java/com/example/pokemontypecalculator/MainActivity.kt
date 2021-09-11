@@ -10,6 +10,9 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.pokemontypecalculator.databinding.ActivityMainBinding
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -18,8 +21,14 @@ import java.io.IOException
 import java.lang.reflect.Type
 
 //class MainActivity(val TypeMatchups: TypeMatchupsClass) : AppCompatActivity() {
+@SuppressLint("UseSwitchCompatOrMaterialCode")
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
+
+    private var recyclerView: RecyclerView? = null
+    private var gridLayoutManager: GridLayoutManager? = null
+    private var arrayList:ArrayList<TypeGridView> ? = null
+    private var typeGridViewAdapter:TypeGridViewAdapter ? = null
 
     // @@@ktg class-level variables are necessary sometimes, but not preferred - in almost all cases in CS, we want
     // to give things as limited of scope as possible (ideally, variables are scope to a function, for instance).
@@ -35,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     // defendingWithTwoTypes() function uses gameSwitch, which is out of onCreate
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var gameSwitch: Switch
+
+    private lateinit var iceJiceSwitch: Switch
 
     // povSpinnerOptions was placed into onCreate
 
@@ -73,12 +84,15 @@ class MainActivity : AppCompatActivity() {
         val defendingType2SpinnerAndLabel = binding.defendingType2SpinnerAndLabel
         // Switch binding
         gameSwitch = binding.gameSwitch
+        iceJiceSwitch = binding.iceJiceSwitch
         // LinearLayout binding
         val mainLinearLayout = binding.mainLinearLayout
         // Table binding
-        val typeTable = binding.typeTable
+        val typeTableRecyclerView = binding.typeTableRecyclerView
         // Info button binding
         val infoButton = binding.infoButton
+        // GridView binding
+        //val typeGridView = binding.typeGridView
 
         // Hides top bar
         supportActionBar?.hide()
@@ -107,28 +121,38 @@ class MainActivity : AppCompatActivity() {
         }
 
         // TODO @@@ktg convert your TableView to a GridLayout (wait until a commit)
+        //setContentView(R.layout.activity_main)
+        recyclerView = findViewById(R.id.typeTableRecyclerView)
+        gridLayoutManager = GridLayoutManager(applicationContext, 3, LinearLayoutManager.VERTICAL,false)
+        recyclerView?.layoutManager = gridLayoutManager
+        recyclerView?.setHasFixedSize(true)
+        arrayList = ArrayList()
+        var arrayOfIcons: MutableList<Int> = mutableListOf(
+            R.drawable.bug_icon,
+            R.drawable.dragon_icon,
+            R.drawable.dark_icon,
+            R.drawable.dragon_icon,
+            R.drawable.electric_icon,
+            R.drawable.fairy_icon,
+            R.drawable.fighting_icon,
+            R.drawable.fire_icon,
+            R.drawable.flying_icon,
+            R.drawable.ghost_icon,
+            R.drawable.grass_icon,
+            R.drawable.ground_icon,
+            R.drawable.ice_icon,
+            R.drawable.normal_icon,
+            R.drawable.poison_icon,
+            R.drawable.psychic_icon,
+            R.drawable.rock_icon,
+            R.drawable.steel_icon,
+            R.drawable.water_icon
+        )
+        arrayList = setDataInList(arrayOfIcons,onesDouble())
+        typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+        recyclerView?.adapter = typeGridViewAdapter
 
         // You'll have to do the enum conversion first
-        arrayWithCellID = listOf(
-            binding.r1column1b,
-            binding.r2column1b,
-            binding.r3column1b,
-            binding.r4column1b,
-            binding.r5column1b,
-            binding.r6column1b,
-            binding.r1column2b,
-            binding.r2column2b,
-            binding.r3column2b,
-            binding.r4column2b,
-            binding.r5column2b,
-            binding.r6column2b,
-            binding.r1column3b,
-            binding.r2column3b,
-            binding.r3column3b,
-            binding.r4column3b,
-            binding.r5column3b,
-            binding.r6column3b,
-        )
 
         // Gives the spinners their options
         setupSpinner(povSpinnerOptions, povSpinner)
@@ -140,8 +164,8 @@ class MainActivity : AppCompatActivity() {
         var attackingTypeSelectedValue = 0
         var defendingType1SelectedValue = 0
         var defendingType2SelectedValue = 0
-        var listOfInteractions: MutableList<Double>
-        var stringListOfInteractions: MutableList<String> = doubleListToStringList(ones())
+        var listOfInteractions: MutableList<Double> = onesDouble()
+        var stringListOfInteractions: MutableList<String> = doubleListToStringList(onesDouble())
 
         // When the user selects an option in the povSpinner, onItemSelectedListener calls this object
         povSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -149,8 +173,9 @@ class MainActivity : AppCompatActivity() {
 
                 povSpinnerSelectedValue = p2
 
-                adjustVisibility(typeTable, 1)
+                adjustVisibility(typeTableRecyclerView, 1)
                 adjustVisibility(gameSwitch, 1)
+                adjustVisibility(iceJiceSwitch, 1)
                 adjustVisibility(tableHeader, 1)
                 adjustVisibility(doesNotExistDisclaimer, 1)
 
@@ -189,7 +214,6 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 attackingTypeSelectedValue = p2
@@ -204,12 +228,17 @@ class MainActivity : AppCompatActivity() {
                 listOfInteractions =
                     attackingEffectivenessCalculator(attackingTypeSelectedValue)
                 stringListOfInteractions = doubleListToStringList(listOfInteractions)
-                changeCellValues(stringListOfInteractions)
-                changeCellColors(stringListOfInteractions)
+                getCellValues(stringListOfInteractions)
+                //changeCellColors(stringListOfInteractions)
+                listOfInteractions = getCellValues(stringListOfInteractions)
+                arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                recyclerView?.adapter = typeGridViewAdapter
 
                 if (attackingTypeSelectedValue != 0) {
-                    adjustVisibility(typeTable, 0)
+                    adjustVisibility(typeTableRecyclerView, 0)
                     adjustVisibility(gameSwitch, 0)
+                    adjustVisibility(iceJiceSwitch, 0)
                     adjustVisibility(tableHeader, 0)
                 }
             }
@@ -231,30 +260,36 @@ class MainActivity : AppCompatActivity() {
 
                 if (defendingType1SelectedValue == 0 && defendingType2SelectedValue == 0) {
                     adjustVisibility(tableHeader, 1)
-                    adjustVisibility(typeTable, 1)
+                    adjustVisibility(typeTableRecyclerView, 1)
                     adjustVisibility(gameSwitch, 1)
+                    adjustVisibility(iceJiceSwitch, 1)
                 }
 
                 if (defendingType1SelectedValue != 0 || defendingType2SelectedValue != 0) {
                     adjustVisibility(tableHeader, 0)
-                    adjustVisibility(typeTable, 0)
+                    adjustVisibility(typeTableRecyclerView, 0)
                     adjustVisibility(gameSwitch, 0)
+                    adjustVisibility(iceJiceSwitch, 0)
                 }
 
                 if (defendingType1SelectedValue == 0 && defendingType2SelectedValue != 0) {
                     adjustVisibility(tableHeader, 0)
-                    adjustVisibility(typeTable, 0)
+                    adjustVisibility(typeTableRecyclerView, 0)
                     adjustVisibility(gameSwitch, 0)
+                    adjustVisibility(iceJiceSwitch, 0)
                 }
 
                 if (defendingType2SelectedValue == 0 || defendingType1SelectedValue == defendingType2SelectedValue) {
                     adjustVisibility(doesNotExistDisclaimer, 1)
-                    // Adjusts table heading
                     listOfInteractions =
                         defendingEffectivenessCalculator(defendingType1SelectedValue)
                     stringListOfInteractions = doubleListToStringList(listOfInteractions)
-                    changeCellValues(stringListOfInteractions)
-                    changeCellColors(stringListOfInteractions)
+                    //changeCellColors(stringListOfInteractions)
+
+                    arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                    typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                    recyclerView?.adapter = typeGridViewAdapter
+
                 }
 
                 if (defendingType2SelectedValue != 0 && defendingType1SelectedValue != defendingType2SelectedValue) {
@@ -267,14 +302,18 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         adjustVisibility(doesNotExistDisclaimer, 1)
                     }
-                    // Adjusts table heading
-                    stringListOfInteractions =
+                    listOfInteractions = defendingWithTwoTypesCalculator(defendingType1SelectedValue,defendingType2SelectedValue)
+                    stringListOfInteractions = doubleListToStringList(
                         defendingWithTwoTypesCalculator(
                             defendingType1SelectedValue,
                             defendingType2SelectedValue
-                        )
-                    changeCellValues(stringListOfInteractions)
-                    changeCellColors(stringListOfInteractions)
+                        ))
+                    //changeCellColors(stringListOfInteractions)
+                    listOfInteractions = getCellValues(stringListOfInteractions)
+                    arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                    typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                    recyclerView?.adapter = typeGridViewAdapter
+
                 }
             }
 
@@ -303,16 +342,26 @@ class MainActivity : AppCompatActivity() {
                     listOfInteractions =
                         defendingEffectivenessCalculator(defendingType1SelectedValue)
                     stringListOfInteractions = doubleListToStringList(listOfInteractions)
-                    changeCellColors(stringListOfInteractions)
-                    changeCellValues(stringListOfInteractions)
+                    //changeCellColors(stringListOfInteractions)
+                    listOfInteractions = getCellValues(stringListOfInteractions)
+                    arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                    typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                    recyclerView?.adapter = typeGridViewAdapter
+
                 }
                 if (defendingType2SelectedValue != 0 && defendingType1SelectedValue != defendingType2SelectedValue) {
-                    stringListOfInteractions = defendingWithTwoTypesCalculator(
-                        defendingType1SelectedValue,
-                        defendingType2SelectedValue
-                    )
-                    changeCellColors(stringListOfInteractions)
-                    changeCellValues(stringListOfInteractions)
+                    listOfInteractions = defendingWithTwoTypesCalculator(defendingType1SelectedValue,defendingType2SelectedValue)
+                    stringListOfInteractions = doubleListToStringList(
+                        defendingWithTwoTypesCalculator(
+                            defendingType1SelectedValue,
+                            defendingType2SelectedValue
+                        ))
+                    getCellValues(stringListOfInteractions)
+                    //changeCellColors(stringListOfInteractions)
+
+                    arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                    typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                    recyclerView?.adapter = typeGridViewAdapter
                 }
             }
 
@@ -325,24 +374,40 @@ class MainActivity : AppCompatActivity() {
                     listOfInteractions =
                         attackingEffectivenessCalculator(attackingTypeSelectedValue)
                     stringListOfInteractions = doubleListToStringList(listOfInteractions)
+                    listOfInteractions = getCellValues(stringListOfInteractions)
+                    arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                    typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                    recyclerView?.adapter = typeGridViewAdapter
+                    stringListOfInteractions = doubleListToStringList(listOfInteractions)
                 }
                 2 -> {
                     if (defendingType2SelectedValue == 0 || defendingType1SelectedValue == defendingType2SelectedValue) {
                         listOfInteractions =
                             defendingEffectivenessCalculator(defendingType1SelectedValue)
+                        arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                        typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                        recyclerView?.adapter = typeGridViewAdapter
+
                         stringListOfInteractions = doubleListToStringList(listOfInteractions)
                     }
                     if (defendingType2SelectedValue != 0 && defendingType1SelectedValue != defendingType2SelectedValue) {
-                        stringListOfInteractions =
+                        listOfInteractions = defendingWithTwoTypesCalculator(defendingType1SelectedValue,defendingType2SelectedValue)
+                        stringListOfInteractions = doubleListToStringList(
                             defendingWithTwoTypesCalculator(
                                 defendingType1SelectedValue,
                                 defendingType2SelectedValue
-                            )
+                            ))
+                        getCellValues(stringListOfInteractions)
+                        //changeCellColors(stringListOfInteractions)
+
+                        arrayList = setDataInList(arrayOfIcons,listOfInteractions)
+                        typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+                        recyclerView?.adapter = typeGridViewAdapter
                     }
                 }
             }
-            changeCellColors(stringListOfInteractions)
-            changeCellValues(stringListOfInteractions)
+            //changeCellColors(stringListOfInteractions)
+            getCellValues(stringListOfInteractions)
             if (onSwitch) {
                 gameSwitch.text = resources.getString((R.string.pogo))
             } else {
@@ -350,24 +415,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
+            if (onSwitch) {iceJiceSwitch.text = "Jice"}
+            else {iceJiceSwitch.text = "Ice"}
+            setDataInList(arrayOfIcons,listOfInteractions)?.let {arrayList = it}
+            typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+            recyclerView?.adapter = typeGridViewAdapter
+        }
+
         infoButton.setOnClickListener {
             val intent = Intent(this, TypeTriviaActivity::class.java)
             startActivity(intent)
         }
 
-        /*val types = PokemonType.values()
-        var listOfKeys: MutableList<String> = mutableListOf()
-        for (type in PokemonType.values()) {
-            var j = PokemonType.type
-            var str: String? = PokemonType.i
-            listOfKeys.add(i)
-        }
-        var keys = arrayOf(TypeMatchups)
-
-        val mapBetweenStringsAndMaps: Map<String,Map<String,Double>> =
-            keys.zip(values).toMap()*/
-
     } // End of onCreate
+
+    private fun setDataInList(iconMutableList:MutableList<Int>, effectivenessMutableList:MutableList<Double>):
+            ArrayList<TypeGridView>{
+        
+        var items: ArrayList<TypeGridView> = ArrayList()
+        for (i in 0 until 18) {
+            items.add(TypeGridView(iconMutableList[i],effectivenessMutableList[i]))
+        }
+
+        if (iceJiceSwitch.isChecked()) {
+            items[12] = TypeGridView(R.drawable.jice_icon, effectivenessMutableList[11])
+        } else {
+            items[12] = TypeGridView(R.drawable.ice_icon, effectivenessMutableList[11])
+        }
+        return items
+    }
 
     fun adjustVisibility(selectedTextView: View, visibleInvisibleGone: Int) {
         when (visibleInvisibleGone) {
@@ -377,10 +454,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<String> {
+    fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<Double> {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
-        val defenderNetList: MutableList<String> = arrayListOf()
+        val defenderNetListOfStrings: MutableList<String> = arrayListOf()
+        var defenderNetListOfDoubles: MutableList<Double> = arrayListOf()
         // @@@ktg find a way to simplify this
         // Just use PoGo numbers
         for (i in 0 until 18) {
@@ -389,7 +467,7 @@ class MainActivity : AppCompatActivity() {
             // (4x or 2.56x)
             // (1 possible permutation)
             if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 1.6)) {
-                defenderNetList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
+                defenderNetListOfStrings.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
             }
 
             // Super effective
@@ -398,7 +476,7 @@ class MainActivity : AppCompatActivity() {
             if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 1.0)
                 || (defenderType1List[i] == 1.0) && (defenderType2List[i] == 1.6)
             ) {
-                defenderNetList.add(Effectiveness.SUPER_EFFECTIVE.impact)
+                defenderNetListOfStrings.add(Effectiveness.SUPER_EFFECTIVE.impact)
             }
 
             // Effective
@@ -408,7 +486,7 @@ class MainActivity : AppCompatActivity() {
                 || (defenderType1List[i] == 1.0) && (defenderType2List[i] == 1.0)
                 || (defenderType1List[i] == 0.625) && (defenderType2List[i] == 1.6)
             ) {
-                defenderNetList.add(Effectiveness.EFFECTIVE.impact)
+                defenderNetListOfStrings.add(Effectiveness.EFFECTIVE.impact)
             }
 
             // Not very effective
@@ -419,7 +497,7 @@ class MainActivity : AppCompatActivity() {
                 || ((defenderType1List[i] == 0.625) && (defenderType2List[i] == 1.0))
                 || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 1.6) && (gameSwitch.isChecked))
             ) {
-                defenderNetList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
+                defenderNetListOfStrings.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
             }
 
             // Type interactions lower than .5x are different in Pokemon Go than the main game
@@ -431,7 +509,7 @@ class MainActivity : AppCompatActivity() {
                 || ((defenderType1List[i] == 1.0) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
                 || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 1.0) && (gameSwitch.isChecked))
             ) {
-                defenderNetList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
+                defenderNetListOfStrings.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
             }
 
             // Does not effect
@@ -440,7 +518,7 @@ class MainActivity : AppCompatActivity() {
             if (((defenderType1List[i] == 0.390625) && (!gameSwitch.isChecked))
                 || ((defenderType2List[i] == 0.390625) && (!gameSwitch.isChecked))
             ) {
-                defenderNetList.add(Effectiveness.DOES_NOT_EFFECT.impact)
+                defenderNetListOfStrings.add(Effectiveness.DOES_NOT_EFFECT.impact)
             }
 
             // Ultra does not effect
@@ -449,10 +527,11 @@ class MainActivity : AppCompatActivity() {
             if (((defenderType1List[i] == 0.625) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
                 || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 0.625) && (gameSwitch.isChecked))
             ) {
-                defenderNetList.add(Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)
+                defenderNetListOfStrings.add(Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)
             }
         }
-        return (defenderNetList)
+        defenderNetListOfDoubles = getCellValues(defenderNetListOfStrings)
+        return (defenderNetListOfDoubles)
     }
 
     fun doubleListToStringList(mutableList: MutableList<Double>): MutableList<String> {
@@ -477,33 +556,41 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun changeCellValues(listOfEffectivenesses: MutableList<String>) {
+    private fun getCellValues(listOfEffectivenesses: MutableList<String>): MutableList<Double> {
+        val mutableListOfEffectivenessDoubles: MutableList<Double> = mutableListOf()
         for (i in 0 until 18) {
-            val textView = arrayWithCellID[i]
             if (!gameSwitch.isChecked) {
                 when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> textView.text = "1.0"
-                    Effectiveness.SUPER_EFFECTIVE.impact -> textView.text = "2.0"
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> textView.text = "4.0"
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> textView.text = "0.5"
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> textView.text = "0.25"
-                    Effectiveness.DOES_NOT_EFFECT.impact -> textView.text = "0"
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.0)
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(4.0)
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.5)
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.25)
+                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.0)
                 }
             } else {
                 when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> textView.text = "1.0"
-                    Effectiveness.SUPER_EFFECTIVE.impact -> textView.text = "1.6"
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> textView.text = "2.56"
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> textView.text = "0.625"
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> textView.text = "0.39"
-                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> textView.text = "0.244"
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.6)
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.56)
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.625)
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.39)
+                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.244)
                 }
             }
         }
-        // End of onCreate
+        return mutableListOfEffectivenessDoubles
     }
 
-    private fun ones(): MutableList<Double> {
+    /*private fun onesString(): MutableList<String> {
+        val table = mutableListOf<String>()
+        for (i in 0 until 18) {
+            table.add("1.0")
+        }
+        return table
+    }*/
+
+    private fun onesDouble(): MutableList<Double> {
         val table = mutableListOf<Double>()
         for (i in 0 until 18) {
             table.add(1.0)
@@ -537,15 +624,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // @@@ktg all these functions look ~eerily~ similar - can we make one function that does all these things?
-    // Probably need to add a couple parameters to do so
-
-    // @@@nap Turned six functions into two
-    // Added the mutable list as a parameter
-    fun changeCellColors(mutableList: MutableList<String>) {
+    /*fun changeCellColors(mutableList: MutableList<String>) {
         for (i in 0 until 18) {
             val textView = arrayWithCellID[i]
+            //val cardView = TypeGridView
             when (mutableList[i]) {
+                Effectiveness.EFFECTIVE.impact -> textView.background =
+                    ContextCompat.getDrawable(this, R.color.x1color)
                 Effectiveness.EFFECTIVE.impact -> textView.background =
                     ContextCompat.getDrawable(this, R.color.x1color)
                 Effectiveness.SUPER_EFFECTIVE.impact -> textView.background =
@@ -567,7 +652,7 @@ class MainActivity : AppCompatActivity() {
                 textView.setTextColor(getColor(R.color.black))
             }
         }
-    }
+    }*/
 
     fun adjustTableHeader(tableHeader: TextView, type1: Int, type2: Int) {
         if (type1 == 0 && type2 == 0) {
@@ -655,7 +740,7 @@ class MainActivity : AppCompatActivity() {
 
     fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
         if (attacker == 0) {
-            return ones()
+            return onesDouble()
         }
         var dictOfSelectedTypes: Map<String, Double> = emptyMap()
 
@@ -674,7 +759,7 @@ class MainActivity : AppCompatActivity() {
     // Returns a mutable list for how one type defends against all other types
     fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
         if (defender == 0) {
-            return ones()
+            return onesDouble()
         }
         var dictOfSelectedTypes: Map<String, Double>
         val listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
