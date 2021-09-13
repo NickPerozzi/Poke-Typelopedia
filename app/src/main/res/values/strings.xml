@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Pokemon Type Calculator</string>
     <string name="pokemon_type_calculator">Pokemon Type Calculator</string>
     <string name="initial_prompt">Please select a POV.</string>
@@ -27,7 +27,7 @@
     <string name="grass">Grass</string>
     <string name="ground">Ground</string>
     <string name="ice">Ice</string>
-    <string name="jice">Jice</string>
+    <string name="jice" tools:ignore="ExtraTranslation">Jice</string>
     <string name="normal">Normal</string>
     <string name="poison">Poison</string>
     <string name="psychic">Psychic</string>
@@ -42,7 +42,8 @@
     <string name="pogo">Pokémon Go</string>
     <string name="mainGame">Main Game</string>
     <string name="pok_mon_type_calculator_app_logo">Pokémon Type Calculator app logo</string>
-    
+    <string name="info_button">info_button</string>
+
     <string-array name="fun_fact_contents">
         <item name="gen_i_ghost_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic-type Pokémon, but due to a coding error they instead did not effect them.</item>
         <item name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the Pokémon would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</item>

@@ -1,12 +1,13 @@
 package com.example.pokemontypecalculator
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 class TypeGridViewAdapter(var context: Context, var arrayList: ArrayList<TypeGridView>) :
@@ -23,10 +24,13 @@ class TypeGridViewAdapter(var context: Context, var arrayList: ArrayList<TypeGri
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
 
-        var typeGridView:TypeGridView = arrayList.get(position)
+        var typeGridView:TypeGridView = arrayList[position]
 
         holder.icons.setImageResource(typeGridView.iconsInGridView!!)
         holder.alphas.text = arrayList[position].textInGridView.toString()
+        typeGridView.backgroundColorInGridView?.let { holder.backgrounds?.setBackgroundColor(it) }
+        typeGridView.textColorInGridView?.let { holder.alphas.setTextColor(it) }
+        //typeGridView.textColorInGridView?.let { holder.textColors?.}
 
     }
 
@@ -38,6 +42,8 @@ class TypeGridViewAdapter(var context: Context, var arrayList: ArrayList<TypeGri
 
         var icons = itemView.findViewById<ImageView>(R.id.type_table_icons)
         var alphas: TextView = itemView.findViewById<TextView>(R.id.type_table_text)
+        var backgrounds: RelativeLayout? = itemView.findViewById<RelativeLayout>(R.id.type_table_relative_layout)
+        var textColors: RelativeLayout? = itemView.findViewById<RelativeLayout>(R.id.type_table_relative_layout)
 
 
     }

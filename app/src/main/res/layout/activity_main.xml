@@ -166,7 +166,7 @@
         tools:ignore="RtlCompat" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
@@ -174,21 +174,27 @@
             android:id="@+id/gameSwitch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="left"
             android:text="@string/mainGame"
             android:textSize="20sp"
             android:visibility="invisible"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
+            android:paddingLeft="10dp"
+            android:paddingStart="10dp"
+            tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
         <Switch
             android:id="@+id/iceJiceSwitch"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="end"
+            android:textAlignment="textEnd"
             android:text="@string/ice"
             android:textSize="20sp"
             android:visibility="invisible"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
+            android:paddingEnd="10dp"
+            android:paddingRight="10dp"
+            tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml"
+            />
 
     </LinearLayout>
 
@@ -216,7 +222,8 @@
         android:layout_width="30dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:src="@drawable/info_button_transparent" />
+        android:src="@drawable/info_button_transparent"
+        android:contentDescription="@string/info_button" />
 
 
 </LinearLayout>
