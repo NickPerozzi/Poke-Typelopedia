@@ -3,7 +3,6 @@ package com.example.pokemontypecalculator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -48,10 +47,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var iceJiceSwitch: Switch
 
-    // povSpinnerOptions was placed into onCreate
-
-
-    // attackingEffectivenessCalculator() function uses spinnerTypeOptions1, which is out of onCreate
+    // attackingEffectivenessCalculator() function uses these, which is out of onCreate
     var defendingSpinnerType1Options = arrayOf<String>()
     private var attackingSpinnerTypeOptions = arrayOf<String>()
 
@@ -161,7 +157,8 @@ class MainActivity : AppCompatActivity() {
                 attackingTypeSpinner.setSelection(0)
                 defendingType1Spinner.setSelection(0)
                 defendingType2Spinner.setSelection(0)
-                gameSwitch.
+                gameSwitch.isChecked = false
+                iceJiceSwitch.isChecked = false
 
                 // Adjusts visibility of various objects
                 makeVisibleIfTypeSelected(typeTableRecyclerView,0)
@@ -226,7 +223,7 @@ class MainActivity : AppCompatActivity() {
 
         defendingType1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             // TODO @@@ktg duplicate code = function-ize
-            // @@@nap function-ized much of it, some parts still duplicate but not sure if it's unavoidable/too pyrrhic to fix
+            // @@@nap functionized much of it, some parts still duplicate but not sure if it's unavoidable/too pyrrhic to fix
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defendingType1 = p2
 
@@ -349,7 +346,7 @@ class MainActivity : AppCompatActivity() {
                               backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
             ArrayList<TypeGridView> {
 
-        var items: ArrayList<TypeGridView> = ArrayList()
+        val items: ArrayList<TypeGridView> = ArrayList()
         for (i in 0 until 18) {
             items.add(
                 TypeGridView(
@@ -361,7 +358,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        if (iceJiceSwitch.isChecked()) {
+        if (iceJiceSwitch.isChecked) {
             items[11] = TypeGridView(
                 R.drawable.jice_icon,
                 effectivenessMutableList[11],
@@ -410,7 +407,6 @@ class MainActivity : AppCompatActivity() {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
         val defenderNetListOfStrings: MutableList<String> = arrayListOf()
-        var defenderNetListOfDoubles: MutableList<Double> = arrayListOf()
         // @@@ktg find a way to simplify this
         // Just use PoGo numbers
         for (i in 0 until 18) {
@@ -485,7 +481,7 @@ class MainActivity : AppCompatActivity() {
         return (defenderNetListOfStrings)
     }
 
-    fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
+    private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
             when (mutableList[i]) {
@@ -583,7 +579,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
+    private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             when (mutableList[i]) {
@@ -599,7 +595,7 @@ class MainActivity : AppCompatActivity() {
         return listOfCellBackgroundColors
     }
 
-    fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
+    private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
@@ -742,7 +738,7 @@ class MainActivity : AppCompatActivity() {
         return listOfDefendingMatchupCoefficients
     }
 
-    var arrayOfIcons: MutableList<Int> = mutableListOf(
+    private var arrayOfIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
         R.drawable.dark_icon,
         R.drawable.dragon_icon,

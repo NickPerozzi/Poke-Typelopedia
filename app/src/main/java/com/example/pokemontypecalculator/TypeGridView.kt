@@ -1,7 +1,5 @@
 package com.example.pokemontypecalculator
 
-import android.graphics.drawable.Drawable
-
 class TypeGridView {
 
     var iconsInGridView: Int?
