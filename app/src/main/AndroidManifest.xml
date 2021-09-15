@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.pokemontypecalculator">
+    package="com.perozzi_package.pokemontypecalculator">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,13 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PokemonTypeCalculator">
         <activity
-            android:name=".TypeTriviaActivity"
+            android:name="com.perozzi_package.pokemontypecalculator.TypeTriviaActivity"
             android:exported="true"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.perozzi_package.pokemontypecalculator.MainActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.perozzi_package.pokemontypecalculator.MainActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
