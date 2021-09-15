@@ -294,12 +294,10 @@ class MainActivity : AppCompatActivity() {
                                 defendingWithTwoTypesCalculator(defendingType1, defendingType2)
                             interactionsToGridViewDualDefender(listOfInteractionsDualDefender)
                         }
-                        if (defendingType1 != 0 && (defendingType1 == defendingType2 || defendingType2 == 0)) {
-                            listOfInteractions =
-                                defendingEffectivenessCalculator(defendingType1)
+                        listOfInteractions = if (defendingType1 != 0 && (defendingType1 == defendingType2 || defendingType2 == 0)) {
+                            defendingEffectivenessCalculator(defendingType1)
                         } else {
-                            listOfInteractions =
-                                defendingEffectivenessCalculator(defendingType2)
+                            defendingEffectivenessCalculator(defendingType2)
                         }
                         interactionsToGridView(listOfInteractions)
                     }
@@ -334,11 +332,9 @@ class MainActivity : AppCompatActivity() {
                 if (defendingType1 != 0 && defendingType2 != 0 && defendingType1 != defendingType2) {
                     interactionsToGridViewDualDefender(listOfInteractionsDualDefender)
                 } else {
-                    if (defendingType1 == 0) {
-                        listOfInteractions =
-                            defendingEffectivenessCalculator(defendingType2)
+                    listOfInteractions = if (defendingType1 == 0) {
+                        defendingEffectivenessCalculator(defendingType2)
                     } else {
-                        listOfInteractions =
                         defendingEffectivenessCalculator(defendingType1)
                     }
                     interactionsToGridView(listOfInteractions)
