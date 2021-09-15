@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.setHasFixedSize(true)
         arrayList = ArrayList()
         arrayList = setDataInList(arrayOfIcons,onesDouble(),listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+        typeGridViewAdapter = TypeGridViewAdapter(arrayList!!)
         recyclerView?.adapter = typeGridViewAdapter
 
         // You'll have to do the enum conversion first
@@ -289,19 +289,19 @@ class MainActivity : AppCompatActivity() {
                             attackingEffectivenessCalculator(attackingType)
                     }
                     2 -> {
-                        if (defendingType2 != 0 && defendingType1 != defendingType2) {
+                        if (defendingType1 != 0 && defendingType2 != 0 && defendingType1 != defendingType2) {
                             listOfInteractionsDualDefender =
                                 defendingWithTwoTypesCalculator(defendingType1, defendingType2)
                             interactionsToGridViewDualDefender(listOfInteractionsDualDefender)
-                        } else {
-                            if (defendingType1 == 0) {
-                                listOfInteractions =
-                                    defendingEffectivenessCalculator(defendingType1)
-                            } else {
-                                defendingEffectivenessCalculator(defendingType2)
-                            }
-                            interactionsToGridView(listOfInteractions)
                         }
+                        if (defendingType1 != 0 && (defendingType1 == defendingType2 || defendingType2 == 0)) {
+                            listOfInteractions =
+                                defendingEffectivenessCalculator(defendingType1)
+                        } else {
+                            listOfInteractions =
+                                defendingEffectivenessCalculator(defendingType2)
+                        }
+                        interactionsToGridView(listOfInteractions)
                     }
                     else -> {}
                 }
@@ -327,12 +327,23 @@ class MainActivity : AppCompatActivity() {
             else {iceJiceSwitch.text = getString(R.string.ice)}
 
             // Sends information to gridView depending on whether dual type is selected or not
-            if (povSpinnerSelectedValue == 2 && defendingType1 !=0 && defendingType2 != 0 && defendingType1 != defendingType2) {
-                interactionsToGridViewDualDefender(listOfInteractionsDualDefender)
-            } else {
+            if (povSpinnerSelectedValue == 1) {
                 interactionsToGridView(listOfInteractions)
             }
-
+            if (povSpinnerSelectedValue == 2) {
+                if (defendingType1 != 0 && defendingType2 != 0 && defendingType1 != defendingType2) {
+                    interactionsToGridViewDualDefender(listOfInteractionsDualDefender)
+                } else {
+                    if (defendingType1 == 0) {
+                        listOfInteractions =
+                            defendingEffectivenessCalculator(defendingType2)
+                    } else {
+                        listOfInteractions =
+                        defendingEffectivenessCalculator(defendingType1)
+                    }
+                    interactionsToGridView(listOfInteractions)
+                }
+            }
         }
 
         infoButton.setOnClickListener {
@@ -382,7 +393,7 @@ class MainActivity : AppCompatActivity() {
         val listOfCellTextColors = effectivenessToCellTextColors(effectivenessList)
         val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(effectivenessList)
         arrayList = setDataInList(arrayOfIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+        typeGridViewAdapter = TypeGridViewAdapter(arrayList!!)
         recyclerView?.adapter = typeGridViewAdapter
     }
 
@@ -391,7 +402,7 @@ class MainActivity : AppCompatActivity() {
         val listOfCellTextColors = effectivenessToCellTextColors(interactionsList)
         val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(interactionsList)
         arrayList = setDataInList(arrayOfIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridViewAdapter = TypeGridViewAdapter(applicationContext, arrayList!!)
+        typeGridViewAdapter = TypeGridViewAdapter(arrayList!!)
         recyclerView?.adapter = typeGridViewAdapter
     }
 

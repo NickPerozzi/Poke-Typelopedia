@@ -70,8 +70,8 @@
 
     <string-array name="pov_spinner_options">
         <item>Attacking or defending?</item>
-        <item>Attacking (1 type)</item>
-        <item>Defending (1 or 2 types)</item>
+        <item>Attacking move (1 type)</item>
+        <item>Defending pokémon (1 or 2 types)</item>
     </string-array>
     <string-array name="spinner_type_options_1">
         <item>(choose)</item>
