@@ -1,7 +1,6 @@
 package com.example.pokemontypecalculator
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +23,7 @@ class TypeGridViewAdapter(var context: Context, var arrayList: ArrayList<TypeGri
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
 
-        var typeGridView:TypeGridView = arrayList[position]
+        val typeGridView:TypeGridView = arrayList[position]
 
         holder.icons.setImageResource(typeGridView.iconsInGridView!!)
         holder.alphas.text = arrayList[position].textInGridView.toString()
