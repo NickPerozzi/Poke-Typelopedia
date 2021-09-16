@@ -24,40 +24,22 @@ import java.lang.reflect.Type
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
+    private var recyclerView: RecyclerView? = null // needed for gridView functionality
+    private var gridLayoutManager: GridLayoutManager? = null // needed for gridView functionality
+    private var arrayListForTypeGrid:ArrayList<TypeGrid> ? = null // needed for gridView functionality
+    private var typeGridAdapter:TypeGridAdapter ? = null // needed for gridView functionality
 
-    private var recyclerView: RecyclerView? = null
-    private var gridLayoutManager: GridLayoutManager? = null
-    private var arrayList:ArrayList<TypeGridView> ? = null
-    private var typeGridViewAdapter:TypeGridViewAdapter ? = null
+    private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>> // used by attackingEffectivenessCalculator()
+    private var defendingSpinnerType1Options = arrayOf<String>() // used by attackingEffectivenessCalculator()
+    private var attackingSpinnerTypeOptions = arrayOf<String>() // used by attackingEffectivenessCalculator()
 
-    // @@@ktg class-level variables are necessary sometimes, but not preferred - in almost all cases in CS, we want
-    // to give things as limited of scope as possible (ideally, variables are scope to a function, for instance).
-    // Some of these class-level (aka "member variables") are probably necessary. But I know at least one isn't.
-    // After you do other refactoring (Enums, especially), come back and look at these. Can you make one or more of them
-    // more tightly scoped (i.e. scoped to something less than the class, like a function)?
-    // And also see if you have lateinit vars after that refactor, see if you can get rid of the lateinit property
-    // of any remaining class-level variables
-
-    // attackingEffectivenessCalculator() function uses typeMatchups, which is out of onCreate    // Functions outside onCreate use this line
-    private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>>
-
-    // defendingWithTwoTypes() function uses gameSwitch, which is out of onCreate
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private lateinit var gameSwitch: Switch
+    private lateinit var gameSwitch: Switch // used by defendingWithTwoTypes()
 
-    private lateinit var iceJiceSwitch: Switch
+    private lateinit var iceJiceSwitch: Switch // used by setDataInList()
 
-    // attackingEffectivenessCalculator() function uses these, which is out of onCreate
-    var defendingSpinnerType1Options = arrayOf<String>()
-    private var attackingSpinnerTypeOptions = arrayOf<String>()
+    private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
 
-    // adjustTableHeading() uses tableHeader, which is in onCreate
-
-    // checkIfExists uses
-    private lateinit var doesNotExistDisclaimer: TextView
-
-    // TODO @@@ktg break this out into several smaller functions that get called from onCreate
-    //
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -89,11 +71,8 @@ class MainActivity : AppCompatActivity() {
         val typeTableRecyclerView = binding.typeTableRecyclerView
         // Info button binding
         val infoButton = binding.infoButton
-        // GridView binding
-        //val typeGridView = binding.typeGridView
 
-        // Hides top bar
-        supportActionBar?.hide()
+        supportActionBar?.hide() // Hides top bar
 
         // Populates spinner options
         val povSpinnerOptions: Array<String> = resources.getStringArray(R.array.pov_spinner_options)
@@ -101,37 +80,31 @@ class MainActivity : AppCompatActivity() {
         defendingSpinnerType1Options = resources.getStringArray(R.array.spinner_type_options_1)
         val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
 
-        // Retrieve .json files
-        fetchJson()
+        fetchJson() //gets .json file
 
         // Night mode compatibility
         when (this.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
             Configuration.UI_MODE_NIGHT_YES -> {
-                println("night mode is on")
                 mainLinearLayout.background =
                     ContextCompat.getDrawable(this, R.drawable.main_header_selector_night)
             }
             Configuration.UI_MODE_NIGHT_NO -> {
-                println("night mode is not on")
                 mainLinearLayout.background =
                     ContextCompat.getDrawable(this, R.drawable.main_header_selector)
             }
         }
 
-        // TODO @@@ktg convert your TableView to a GridLayout (wait until a commit)
-        //setContentView(R.layout.activity_main)
+        // Initializes the gridView
         val listOfCellBackgroundColors: MutableList<Int> = onesInt()
         val listOfCellTextColors: MutableList<Int> = onesInt()
         recyclerView = findViewById(R.id.typeTableRecyclerView)
         gridLayoutManager = GridLayoutManager(applicationContext, 3, LinearLayoutManager.VERTICAL,false)
         recyclerView?.layoutManager = gridLayoutManager
         recyclerView?.setHasFixedSize(true)
-        arrayList = ArrayList()
-        arrayList = setDataInList(arrayOfIcons,onesDouble(),listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridViewAdapter = TypeGridViewAdapter(arrayList!!)
-        recyclerView?.adapter = typeGridViewAdapter
-
-        // You'll have to do the enum conversion first
+        arrayListForTypeGrid = ArrayList()
+        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,onesDouble(),listOfCellBackgroundColors,listOfCellTextColors)
+        typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
+        recyclerView?.adapter = typeGridAdapter
 
         // Gives the spinners their options
         setupSpinner(povSpinnerOptions, povSpinner)
@@ -349,14 +322,100 @@ class MainActivity : AppCompatActivity() {
 
     } // End of onCreate
 
-    private fun setDataInList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<Double>,
-                              backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
-            ArrayList<TypeGridView> {
+    private fun interactionsToGridView(interactionsList: MutableList<Double>) {
+        val effectivenessList = interactionsToEffectiveness(interactionsList)
+        val displayedListOfInteractions = effectivenessToDisplayedCellValues(effectivenessList)
+        val listOfCellTextColors = effectivenessToCellTextColors(effectivenessList)
+        val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(effectivenessList)
+        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
+        typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
+        recyclerView?.adapter = typeGridAdapter
+    }
 
-        val items: ArrayList<TypeGridView> = ArrayList()
+    private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
+        val stringList: MutableList<String> = mutableListOf()
+        for (i in 0 until 18) {
+            when (mutableList[i]) {
+                1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
+                1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
+                0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
+            }
+            if (gameSwitch.isChecked) {
+                when (mutableList[i]) {
+                    0.390625 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
+                }
+            } else {
+                when (mutableList[i]) {
+                    0.390625 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
+                }
+            }
+        }
+        return stringList
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<Double> {
+        val mutableListOfEffectivenessDoubles: MutableList<Double> = mutableListOf()
+        for (i in 0 until 18) {
+            if (!gameSwitch.isChecked) {
+                when (listOfEffectivenesses[i]) {
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.0)
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(4.0)
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.5)
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.25)
+                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.0)
+                }
+            } else {
+                when (listOfEffectivenesses[i]) {
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.6)
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.56)
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.625)
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.39)
+                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.244)
+                }
+            }
+        }
+        return mutableListOfEffectivenessDoubles
+    }
+
+    private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
+        val listOfCellTextColors: MutableList<Int> = mutableListOf()
+        for (i in 0 until 18) {
+            if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
+                listOfCellTextColors.add(getColor(R.color.white))
+            } else {
+                listOfCellTextColors.add(getColor(R.color.black))
+            }
+        }
+        return listOfCellTextColors
+    }
+
+    private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
+        val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
+        for (i in 0 until 18) {
+            when (mutableList[i]) {
+                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x1color))
+                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x2color))
+                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x4color))
+                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x_5color))
+                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x_25color))
+                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(getColor(R.color.x0color))
+                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(getColor(R.color.UDNEcolor))
+            }
+        }
+        return listOfCellBackgroundColors
+    }
+
+    private fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<Double>,
+                                      backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
+            ArrayList<TypeGrid> {
+
+        val items: ArrayList<TypeGrid> = ArrayList()
         for (i in 0 until 18) {
             items.add(
-                TypeGridView(
+                TypeGrid(
                     iconMutableList[i],
                     effectivenessMutableList[i],
                     backgroundColorList[i],
@@ -364,45 +423,37 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         }
-
-        if (iceJiceSwitch.isChecked) {
-            items[11] = TypeGridView(
+        
+        // Determines whether to add "Ice" or "Jice" icon
+        items[11] = if (iceJiceSwitch.isChecked) {
+            TypeGrid(
                 R.drawable.jice_icon,
                 effectivenessMutableList[11],
                 backgroundColorList[11],
                 textColorList[11]
             )
         } else {
-            items[11] = TypeGridView(
+            TypeGrid(
                 R.drawable.ice_icon,
                 effectivenessMutableList[11],
                 backgroundColorList[11],
                 textColorList[11]
             )
         }
+
         return items
     }
 
-    fun interactionsToGridView(interactionsList: MutableList<Double>) {
-        val effectivenessList = interactionsToEffectiveness(interactionsList)
-        val displayedListOfInteractions = effectivenessToDisplayedCellValues(effectivenessList)
-        val listOfCellTextColors = effectivenessToCellTextColors(effectivenessList)
-        val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(effectivenessList)
-        arrayList = setDataInList(arrayOfIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridViewAdapter = TypeGridViewAdapter(arrayList!!)
-        recyclerView?.adapter = typeGridViewAdapter
-    }
-
-    fun interactionsToGridViewDualDefender(interactionsList: MutableList<String>) {
+    private fun interactionsToGridViewDualDefender(interactionsList: MutableList<String>) {
         val displayedListOfInteractions = effectivenessToDisplayedCellValues(interactionsList)
         val listOfCellTextColors = effectivenessToCellTextColors(interactionsList)
         val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(interactionsList)
-        arrayList = setDataInList(arrayOfIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridViewAdapter = TypeGridViewAdapter(arrayList!!)
-        recyclerView?.adapter = typeGridViewAdapter
+        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
+        typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
+        recyclerView?.adapter = typeGridAdapter
     }
 
-    fun adjustVisibility(selectedTextView: View, visibleInvisibleGone: Int) {
+    private fun adjustVisibility(selectedTextView: View, visibleInvisibleGone: Int) {
         when (visibleInvisibleGone) {
             0 -> selectedTextView.visibility = View.VISIBLE
             1 -> selectedTextView.visibility = View.INVISIBLE
@@ -410,7 +461,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<String> {
+    private fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<String> {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
         val defenderNetListOfStrings: MutableList<String> = arrayListOf()
@@ -488,54 +539,6 @@ class MainActivity : AppCompatActivity() {
         return (defenderNetListOfStrings)
     }
 
-    private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
-        val stringList: MutableList<String> = mutableListOf()
-        for (i in 0 until 18) {
-            when (mutableList[i]) {
-                1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
-                1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
-                0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
-            }
-            if (gameSwitch.isChecked) {
-                when (mutableList[i]) {
-                    0.390625 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
-                }
-            } else {
-                when (mutableList[i]) {
-                    0.390625 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
-                }
-            }
-        }
-        return stringList
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<Double> {
-        val mutableListOfEffectivenessDoubles: MutableList<Double> = mutableListOf()
-        for (i in 0 until 18) {
-            if (!gameSwitch.isChecked) {
-                when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
-                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.0)
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(4.0)
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.5)
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.25)
-                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.0)
-                }
-            } else {
-                when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
-                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.6)
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.56)
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.625)
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.39)
-                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.244)
-                }
-            }
-        }
-        return mutableListOfEffectivenessDoubles
-    }
-
     private fun onesString(): MutableList<String> {
         val table = mutableListOf<String>()
         for (i in 0 until 18) {
@@ -586,35 +589,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
-        val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
-        for (i in 0 until 18) {
-            when (mutableList[i]) {
-                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x1color))
-                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x2color))
-                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x4color))
-                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x_5color))
-                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x_25color))
-                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(getColor(R.color.x0color))
-                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(getColor(R.color.UDNEcolor))
-            }
-        }
-        return listOfCellBackgroundColors
-    }
-
-    private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
-        val listOfCellTextColors: MutableList<Int> = mutableListOf()
-        for (i in 0 until 18) {
-            if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
-                listOfCellTextColors.add(getColor(R.color.white))
-            } else {
-                listOfCellTextColors.add(getColor(R.color.black))
-            }
-        }
-        return listOfCellTextColors
-    }
-
-    fun adjustTableHeaderText(tableHeader: TextView, type1: Int, type2: Int) {
+    private fun adjustTableHeaderText(tableHeader: TextView, type1: Int, type2: Int) {
         if (type1 == 0 && type2 == 0) {
             adjustVisibility(tableHeader, 2)
         }
@@ -658,50 +633,16 @@ class MainActivity : AppCompatActivity() {
     // instantly
 
     // @@@nap bet
-    fun checkIfTypingExists(type1: Int, type2: Int) {
-        if (type1 != 0 && type2 != 0 && type1 != type2 &&
-            ((type1 == 13 && type2 == 12)
-            || (type1 == 13 && type2 == 14)
-            || (type1 == 13 && type2 == 1)
-            || (type1 == 13 && type2 == 16)
-            || (type1 == 13 && type2 == 9)
-            || (type1 == 13 && type2 == 17)
-            || (type1 == 7 && type2 == 5)
-            || (type1 == 7 && type2 == 8)
-            || (type1 == 4 && type2 == 6)
-            || (type1 == 12 && type2 == 14)
-            || (type1 == 6 && type2 == 11)
-            || (type1 == 6 && type2 == 5)
-            || (type1 == 14 && type2 == 17)
-            || (type1 == 11 && type2 == 8)
-            || (type1 == 1 && type2 == 3)
-            || (type1 == 1 && type2 == 2)
-            || (type1 == 16 && type2 == 9)
-            || (type1 == 12 && type2 == 13)
-            || (type1 == 14 && type2 == 13)
-            || (type1 == 1 && type2 == 13)
-            || (type1 == 16 && type2 == 13)
-            || (type1 == 9 && type2 == 13)
-            || (type1 == 17 && type2 == 13)
-            || (type1 == 5 && type2 == 7)
-            || (type1 == 8 && type2 == 7)
-            || (type1 == 6 && type2 == 4)
-            || (type1 == 14 && type2 == 12)
-            || (type1 == 11 && type2 == 6)
-            || (type1 == 5 && type2 == 6)
-            || (type1 == 17 && type2 == 14)
-            || (type1 == 8 && type2 == 11)
-            || (type1 == 3 && type2 == 1)
-            || (type1 == 2 && type2 == 1)
-            || (type1 == 9 && type2 == 16)
-        )) {
+    private fun checkIfTypingExists(type1: Int, type2: Int) {
+        val currentTypingPair: List<Int> = listOf(type1, type2)
+        if (currentTypingPair in listOfNonexistentTypes) {
             adjustVisibility(doesNotExistDisclaimer, 0)
         } else {
             adjustVisibility(doesNotExistDisclaimer, 1)
         }
     }
 
-    fun makeVisibleIfTypeSelected(tableHeader: View, type1: Int, type2: Int = 0) {
+    private fun makeVisibleIfTypeSelected(tableHeader: View, type1: Int, type2: Int = 0) {
         if (type1 != 0 || type2 != 0) {
             adjustVisibility(tableHeader, 0)
         } else {
@@ -712,15 +653,11 @@ class MainActivity : AppCompatActivity() {
     // @@@ktg there's an easier way to instantiate a list of the same value
     // hint: loops/in-line functions
 
-    fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
-        if (attacker == 0) {
-            return onesDouble()
-        }
+    private fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
+        if (attacker == 0) { return onesDouble() }
+
         var dictOfSelectedTypes: Map<String, Double> = emptyMap()
-
-        // @@@nap LFG
-
-        val attackerType: String = defendingSpinnerType1Options[attacker]
+        val attackerType: String = attackingSpinnerTypeOptions[attacker]
 
         for (moveType in PokemonType.values()) {
             if (attackerType == moveType.type) {
@@ -731,7 +668,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Returns a mutable list for how one type defends against all other types
-    fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
+    private fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
         if (defender == 0) {
             return onesDouble()
         }
@@ -765,4 +702,40 @@ class MainActivity : AppCompatActivity() {
         R.drawable.steel_icon,
         R.drawable.water_icon
     )
+
+    private val listOfNonexistentTypes: List<List<Int>> = listOf(
+        listOf(13,12),
+        listOf(13,14),
+        listOf(13,1),
+        listOf(13,16),
+        listOf(13,9),
+        listOf(13,17),
+        listOf(7,5),
+        listOf(7,8),
+        listOf(4,6),
+        listOf(12,14),
+        listOf(6,11),
+        listOf(6,5),
+        listOf(14,17),
+        listOf(11,8),
+        listOf(1,3),
+        listOf(1,2),
+        listOf(16,9),
+        listOf(12,13),
+        listOf(14,13),
+        listOf(1,13),
+        listOf(16,13),
+        listOf(9,13),
+        listOf(17,13),
+        listOf(5,7),
+        listOf(8,7),
+        listOf(6,4),
+        listOf(14,12),
+        listOf(11,6),
+        listOf(5,6),
+        listOf(17,14),
+        listOf(8,11),
+        listOf(3,1),
+        listOf(2,1),
+        listOf(9,16))
 }
