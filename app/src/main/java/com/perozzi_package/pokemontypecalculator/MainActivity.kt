@@ -5,11 +5,13 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var iceJiceSwitch: Switch // used by setDataInList()
     private var jiceTime = false
+    private var pogoTime = false
 
     private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
 
@@ -47,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var defendingType2SpinnerAndLabel: LinearLayout
     private var defendingType1: Int = 0
     private var defendingType2: Int = 0
+    private var attackingType: Int = 0
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,13 +107,15 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.layoutManager = gridLayoutManager
         recyclerView?.setHasFixedSize(true)
         arrayListForTypeGrid = ArrayList()
-        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,onesDouble(),listOfCellBackgroundColors,listOfCellTextColors)
+        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,onesString(),listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(tableHeader,1, 50, 2, TypedValue.COMPLEX_UNIT_DIP)
+
 
 
         weAreDefending = false
-        var attackingType = 0
+        attackingType = 0
         defendingType1 = 0
         defendingType2 = 0
         var listOfInteractions: MutableList<Double> = onesDouble()
@@ -239,6 +245,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
+            pogoTime = onSwitch
             run {
                 when (weAreDefending) {
                     false -> {
@@ -259,7 +266,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Changes the switch's text between "Pokémon GO and Main Game)
-            if (onSwitch) {
+            if (pogoTime) {
                 gameSwitch.text = resources.getString((R.string.pogo))
             } else {
                 gameSwitch.text = resources.getString((R.string.mainGame))
@@ -316,8 +323,8 @@ class MainActivity : AppCompatActivity() {
                     defendingWithTwoTypesCalculator(defendingType1, defendingType2)
                 }
                 interactionsToGridView(listOfInteractions)
+                adjustTableHeaderText(tableHeader, defendingType1, defendingType2)
             }
-            adjustTableHeaderText(tableHeader, defendingType1, defendingType2)
         }
 
         infoButton.setOnClickListener {
@@ -344,21 +351,24 @@ class MainActivity : AppCompatActivity() {
     private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
-            when (mutableList[i]) {
-                2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
-                1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
-                1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
-                0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
-                0.390625 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
-                0.0 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
-            }
-            if (gameSwitch.isChecked) {
+            if (pogoTime) {
                 when (mutableList[i]) {
+                    2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
+                    1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
+                    1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
+                    0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
+                    0.390625 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
                     0.244 -> stringList.add(Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)
                 }
             } else {
                 when (mutableList[i]) {
-                    0.244 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
+                    2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
+                    1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
+                    1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
+                    0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
+                    0.25 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
+                    0.390625 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
+                    0.0 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
                 }
             }
         }
@@ -381,26 +391,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<Double> {
-        val mutableListOfEffectivenessDoubles: MutableList<Double> = mutableListOf()
+    private fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
+        val mutableListOfEffectivenessDoubles: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
-            if (!gameSwitch.isChecked) {
+            if (!pogoTime) {
                 when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
-                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.0)
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(4.0)
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.5)
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.25)
-                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.0)
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2")
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x4")
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.5")
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.25")
+                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0")
                 }
             } else {
                 when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.0)
-                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(1.6)
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(2.56)
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.625)
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(0.39)
-                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(0.244)
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1.6")
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2.56")
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.625")
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.391")
+                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x.244")
                 }
             }
         }
@@ -435,7 +445,7 @@ class MainActivity : AppCompatActivity() {
         return listOfCellBackgroundColors
     }
 
-    private fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<Double>,
+    private fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<String>,
                                       backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
             ArrayList<TypeGrid> {
 
@@ -486,84 +496,58 @@ class MainActivity : AppCompatActivity() {
         // @@@ktg find a way to simplify this
         // Just use PoGo numbers
         for (i in 0 until 18) {
-
-            // Ultra super effective
-            // (4x or 2.56x)
-            // (1 possible permutation)
-            if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 1.6)) {
-                defenderNetEffectivenessList.add(2.56)
-            }
-
-            // Super effective
-            // (2x or 1.6x)
-            // (2 possible permutations)
-            if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 1.0)
-                || (defenderType1List[i] == 1.0) && (defenderType2List[i] == 1.6)
-            ) {
-                defenderNetEffectivenessList.add(1.6)
-            }
-
-            // Effective
-            // (1x or 1x)
-            // (3 possible permutations)
-            if ((defenderType1List[i] == 1.6) && (defenderType2List[i] == 0.625)
-                || (defenderType1List[i] == 1.0) && (defenderType2List[i] == 1.0)
-                || (defenderType1List[i] == 0.625) && (defenderType2List[i] == 1.6)
-            ) {
-                defenderNetEffectivenessList.add(1.0)
-            }
-
-            // Not very effective
-            // (.5x or .625x)
-            // (2 permutations in main game, 4 in PoGo)
-            if (((defenderType1List[i] == 1.6) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
-                || ((defenderType1List[i] == 1.0) && (defenderType2List[i] == 0.625))
-                || ((defenderType1List[i] == 0.625) && (defenderType2List[i] == 1.0))
-                || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 1.6) && (gameSwitch.isChecked))
-            ) {
-                defenderNetEffectivenessList.add(0.625)
-            }
-
-            // Type interactions lower than .5x are different in Pokemon Go than the main game
-
-            // Ultra not very effective
-            // (.25x or .390625x)
-            // (1 permutation in main game, 2 in PoGo)
-            if (((defenderType1List[i] == 0.625) && (defenderType2List[i] == 0.625))
-                || ((defenderType1List[i] == 1.0) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
-                || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 1.0) && (gameSwitch.isChecked))
-            ) {
-                defenderNetEffectivenessList.add(0.390625)
-            }
-
-            // Does not effect
-            // (0x in main game, not possible in PoGo)
-            // (7 permutations for main game, 0 in PoGo)
-            if (((defenderType1List[i] == 0.390625) && (!gameSwitch.isChecked))
-                || ((defenderType2List[i] == 0.390625) && (!gameSwitch.isChecked))
-            ) {
-                defenderNetEffectivenessList.add(0.0)
-            }
-
-            // Ultra does not effect
-            // (Not possible in main game, .244x in PoGo)
-            // (0 permutations in main game, 2 in PoGo)
-            if (((defenderType1List[i] == 0.625) && (defenderType2List[i] == 0.390625) && (gameSwitch.isChecked))
-                || ((defenderType1List[i] == 0.390625) && (defenderType2List[i] == 0.625) && (gameSwitch.isChecked))
-            ) {
-                defenderNetEffectivenessList.add(0.244)
+            val types: List<Double> = listOf(defenderType1List[i],defenderType2List[i])
+            when (pogoTime) {
+                true -> {
+                    when (types) {
+                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56)
+                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6)
+                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6)
+                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0)
+                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0)
+                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0)
+                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625)
+                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625)
+                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.625)
+                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.625)
+                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.390625)
+                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.390625)
+                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.390625)
+                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.244)
+                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.244)
+                    }
+                }
+                false -> {
+                    when (types) {
+                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56)
+                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6)
+                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6)
+                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0)
+                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0)
+                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0)
+                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625)
+                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625)
+                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.25)
+                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.0)
+                    }
+                }
             }
         }
         return (defenderNetEffectivenessList)
     }
 
-    /*private fun onesString(): MutableList<String> {
+    private fun onesString(): MutableList<String> {
         val table = mutableListOf<String>()
         for (i in 0 until 18) {
             table.add("1.0")
         }
         return table
-    }*/
+    }
 
     private fun onesDouble(): MutableList<Double> {
         val table = mutableListOf<Double>()

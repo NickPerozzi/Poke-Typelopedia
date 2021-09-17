@@ -24,7 +24,7 @@ class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
         val typeGrid:TypeGrid = arrayListForTypeGrid[position]
         holder.icons.setImageResource(typeGrid.iconsInGridView!!)
-        holder.alphas.text = "x " + arrayListForTypeGrid[position].textInGridView.toString()
+        holder.alphas.text = arrayListForTypeGrid[position].textInGridView
         typeGrid.backgroundColorInGridView?.let { holder.backgrounds?.setBackgroundColor(it) }
         typeGrid.textColorInGridView?.let { holder.alphas.setTextColor(it) }
     }
@@ -34,5 +34,4 @@ class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
         var alphas: TextView = itemView.findViewById(R.id.type_table_text)
         var backgrounds: RelativeLayout? = itemView.findViewById(R.id.type_table_relative_layout)
     }
-
 }

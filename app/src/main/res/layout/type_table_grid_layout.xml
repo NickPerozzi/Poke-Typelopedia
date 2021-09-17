@@ -37,6 +37,11 @@
             android:layout_gravity="center_horizontal"
             android:layout_toRightOf="@+id/type_table_icons"
             android:layout_toEndOf="@+id/type_table_icons"
+            android:textSize="12sp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="8sp"
+            app:autoSizeMaxTextSize="40sp"
+            app:autoSizeStepGranularity="2sp"
             />
 
     </RelativeLayout>
