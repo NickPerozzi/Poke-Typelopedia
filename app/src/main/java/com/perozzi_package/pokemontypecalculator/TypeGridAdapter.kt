@@ -1,5 +1,6 @@
 package com.perozzi_package.pokemontypecalculator
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,10 +20,11 @@ class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
 
     override fun getItemCount(): Int { return arrayListForTypeGrid.size }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
         val typeGrid:TypeGrid = arrayListForTypeGrid[position]
         holder.icons.setImageResource(typeGrid.iconsInGridView!!)
-        holder.alphas.text = arrayListForTypeGrid[position].textInGridView.toString()
+        holder.alphas.text = "x " + arrayListForTypeGrid[position].textInGridView.toString()
         typeGrid.backgroundColorInGridView?.let { holder.backgrounds?.setBackgroundColor(it) }
         typeGrid.textColorInGridView?.let { holder.alphas.setTextColor(it) }
     }

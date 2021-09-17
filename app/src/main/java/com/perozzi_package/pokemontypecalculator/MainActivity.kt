@@ -331,8 +331,6 @@ class MainActivity : AppCompatActivity() {
     /////////////////////////////////     End of onCreate     ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
     private fun interactionsToGridView(interactionsList: MutableList<Double>) {
         val effectivenessList = interactionsToEffectiveness(interactionsList)
         val displayedListOfInteractions = effectivenessToDisplayedCellValues(effectivenessList)
@@ -342,8 +340,6 @@ class MainActivity : AppCompatActivity() {
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
     }
-
-
 
     private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
