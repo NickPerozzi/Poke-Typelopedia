@@ -37,6 +37,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_toRightOf="@+id/type_table_icons"
             android:layout_toEndOf="@+id/type_table_icons"
+            android:textSize="12sp"
             />
 
     </RelativeLayout>
