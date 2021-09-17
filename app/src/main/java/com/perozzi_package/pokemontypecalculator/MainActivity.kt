@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gameSwitch: Switch // used by defendingWithTwoTypes()
 
     private lateinit var iceJiceSwitch: Switch // used by setDataInList()
+    private var jiceTime = false
 
     private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
 
@@ -283,6 +284,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
+            jiceTime = onSwitch
             if (onSwitch) {
                 iceJiceSwitch.text = getString(R.string.jice)
 
@@ -455,7 +457,7 @@ class MainActivity : AppCompatActivity() {
         }
         
         // Determines whether to add "Ice" or "Jice" icon
-        items[11] = if (iceJiceSwitch.isChecked) {
+        items[11] = if (jiceTime) {
             TypeGrid(
                 R.drawable.jice_icon,
                 effectivenessMutableList[11],
@@ -623,10 +625,10 @@ class MainActivity : AppCompatActivity() {
         if (type1 == 0 && type2 == 0) {
             adjustVisibility(tableHeader, 2)
         }
-        val arrayOfTypesJiceOrNoJice: Array<String> = defendingSpinnerType1Options
-        /*if (iceJiceSwitch.isSelected) {
+        val arrayOfTypesJiceOrNoJice: Array<String> = resources.getStringArray(R.array.spinner_type_options_1)
+        if (jiceTime) {
             arrayOfTypesJiceOrNoJice[12] = getString(R.string.jice)
-        }*/
+        }
         when (weAreDefending) {
             true -> {
                 if (type1 != 0 && type2 == 0) {
@@ -634,7 +636,7 @@ class MainActivity : AppCompatActivity() {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        defendingSpinnerType1Options[type1]
+                        arrayOfTypesJiceOrNoJice[type1]
                     )
                 }
                 if (type1 == 0 && type2 != 0) {
@@ -642,7 +644,7 @@ class MainActivity : AppCompatActivity() {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        defendingSpinnerType1Options[type2]
+                        arrayOfTypesJiceOrNoJice[type2]
                     )
                 }
                 if (type1 != 0 && type2 != 0 && type1 != type2) {
@@ -650,8 +652,8 @@ class MainActivity : AppCompatActivity() {
                     tableHeader.text = resources.getString(
                         R.string.table_header_two_types,
                         "_____",
-                        defendingSpinnerType1Options[type1],
-                        defendingSpinnerType1Options[type2]
+                        arrayOfTypesJiceOrNoJice[type1],
+                        arrayOfTypesJiceOrNoJice[type2]
                     )
                 }
                 if (type1 != 0 && type1 == type2) {
@@ -659,7 +661,7 @@ class MainActivity : AppCompatActivity() {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        defendingSpinnerType1Options[type1]
+                        arrayOfTypesJiceOrNoJice[type1]
                     )
                 }
             }
@@ -667,7 +669,7 @@ class MainActivity : AppCompatActivity() {
                 adjustVisibility(tableHeader, 0)
                 tableHeader.text = resources.getString(
                     R.string.table_header_one_type,
-                    defendingSpinnerType1Options[type1], "_____"
+                    arrayOfTypesJiceOrNoJice[type1], "_____"
                 )
             }
         }
