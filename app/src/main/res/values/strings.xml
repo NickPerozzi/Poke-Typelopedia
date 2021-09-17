@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Pokémon Typelopedia</string>
     <string name="pokemon_type_calculator">Pokémon Typelopedia</string>
-    <string name="initial_prompt">Please select a POV.</string>
+    <string name="initial_prompt">Are you attacking or defending?</string>
     <string name="attacking_prompt">What type is the attack?</string>
     <string name="defending_prompt">What type is the defender?</string>
     <string name="table_header_attacking_part_1">When\u0020</string>
@@ -44,7 +44,8 @@
     <string name="pok_mon_type_calculator_app_logo">Pokémon Type Calculator app logo</string>
     <string name="info_button">info_button</string>
     <string name="icon_of_respective_types_of_pok_mon">Icon of respective types of Pokémon</string>
-
+    <string name="pov_switch_to_attacking">Attacking move (1 type)</string>
+    <string name="pov_switch_to_defending">Defending Pokémon (1 or 2 types)</string>
     <string-array name="fun_fact_contents">
         <item name="gen_i_ghost_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic-type Pokémon, but due to a coding error they instead did not effect them.</item>
         <item name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the Pokémon would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</item>
