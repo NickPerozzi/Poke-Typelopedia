@@ -32,12 +32,11 @@
         <TextView
             android:id="@+id/type_table_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="22dp"
             android:textAlignment="center"
             android:layout_gravity="center_horizontal"
             android:layout_toRightOf="@+id/type_table_icons"
             android:layout_toEndOf="@+id/type_table_icons"
-            android:textSize="12sp"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="8sp"
             app:autoSizeMaxTextSize="40sp"
