@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
 import com.google.gson.GsonBuilder
@@ -281,31 +282,35 @@ class MainActivity : AppCompatActivity() {
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
             jiceTime = onSwitch
-            if (onSwitch) {
-                iceJiceSwitch.text = getString(R.string.jice)
 
-                /*attackingSpinnerTypeOptions[12] = getString(R.string.jice)
-                defendingSpinnerType1Options[12] = getString(R.string.jice)
-                val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
-                defendingSpinnerType2Options[12] = getString(R.string.jice)*/
-            }
-            else {
-                iceJiceSwitch.text = getString(R.string.ice)
-                /*attackingSpinnerTypeOptions[12] = getString(R.string.ice)
-                defendingSpinnerType1Options[12] = getString(R.string.ice)
-                val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
-                defendingSpinnerType2Options[12] = getString(R.string.ice)*/
+            // Adjusts the text on the switch itself
+            iceJiceSwitch.text = if (onSwitch) { getString(R.string.jice) } else { getString(R.string.ice) }
 
+            // Adjusts the text in the spinners
+            attackingSpinnerTypeOptions[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
+            defendingSpinnerType1Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
+            defendingSpinnerType2Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
+
+            // Adjusts the text in the table header (only if Ice/Jice is currently selected)
+            if (attackingType == 12 || defendingType1 == 12 || defendingType2 == 12) {
+                when (weAreDefending) {
+                    false -> adjustTableHeaderText(tableHeader, attackingType)
+                    true -> adjustTableHeaderText(tableHeader, defendingType1, defendingType2)
+                }
             }
-            /*setupSpinner(attackingSpinnerTypeOptions, attackingTypeSpinner)
-            setupSpinner(defendingSpinnerType1Options, defendingType1Spinner)
-            setupSpinner(defendingSpinnerType2Options, defendingType2Spinner)*/
+            // Adjusts the icon in the gridView
+            arrayOfIconsCanWeGetAQuickJiceCheck() // Adjusts arrayOfIcons appropriately
+            /*
+            TODO(
+                ListAdapter -> submitList -> arrayOfIcons
+                typeGridAdapter.submitList(arrayOfIcons)
+                recyclerView?.adapter = typeGridAdapter
+                )
+            */
 
             // Sends information to gridView depending on whether dual type is selected or not
             if (!weAreDefending) {
                 interactionsToGridView(listOfInteractions)
-
-                adjustTableHeaderText(tableHeader,attackingType)
             }
             if (weAreDefending) {
                 listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
@@ -316,7 +321,6 @@ class MainActivity : AppCompatActivity() {
                     defendingWithTwoTypesCalculator(defendingType1, defendingType2)
                 }
                 interactionsToGridView(listOfInteractions)
-                adjustTableHeaderText(tableHeader, defendingType1, defendingType2)
             }
         }
 
@@ -340,7 +344,8 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.adapter = typeGridAdapter
     }
 
-    // go from gridview not having jice but everything (long story short) ONLY update the jice elements (not calling setDatainTypeGridlist) and do typegridadapter.submitList(pass in your
+    // ONLY update the jice elements
+    // (not calling setDatainTypeGridlist) and do typegridadapter.submitList(pass in your
     // array list for typegrid
 
     private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
@@ -490,6 +495,7 @@ class MainActivity : AppCompatActivity() {
         val defenderNetEffectivenessList: MutableList<Double> = mutableListOf()
         // @@@ktg find a way to simplify this
         // Just use PoGo numbers
+        // @@@nap believe this comment is dated but there is still room to improve efficiency
         for (i in 0 until 18) {
             val types: List<Double> = listOf(defenderType1List[i],defenderType2List[i])
             when (pogoTime) {
@@ -654,6 +660,7 @@ class MainActivity : AppCompatActivity() {
 
     // @@@ktg there's an easier way to instantiate a list of the same value
     // hint: loops/in-line functions
+    // @@@nap see onesString(), onesDouble(), and onesInt()
 
     private fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
         if (attacker == 0) { return onesDouble() }
@@ -669,7 +676,6 @@ class MainActivity : AppCompatActivity() {
         return dictOfSelectedTypes.values.toMutableList()
     }
 
-    // Returns a mutable list for how one type defends against all other types
     private fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
         if (defender == 0) {
             return onesDouble()
@@ -704,6 +710,9 @@ class MainActivity : AppCompatActivity() {
         R.drawable.steel_icon,
         R.drawable.water_icon
     )
+    private fun arrayOfIconsCanWeGetAQuickJiceCheck() {
+        arrayOfIcons[11] = if (jiceTime) {R.drawable.jice_icon} else {R.drawable.ice_icon}
+    }
 
     private val listOfNonexistentTypes: List<List<Int>> = listOf(
         listOf(13,12), // Normal ice
