@@ -5,13 +5,11 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide() // Hides top bar
 
         val binding =
-            ActivityMainBinding.inflate(layoutInflater); setContentView(binding.root) // Sets up bindings
+            ActivityMainBinding.inflate(layoutInflater); setContentView(binding.root) // Sets up bindings for activity_main
 
         // Night mode compatibility
         val mainLinearLayout = binding.mainLinearLayout
@@ -110,10 +108,6 @@ class MainActivity : AppCompatActivity() {
         arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,onesString(),listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
-        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(tableHeader,1, 50, 2, TypedValue.COMPLEX_UNIT_DIP)
-
-
-
         weAreDefending = false
         attackingType = 0
         defendingType1 = 0
@@ -290,7 +284,6 @@ class MainActivity : AppCompatActivity() {
             if (onSwitch) {
                 iceJiceSwitch.text = getString(R.string.jice)
 
-                // Switching Ice to Jice in the spinner values is actually a very involved task so
                 /*attackingSpinnerTypeOptions[12] = getString(R.string.jice)
                 defendingSpinnerType1Options[12] = getString(R.string.jice)
                 val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
@@ -331,7 +324,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, TypeTriviaActivity::class.java)
             startActivity(intent)
         }
-
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,6 +339,9 @@ class MainActivity : AppCompatActivity() {
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
     }
+
+    // go from gridview not having jice but everything (long story short) ONLY update the jice elements (not calling setDatainTypeGridlist) and do typegridadapter.submitList(pass in your
+    // array list for typegrid
 
     private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
@@ -399,8 +394,8 @@ class MainActivity : AppCompatActivity() {
                     Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
                     Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2")
                     Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x4")
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.5")
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.25")
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.5")
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.25")
                     Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0")
                 }
             } else {
@@ -408,9 +403,9 @@ class MainActivity : AppCompatActivity() {
                     Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
                     Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1.6")
                     Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2.56")
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.625")
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x.391")
-                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x.244")
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.625")
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.391")
+                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0.244")
                 }
             }
         }
@@ -594,7 +589,7 @@ class MainActivity : AppCompatActivity() {
     private fun adjustTableHeaderText(tableHeader: TextView, type1: Int, type2: Int = 0) {
         if (type1 == 0 && type2 == 0) {
             adjustVisibility(tableHeader, 2)
-        }
+        } else {adjustVisibility(tableHeader, 0)}
         val arrayOfTypesJiceOrNoJice: Array<String> = resources.getStringArray(R.array.spinner_type_options_1)
         if (jiceTime) {
             arrayOfTypesJiceOrNoJice[12] = getString(R.string.jice)
@@ -602,7 +597,6 @@ class MainActivity : AppCompatActivity() {
         when (weAreDefending) {
             true -> {
                 if (type1 != 0 && type2 == 0) {
-                    adjustVisibility(tableHeader, 0)
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
@@ -610,7 +604,6 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
                 if (type1 == 0 && type2 != 0) {
-                    adjustVisibility(tableHeader, 0)
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
@@ -618,7 +611,6 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
                 if (type1 != 0 && type2 != 0 && type1 != type2) {
-                    adjustVisibility(tableHeader, 0)
                     tableHeader.text = resources.getString(
                         R.string.table_header_two_types,
                         "_____",
@@ -627,7 +619,6 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
                 if (type1 != 0 && type1 == type2) {
-                    adjustVisibility(tableHeader, 0)
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
@@ -636,7 +627,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             false -> {
-                adjustVisibility(tableHeader, 0)
                 tableHeader.text = resources.getString(
                     R.string.table_header_one_type,
                     arrayOfTypesJiceOrNoJice[type1], "_____"
@@ -669,7 +659,7 @@ class MainActivity : AppCompatActivity() {
         if (attacker == 0) { return onesDouble() }
 
         var dictOfSelectedTypes: Map<String, Double> = emptyMap()
-        val attackerType: String = attackingSpinnerTypeOptions[attacker]
+        val attackerType: String = resources.getStringArray(R.array.spinner_type_options_1)[attacker]
 
         for (moveType in PokemonType.values()) {
             if (attackerType == moveType.type) {
@@ -686,7 +676,7 @@ class MainActivity : AppCompatActivity() {
         }
         var dictOfSelectedTypes: Map<String, Double>
         val listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
-        val defendingType: String = defendingSpinnerType1Options[defender]
+        val defendingType: String = resources.getStringArray(R.array.spinner_type_options_1)[defender]
         for (moveType in PokemonType.values()) {
             dictOfSelectedTypes = typeMatchups.getValue(moveType)
             dictOfSelectedTypes[defendingType]?.let { listOfDefendingMatchupCoefficients.add(it) }
