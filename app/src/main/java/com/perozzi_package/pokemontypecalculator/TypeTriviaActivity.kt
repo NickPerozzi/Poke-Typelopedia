@@ -30,7 +30,7 @@ class TypeTriviaActivity : AppCompatActivity() {
         recyclerView.adapter = funFactAdapter
 
         val actionBar = supportActionBar
-        actionBar!!.title = "Pokémon typing fun facts!"
+        actionBar!!.title = "Some fun facts about types!"
         actionBar.setDisplayHomeAsUpEnabled(true)
     }
 
