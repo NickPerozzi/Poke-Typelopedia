@@ -3,6 +3,7 @@ package com.perozzi_package.pokemontypecalculator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
 import com.google.gson.GsonBuilder
@@ -21,29 +21,33 @@ import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
 
-//class MainActivity(val TypeMatchups: TypeMatchupsClass) : AppCompatActivity() {
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
-    private var recyclerView: RecyclerView? = null // needed for gridView functionality
-    private var gridLayoutManager: GridLayoutManager? = null // needed for gridView functionality
-    private var arrayListForTypeGrid:ArrayList<TypeGrid> ? = null // needed for gridView functionality
-    private var typeGridAdapter:TypeGridAdapter ? = null // needed for gridView functionality
 
-    private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>> // used by attackingEffectivenessCalculator()
-    private var defendingSpinnerType1Options = arrayOf<String>() // used by attackingEffectivenessCalculator()
-    private var attackingSpinnerTypeOptions = arrayOf<String>() // used by attackingEffectivenessCalculator()
+    // needed for gridView functionality
+    private var recyclerView: RecyclerView? = null
+    private var gridLayoutManager: GridLayoutManager? = null
+    private var arrayListForTypeGrid:ArrayList<TypeGrid> ? = null
+    private var typeGridAdapter:TypeGridAdapter ? = null
 
+    // needed for 3 functions
+    private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>>
+
+    // needed for 3 functions
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private lateinit var gameSwitch: Switch // used by defendingWithTwoTypes()
-
-    private lateinit var iceJiceSwitch: Switch // used by setDataInList()
     private var jiceTime = false
+
+    // needed for 3 functions
     private var pogoTime = false
 
+    // needed for checkIfTypingExists()
     private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
 
-    private var weAreDefending = false // used by adjustMoveSpinnerAndLabelVisibility()
+    // needed for 2 functions
+    private var weAreDefending = false
+
+    // needed for adjustTypeSpinnerVisibility()
     private lateinit var attackingTypeSpinnerAndLabel: LinearLayout
     private lateinit var defendingType1SpinnerAndLabel: LinearLayout
     private lateinit var defendingType2SpinnerAndLabel: LinearLayout
@@ -51,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     private var defendingType2: Int = 0
     private var attackingType: Int = 0
 
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    @SuppressLint("UseSwitchCompatOrMaterialCode", "ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide() // Hides top bar
@@ -61,14 +65,17 @@ class MainActivity : AppCompatActivity() {
 
         // Night mode compatibility
         val mainLinearLayout = binding.mainLinearLayout
+        val gameSwitchText = binding.gameSwitchText
         when (this.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
             Configuration.UI_MODE_NIGHT_YES -> {
                 mainLinearLayout.background =
                     ContextCompat.getDrawable(this, R.drawable.main_header_selector_night)
+                gameSwitchText.setTextColor(Color.WHITE)
             }
             Configuration.UI_MODE_NIGHT_NO -> {
                 mainLinearLayout.background =
                     ContextCompat.getDrawable(this, R.drawable.main_header_selector)
+                gameSwitchText.setTextColor(Color.BLACK)
             }
         }
 
@@ -83,15 +90,15 @@ class MainActivity : AppCompatActivity() {
         defendingType1SpinnerAndLabel = binding.defendingType1SpinnerAndLabel
         defendingType2SpinnerAndLabel = binding.defendingType2SpinnerAndLabel
         val povSwitch = binding.povSwitch
-        gameSwitch = binding.gameSwitch
-        iceJiceSwitch = binding.iceJiceSwitch
+        val gameSwitch = binding.gameSwitch
+        val iceJiceSwitch = binding.iceJiceSwitch
         val typeTableRecyclerView = binding.typeTableRecyclerView
         val infoButton = binding.infoButton
 
         // Populates spinner options
-        attackingSpinnerTypeOptions = resources.getStringArray(R.array.spinner_type_options_1)
+        val attackingSpinnerTypeOptions = resources.getStringArray(R.array.spinner_type_options_1)
         setupSpinner(attackingSpinnerTypeOptions, attackingTypeSpinner)
-        defendingSpinnerType1Options = resources.getStringArray(R.array.spinner_type_options_1)
+        val defendingSpinnerType1Options = resources.getStringArray(R.array.spinner_type_options_1)
         setupSpinner(defendingSpinnerType1Options, defendingType1Spinner)
         val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
         setupSpinner(defendingSpinnerType2Options, defendingType2Spinner)
@@ -169,6 +176,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Adjusts visibility depending on whether user has selected a type yet
                 makeVisibleIfTypeSelected(typeTableRecyclerView,attackingType)
+                makeVisibleIfTypeSelected(gameSwitchText,attackingType)
                 makeVisibleIfTypeSelected(gameSwitch,attackingType)
                 makeVisibleIfTypeSelected(iceJiceSwitch,attackingType)
                 makeVisibleIfTypeSelected(tableHeader,attackingType)
@@ -195,7 +203,8 @@ class MainActivity : AppCompatActivity() {
                 checkIfTypingExists(defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(tableHeader,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(typeTableRecyclerView,defendingType1,defendingType2)
-                makeVisibleIfTypeSelected(gameSwitch,defendingType1,defendingType2)
+                makeVisibleIfTypeSelected(gameSwitchText,attackingType)
+                makeVisibleIfTypeSelected(gameSwitch,attackingType)
                 makeVisibleIfTypeSelected(iceJiceSwitch,defendingType1,defendingType2)
 
                 // Gets values and shows them in GridView if only one type is selected
@@ -223,7 +232,8 @@ class MainActivity : AppCompatActivity() {
                 checkIfTypingExists(defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(tableHeader,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(typeTableRecyclerView,defendingType1,defendingType2)
-                makeVisibleIfTypeSelected(gameSwitch,defendingType1,defendingType2)
+                makeVisibleIfTypeSelected(gameSwitchText,attackingType)
+                makeVisibleIfTypeSelected(gameSwitch,attackingType)
                 makeVisibleIfTypeSelected(iceJiceSwitch,defendingType1,defendingType2)
 
                 listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
@@ -262,9 +272,9 @@ class MainActivity : AppCompatActivity() {
 
             // Changes the switch's text between "Pokémon GO and Main Game)
             if (pogoTime) {
-                gameSwitch.text = resources.getString((R.string.pogo))
+                gameSwitchText.text = resources.getString((R.string.pogo))
             } else {
-                gameSwitch.text = resources.getString((R.string.mainGame))
+                gameSwitchText.text = resources.getString((R.string.mainGame))
             }
 
             // Sends information to gridView depending on whether dual type is selected or not
@@ -299,14 +309,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             // Adjusts the icon in the gridView
-            arrayOfIconsCanWeGetAQuickJiceCheck() // Adjusts arrayOfIcons appropriately
-            /*
-            TODO(
-                ListAdapter -> submitList -> arrayOfIcons
-                typeGridAdapter.submitList(arrayOfIcons)
-                recyclerView?.adapter = typeGridAdapter
-                )
-            */
+            arrayOfIconsCanWeGetAQuickJiceCheck()
+
+
+            // ListAdapter -> submitList -> arrayOfIcons
+            /*typeGridAdapter.submitList(arrayOfIcons)
+            recyclerView?.adapter = typeGridAdapter*/
+
 
             // Sends information to gridView depending on whether dual type is selected or not
             if (!weAreDefending) {
@@ -345,8 +354,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ONLY update the jice elements
-    // (not calling setDatainTypeGridlist) and do typegridadapter.submitList(pass in your
-    // array list for typegrid
+    // write a function that replaces setDataInTypeGridList
+    //
 
     private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
@@ -711,7 +720,7 @@ class MainActivity : AppCompatActivity() {
         R.drawable.water_icon
     )
     private fun arrayOfIconsCanWeGetAQuickJiceCheck() {
-        arrayOfIcons[11] = if (jiceTime) {R.drawable.jice_icon} else {R.drawable.ice_icon}
+        arrayListForTypeGrid?.get(11)?.iconsInGridView = if (jiceTime) {R.drawable.jice_icon} else {R.drawable.ice_icon}
     }
 
     private val listOfNonexistentTypes: List<List<Int>> = listOf(
