@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
 class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
-    RecyclerView.Adapter<TypeGridAdapter.ItemHolder>() {
+    ListAdapter<TypeGrid, TypeGridAdapter.ItemHolder>(TypeGridDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val itemHolder = LayoutInflater.from(parent.context)
@@ -34,4 +36,15 @@ class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
         var alphas: TextView = itemView.findViewById(R.id.type_table_text)
         var backgrounds: RelativeLayout? = itemView.findViewById(R.id.type_table_relative_layout)
     }
+}
+
+class TypeGridDiffUtil : DiffUtil.ItemCallback<TypeGrid>() {
+    override fun areItemsTheSame(oldItem: TypeGrid, newItem: TypeGrid): Boolean {
+        return oldItem.iconsInGridView == newItem.iconsInGridView
+    }
+
+    override fun areContentsTheSame(oldItem: TypeGrid, newItem: TypeGrid): Boolean {
+        return oldItem.iconsInGridView == newItem.iconsInGridView
+    }
+
 }

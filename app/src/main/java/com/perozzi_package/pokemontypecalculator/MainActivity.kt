@@ -25,32 +25,41 @@ import java.lang.reflect.Type
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
 
+    // Link between UI and BL
     // needed for gridView functionality
     private var recyclerView: RecyclerView? = null
     private var gridLayoutManager: GridLayoutManager? = null
     private var arrayListForTypeGrid:ArrayList<TypeGrid> ? = null
     private var typeGridAdapter:TypeGridAdapter ? = null
 
+    // BL
     // needed for 3 functions
     private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>>
 
+    // BL
     // needed for 3 functions
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private var jiceTime = false
 
+    // BL
     // needed for 3 functions
     private var pogoTime = false
 
+    // BL
     // needed for checkIfTypingExists()
     private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
 
+    // BL
     // needed for 2 functions
     private var weAreDefending = false
 
+    // UI
     // needed for adjustTypeSpinnerVisibility()
     private lateinit var attackingTypeSpinnerAndLabel: LinearLayout
     private lateinit var defendingType1SpinnerAndLabel: LinearLayout
     private lateinit var defendingType2SpinnerAndLabel: LinearLayout
+
+    // BL
     private var defendingType1: Int = 0
     private var defendingType2: Int = 0
     private var attackingType: Int = 0
@@ -60,9 +69,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide() // Hides top bar
 
+        // UI
         val binding =
             ActivityMainBinding.inflate(layoutInflater); setContentView(binding.root) // Sets up bindings for activity_main
 
+        // UI
         // Night mode compatibility
         val mainLinearLayout = binding.mainLinearLayout
         val gameSwitchText = binding.gameSwitchText
@@ -79,6 +90,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // UI
         // Bindings
         val defendingType1Spinner = binding.type1Spinner
         val defendingType2Spinner = binding.type2Spinner
@@ -95,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         val typeTableRecyclerView = binding.typeTableRecyclerView
         val infoButton = binding.infoButton
 
+        // UI
         // Populates spinner options
         val attackingSpinnerTypeOptions = resources.getStringArray(R.array.spinner_type_options_1)
         setupSpinner(attackingSpinnerTypeOptions, attackingTypeSpinner)
@@ -103,11 +116,15 @@ class MainActivity : AppCompatActivity() {
         val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
         setupSpinner(defendingSpinnerType2Options, defendingType2Spinner)
 
+        // BL
         fetchJson() //gets .json file
 
+        // BL
         // Initializes the gridView
         val listOfCellBackgroundColors: MutableList<Int> = onesInt()
         val listOfCellTextColors: MutableList<Int> = onesInt()
+
+        // Link between UI and BL
         recyclerView = findViewById(R.id.typeTableRecyclerView)
         gridLayoutManager = GridLayoutManager(applicationContext, 3, LinearLayoutManager.VERTICAL,false)
         recyclerView?.layoutManager = gridLayoutManager
@@ -116,14 +133,17 @@ class MainActivity : AppCompatActivity() {
         arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,onesString(),listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
+
+        // BL
         weAreDefending = false
         attackingType = 0
         defendingType1 = 0
         defendingType2 = 0
+
+        // BL
         var listOfInteractions: MutableList<Double> = onesDouble()
 
-        //var effectivenessList: MutableList<String> = interactionsToEffectiveness(onesDouble())
-
+        // UI
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
             weAreDefending = onSwitch
             adjustTypeSpinnersVisibility()
@@ -249,6 +269,7 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
+        // UI
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
             pogoTime = onSwitch
             run {
@@ -309,15 +330,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             // Adjusts the icon in the gridView
-            arrayOfIconsCanWeGetAQuickJiceCheck()
-
-
-            // ListAdapter -> submitList -> arrayOfIcons
-            /*typeGridAdapter.submitList(arrayOfIcons)
-            recyclerView?.adapter = typeGridAdapter*/
+            justChangeJiceInGridView()
 
 
             // Sends information to gridView depending on whether dual type is selected or not
+
+            // TODO(Eventually not need these lines of code)
             if (!weAreDefending) {
                 interactionsToGridView(listOfInteractions)
             }
@@ -343,6 +361,128 @@ class MainActivity : AppCompatActivity() {
     /////////////////////////////////     End of onCreate     ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
+    // UI
+    private var arrayOfIcons: MutableList<Int> = mutableListOf(
+        R.drawable.bug_icon,
+        R.drawable.dark_icon,
+        R.drawable.dragon_icon,
+        R.drawable.electric_icon,
+        R.drawable.fairy_icon,
+        R.drawable.fighting_icon,
+        R.drawable.fire_icon,
+        R.drawable.flying_icon,
+        R.drawable.ghost_icon,
+        R.drawable.grass_icon,
+        R.drawable.ground_icon,
+        R.drawable.ice_icon,
+        R.drawable.normal_icon,
+        R.drawable.poison_icon,
+        R.drawable.psychic_icon,
+        R.drawable.rock_icon,
+        R.drawable.steel_icon,
+        R.drawable.water_icon
+    )
+
+    // UI
+    private fun makeVisibleIfTypeSelected(givenView: View, type1: Int, type2: Int = 0) {
+        if (type1 != 0 || type2 != 0) {
+            adjustVisibility(givenView, 0)
+        } else {
+            adjustVisibility(givenView,1)
+        }
+    }
+
+    // UI
+    private fun justChangeJiceIconInGrid(arrayList: ArrayList<TypeGrid>) {
+
+    }
+    // ONLY update the jice elements
+    // write a function that replaces setDataInTypeGridList
+
+    // UI
+    private fun adjustTypeSpinnersVisibility() {
+        when (weAreDefending) {
+            false -> {
+                adjustVisibility(attackingTypeSpinnerAndLabel, 0)
+                adjustVisibility(defendingType1SpinnerAndLabel, 2)
+                adjustVisibility(defendingType2SpinnerAndLabel, 2)
+            }
+            true -> {
+                adjustVisibility(attackingTypeSpinnerAndLabel, 2)
+                adjustVisibility(defendingType1SpinnerAndLabel, 0)
+                adjustVisibility(defendingType2SpinnerAndLabel, 0)
+            }
+        }
+    }
+
+    // UI
+    private fun adjustVisibility(selectedTextView: View, visibleInvisibleGone: Int) {
+        when (visibleInvisibleGone) {
+            0 -> selectedTextView.visibility = View.VISIBLE
+            1 -> selectedTextView.visibility = View.INVISIBLE
+            2 -> selectedTextView.visibility = View.GONE
+        }
+    }
+
+    // UI
+    private fun setupSpinner(spinnerOptions: Array<String>, spinner: Spinner) {
+        // Assigning the povSpinner options to an adapter value, which is then assigned to the povSpinner
+        val spinnerAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerOptions)
+        spinner.adapter = spinnerAdapter
+    }
+
+    // UI
+    private fun adjustTableHeaderText(tableHeader: TextView, type1: Int, type2: Int = 0) {
+        if (type1 == 0 && type2 == 0) {
+            adjustVisibility(tableHeader, 2)
+        } else {adjustVisibility(tableHeader, 0)}
+        val arrayOfTypesJiceOrNoJice: Array<String> = resources.getStringArray(R.array.spinner_type_options_1)
+        if (jiceTime) {
+            arrayOfTypesJiceOrNoJice[12] = getString(R.string.jice)
+        }
+        when (weAreDefending) {
+            true -> {
+                if (type1 != 0 && type2 == 0) {
+                    tableHeader.text = resources.getString(
+                        R.string.table_header_one_type,
+                        "_____",
+                        arrayOfTypesJiceOrNoJice[type1]
+                    )
+                }
+                if (type1 == 0 && type2 != 0) {
+                    tableHeader.text = resources.getString(
+                        R.string.table_header_one_type,
+                        "_____",
+                        arrayOfTypesJiceOrNoJice[type2]
+                    )
+                }
+                if (type1 != 0 && type2 != 0 && type1 != type2) {
+                    tableHeader.text = resources.getString(
+                        R.string.table_header_two_types,
+                        "_____",
+                        arrayOfTypesJiceOrNoJice[type1],
+                        arrayOfTypesJiceOrNoJice[type2]
+                    )
+                }
+                if (type1 != 0 && type1 == type2) {
+                    tableHeader.text = resources.getString(
+                        R.string.table_header_one_type,
+                        "_____",
+                        arrayOfTypesJiceOrNoJice[type1]
+                    )
+                }
+            }
+            false -> {
+                tableHeader.text = resources.getString(
+                    R.string.table_header_one_type,
+                    arrayOfTypesJiceOrNoJice[type1], "_____"
+                )
+            }
+        }
+    }
+
+    // BL to UI
     private fun interactionsToGridView(interactionsList: MutableList<Double>) {
         val effectivenessList = interactionsToEffectiveness(interactionsList)
         val displayedListOfInteractions = effectivenessToDisplayedCellValues(effectivenessList)
@@ -353,10 +493,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.adapter = typeGridAdapter
     }
 
-    // ONLY update the jice elements
-    // write a function that replaces setDataInTypeGridList
-    //
-
+    // BL
     private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
@@ -384,21 +521,7 @@ class MainActivity : AppCompatActivity() {
         return stringList
     }
 
-    private fun adjustTypeSpinnersVisibility() {
-        when (weAreDefending) {
-            false -> {
-                adjustVisibility(attackingTypeSpinnerAndLabel, 0)
-                adjustVisibility(defendingType1SpinnerAndLabel, 2)
-                adjustVisibility(defendingType2SpinnerAndLabel, 2)
-            }
-            true -> {
-                adjustVisibility(attackingTypeSpinnerAndLabel, 2)
-                adjustVisibility(defendingType1SpinnerAndLabel, 0)
-                adjustVisibility(defendingType2SpinnerAndLabel, 0)
-            }
-        }
-    }
-
+    //BL
     @SuppressLint("SetTextI18n")
     private fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
         val mutableListOfEffectivenessDoubles: MutableList<String> = mutableListOf()
@@ -426,6 +549,7 @@ class MainActivity : AppCompatActivity() {
         return mutableListOfEffectivenessDoubles
     }
 
+    // BL
     private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
@@ -438,6 +562,7 @@ class MainActivity : AppCompatActivity() {
         return listOfCellTextColors
     }
 
+    // BL
     private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
@@ -454,6 +579,7 @@ class MainActivity : AppCompatActivity() {
         return listOfCellBackgroundColors
     }
 
+    // BL
     private fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<String>,
                                       backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
             ArrayList<TypeGrid> {
@@ -471,6 +597,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Determines whether to add "Ice" or "Jice" icon
+
+        // TODO(eventually not need these lines of code)
         items[11] = if (jiceTime) {
             TypeGrid(
                 R.drawable.jice_icon,
@@ -490,14 +618,7 @@ class MainActivity : AppCompatActivity() {
         return items
     }
 
-    private fun adjustVisibility(selectedTextView: View, visibleInvisibleGone: Int) {
-        when (visibleInvisibleGone) {
-            0 -> selectedTextView.visibility = View.VISIBLE
-            1 -> selectedTextView.visibility = View.INVISIBLE
-            2 -> selectedTextView.visibility = View.GONE
-        }
-    }
-
+    // BL
     private fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<Double> {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
@@ -551,6 +672,7 @@ class MainActivity : AppCompatActivity() {
         return (defenderNetEffectivenessList)
     }
 
+    // BL
     private fun onesString(): MutableList<String> {
         val table = mutableListOf<String>()
         for (i in 0 until 18) {
@@ -559,6 +681,7 @@ class MainActivity : AppCompatActivity() {
         return table
     }
 
+    // BL
     private fun onesDouble(): MutableList<Double> {
         val table = mutableListOf<Double>()
         for (i in 0 until 18) {
@@ -567,6 +690,7 @@ class MainActivity : AppCompatActivity() {
         return table
     }
 
+    // BL
     private fun onesInt(): MutableList<Int> {
         val table = mutableListOf<Int>()
         for (i in 0 until 18) {
@@ -575,13 +699,7 @@ class MainActivity : AppCompatActivity() {
         return table
     }
 
-    private fun setupSpinner(spinnerOptions: Array<String>, spinner: Spinner) {
-        // Assigning the povSpinner options to an adapter value, which is then assigned to the povSpinner
-        val spinnerAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerOptions)
-        spinner.adapter = spinnerAdapter
-    }
-
+    // BL
     private fun fetchJson() {
         val url = "https://pogoapi.net/api/v1/type_effectiveness.json"
         val request = Request.Builder().url(url).build()
@@ -601,55 +719,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun adjustTableHeaderText(tableHeader: TextView, type1: Int, type2: Int = 0) {
-        if (type1 == 0 && type2 == 0) {
-            adjustVisibility(tableHeader, 2)
-        } else {adjustVisibility(tableHeader, 0)}
-        val arrayOfTypesJiceOrNoJice: Array<String> = resources.getStringArray(R.array.spinner_type_options_1)
-        if (jiceTime) {
-            arrayOfTypesJiceOrNoJice[12] = getString(R.string.jice)
-        }
-        when (weAreDefending) {
-            true -> {
-                if (type1 != 0 && type2 == 0) {
-                    tableHeader.text = resources.getString(
-                        R.string.table_header_one_type,
-                        "_____",
-                        arrayOfTypesJiceOrNoJice[type1]
-                    )
-                }
-                if (type1 == 0 && type2 != 0) {
-                    tableHeader.text = resources.getString(
-                        R.string.table_header_one_type,
-                        "_____",
-                        arrayOfTypesJiceOrNoJice[type2]
-                    )
-                }
-                if (type1 != 0 && type2 != 0 && type1 != type2) {
-                    tableHeader.text = resources.getString(
-                        R.string.table_header_two_types,
-                        "_____",
-                        arrayOfTypesJiceOrNoJice[type1],
-                        arrayOfTypesJiceOrNoJice[type2]
-                    )
-                }
-                if (type1 != 0 && type1 == type2) {
-                    tableHeader.text = resources.getString(
-                        R.string.table_header_one_type,
-                        "_____",
-                        arrayOfTypesJiceOrNoJice[type1]
-                    )
-                }
-            }
-            false -> {
-                tableHeader.text = resources.getString(
-                    R.string.table_header_one_type,
-                    arrayOfTypesJiceOrNoJice[type1], "_____"
-                )
-            }
-        }
-    }
-
+    // BL
     private fun checkIfTypingExists(type1: Int, type2: Int) {
         val currentTypingPair: List<Int> = listOf(type1, type2)
         if (currentTypingPair in listOfNonexistentTypes) {
@@ -659,18 +729,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun makeVisibleIfTypeSelected(givenView: View, type1: Int, type2: Int = 0) {
-        if (type1 != 0 || type2 != 0) {
-            adjustVisibility(givenView, 0)
-        } else {
-            adjustVisibility(givenView,1)
-        }
-    }
-
     // @@@ktg there's an easier way to instantiate a list of the same value
     // hint: loops/in-line functions
     // @@@nap see onesString(), onesDouble(), and onesInt()
 
+    // BL
     private fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
         if (attacker == 0) { return onesDouble() }
 
@@ -685,6 +748,7 @@ class MainActivity : AppCompatActivity() {
         return dictOfSelectedTypes.values.toMutableList()
     }
 
+    // BL
     private fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
         if (defender == 0) {
             return onesDouble()
@@ -699,30 +763,13 @@ class MainActivity : AppCompatActivity() {
         return listOfDefendingMatchupCoefficients
     }
 
-    private var arrayOfIcons: MutableList<Int> = mutableListOf(
-        R.drawable.bug_icon,
-        R.drawable.dark_icon,
-        R.drawable.dragon_icon,
-        R.drawable.electric_icon,
-        R.drawable.fairy_icon,
-        R.drawable.fighting_icon,
-        R.drawable.fire_icon,
-        R.drawable.flying_icon,
-        R.drawable.ghost_icon,
-        R.drawable.grass_icon,
-        R.drawable.ground_icon,
-        R.drawable.ice_icon,
-        R.drawable.normal_icon,
-        R.drawable.poison_icon,
-        R.drawable.psychic_icon,
-        R.drawable.rock_icon,
-        R.drawable.steel_icon,
-        R.drawable.water_icon
-    )
-    private fun arrayOfIconsCanWeGetAQuickJiceCheck() {
-        arrayListForTypeGrid?.get(11)?.iconsInGridView = if (jiceTime) {R.drawable.jice_icon} else {R.drawable.ice_icon}
+    // BL
+    private fun justChangeJiceInGridView() {
+        arrayListForTypeGrid?.get(11)?.iconsInGridView = if (jiceTime) { R.drawable.jice_icon } else { R.drawable.ice_icon }
+        arrayListForTypeGrid?.let { TypeGridAdapter(it).submitList(arrayListForTypeGrid) }
     }
 
+    // BL
     private val listOfNonexistentTypes: List<List<Int>> = listOf(
         listOf(13,12), // Normal ice
         listOf(12,13),
