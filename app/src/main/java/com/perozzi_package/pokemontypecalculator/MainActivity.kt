@@ -393,13 +393,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // UI
-    private fun justChangeJiceIconInGrid(arrayList: ArrayList<TypeGrid>) {
-
-    }
-    // ONLY update the jice elements
-    // write a function that replaces setDataInTypeGridList
-
-    // UI
     private fun adjustTypeSpinnersVisibility() {
         when (weAreDefending) {
             false -> {
@@ -762,6 +755,9 @@ class MainActivity : AppCompatActivity() {
         }
         return listOfDefendingMatchupCoefficients
     }
+
+    // ONLY update the jice elements
+    // write a function that replaces setDataInTypeGridList
 
     // BL
     private fun justChangeJiceInGridView() {
