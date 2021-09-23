@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     // BL
     // needed for 3 functions
-    private lateinit var typeMatchups: Map<PokemonType, Map<String, Double>>
+    private lateinit var typeMatchups: Map<Types, Map<String, Double>>
 
     // BL
     // needed for 3 functions
@@ -60,9 +60,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var defendingType2SpinnerAndLabel: LinearLayout
 
     // BL
-    private var defendingType1: Int = 0
-    private var defendingType2: Int = 0
-    private var attackingType: Int = 0
+    private var defendingType1: String = "(choose)"
+    private var defendingType2: String = "(choose)"
+    private var attackingType: String = "[none]"
 
     @SuppressLint("UseSwitchCompatOrMaterialCode", "ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -136,9 +136,14 @@ class MainActivity : AppCompatActivity() {
 
         // BL
         weAreDefending = false
-        attackingType = 0
-        defendingType1 = 0
-        defendingType2 = 0
+        attackingType = "(choose)"
+        defendingType1 = "(choose)"
+        defendingType2 = "[none]"
+
+        // Necessary to adjust spinner values when switching between Attacker and Defender
+        var atkSpinnerIndex = 0
+        var defSpinner1Index = 0
+        var defSpinner2Index = 0
 
         // BL
         var listOfInteractions: MutableList<Double> = onesDouble()
@@ -150,13 +155,14 @@ class MainActivity : AppCompatActivity() {
 
             when (weAreDefending) {
                 false -> {
-                    if (defendingType1 != 0) {
+                    if (defendingType1 != "(choose)") {
                         attackingType = defendingType1
-                        attackingTypeSpinner.setSelection(defendingType1)
+                        // This line is the reason defSpinner1Index exists
+                        attackingTypeSpinner.setSelection(defSpinner1Index)
                     }
-                    if (defendingType1 == 0 && defendingType2 != 0) {
+                    if (defendingType1 == "(choose)" && defendingType2 != "[none]") {
                         attackingType = defendingType2
-                        attackingTypeSpinner.setSelection(defendingType1)
+                        attackingTypeSpinner.setSelection(defSpinner2Index)
                     }
 
                     povSwitch.text = getString(R.string.pov_switch_to_attacking)
@@ -167,17 +173,17 @@ class MainActivity : AppCompatActivity() {
                     listOfInteractions = attackingEffectivenessCalculator(attackingType)
                 }
                 true -> {
-                    defendingType2 = 0
+                    defendingType2 = "[none]"
                     defendingType2Spinner.setSelection(0)
                     defendingType1 = attackingType
-                    defendingType1Spinner.setSelection(attackingType)
+                    defendingType1Spinner.setSelection(atkSpinnerIndex)
                     povSwitch.text = getString(R.string.pov_switch_to_defending)
                     typeSelectionPrompt.text = resources.getString(R.string.defending_prompt)
                     adjustTableHeaderText(tableHeader,defendingType1,defendingType2)
 
-                    listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
+                    listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
                         defendingEffectivenessCalculator(defendingType1)
-                    } else if (defendingType1 == 0) {
+                    } else if (defendingType1 == "(choose)") {
                         defendingEffectivenessCalculator(defendingType2)
                     } else {
                         defendingWithTwoTypesCalculator(defendingType1, defendingType2)
@@ -189,7 +195,10 @@ class MainActivity : AppCompatActivity() {
 
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                attackingType = p2
+                atkSpinnerIndex = p2
+                attackingType = Types.values()[p2].type
+                // Saving for later in case I need it
+                // attackingType = attackingTypeSpinner.selectedItem.toString()
 
                 // Table header text adjustment
                 adjustTableHeaderText(tableHeader,attackingType)
@@ -214,7 +223,8 @@ class MainActivity : AppCompatActivity() {
             // TODO @@@ktg duplicate code = function-ize
             // @@@nap functionized much of it, some parts still duplicate but not sure if it's unavoidable/too pyrrhic to fix
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
-                defendingType1 = p2
+                defSpinner1Index = p2
+                defendingType1 = Types.values()[p2].type
 
                 // Table header text adjustment
                 adjustTableHeaderText(tableHeader,defendingType1,defendingType2)
@@ -223,14 +233,14 @@ class MainActivity : AppCompatActivity() {
                 checkIfTypingExists(defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(tableHeader,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(typeTableRecyclerView,defendingType1,defendingType2)
-                makeVisibleIfTypeSelected(gameSwitchText,attackingType)
-                makeVisibleIfTypeSelected(gameSwitch,attackingType)
+                makeVisibleIfTypeSelected(gameSwitchText,defendingType1,defendingType2)
+                makeVisibleIfTypeSelected(gameSwitch,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(iceJiceSwitch,defendingType1,defendingType2)
 
                 // Gets values and shows them in GridView if only one type is selected
-                listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
+                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
                     defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == 0) {
+                } else if (defendingType1 == "(choose)") {
                     defendingEffectivenessCalculator(defendingType2)
                 } else {
                     defendingWithTwoTypesCalculator(defendingType1, defendingType2)
@@ -243,7 +253,8 @@ class MainActivity : AppCompatActivity() {
         // Called when user selects an option in the second type spinner
         defendingType2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
-                defendingType2 = p2
+                defSpinner2Index = p2
+                defendingType2 = Types.values()[p2].type
 
                 // Table header text adjustment
                 adjustTableHeaderText(tableHeader,defendingType1,defendingType2)
@@ -252,13 +263,13 @@ class MainActivity : AppCompatActivity() {
                 checkIfTypingExists(defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(tableHeader,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(typeTableRecyclerView,defendingType1,defendingType2)
-                makeVisibleIfTypeSelected(gameSwitchText,attackingType)
-                makeVisibleIfTypeSelected(gameSwitch,attackingType)
+                makeVisibleIfTypeSelected(gameSwitchText,defendingType1,defendingType2)
+                makeVisibleIfTypeSelected(gameSwitch,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(iceJiceSwitch,defendingType1,defendingType2)
 
-                listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
+                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
                     defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == 0) {
+                } else if (defendingType1 == "(choose)") {
                     defendingEffectivenessCalculator(defendingType2)
                 } else {
                     defendingWithTwoTypesCalculator(defendingType1, defendingType2)
@@ -279,9 +290,9 @@ class MainActivity : AppCompatActivity() {
                             attackingEffectivenessCalculator(attackingType)
                     }
                     true -> {
-                        listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
+                        listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
                             defendingEffectivenessCalculator(defendingType1)
-                        } else if (defendingType1 == 0) {
+                        } else if (defendingType1 == "(choose)") {
                             defendingEffectivenessCalculator(defendingType2)
                         } else {
                             defendingWithTwoTypesCalculator(defendingType1, defendingType2)
@@ -291,7 +302,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Changes the switch's text between "Pokémon GO and Main Game)
+            // Changes the switch's text between Pogo and Main Game
             if (pogoTime) {
                 gameSwitchText.text = resources.getString((R.string.pogo))
             } else {
@@ -300,9 +311,9 @@ class MainActivity : AppCompatActivity() {
 
             // Sends information to gridView depending on whether dual type is selected or not
             if (weAreDefending) {
-                listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
+                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
                     defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == 0) {
+                } else if (defendingType1 == "(choose)") {
                     defendingEffectivenessCalculator(defendingType2)
                 } else {
                     defendingWithTwoTypesCalculator(defendingType1, defendingType2)
@@ -323,7 +334,8 @@ class MainActivity : AppCompatActivity() {
             defendingSpinnerType2Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
 
             // Adjusts the text in the table header (only if Ice/Jice is currently selected)
-            if (attackingType == 12 || defendingType1 == 12 || defendingType2 == 12) {
+            if ((attackingType == "Ice" || defendingType1 == "Ice" || defendingType2 == "Ice")
+                || (attackingType == "Jice" || defendingType1 == "Jice" || defendingType2 == "Jice")) {
                 when (weAreDefending) {
                     false -> adjustTableHeaderText(tableHeader, attackingType)
                     true -> adjustTableHeaderText(tableHeader, defendingType1, defendingType2)
@@ -340,9 +352,9 @@ class MainActivity : AppCompatActivity() {
                 interactionsToGridView(listOfInteractions)
             }
             if (weAreDefending) {
-                listOfInteractions = if (defendingType2 == 0 || defendingType1 == defendingType2) {
+                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
                     defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == 0) {
+                } else if (defendingType1 == "(choose)") {
                     defendingEffectivenessCalculator(defendingType2)
                 } else {
                     defendingWithTwoTypesCalculator(defendingType1, defendingType2)
@@ -384,11 +396,11 @@ class MainActivity : AppCompatActivity() {
     )
 
     // UI
-    private fun makeVisibleIfTypeSelected(givenView: View, type1: Int, type2: Int = 0) {
-        if (type1 != 0 || type2 != 0) {
-            adjustVisibility(givenView, 0)
+    private fun makeVisibleIfTypeSelected(givenView: View, type1: String, type2: String = "[none]") {
+        if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)) {
+            adjustVisibility(givenView, 1)
         } else {
-            adjustVisibility(givenView,1)
+            adjustVisibility(givenView,0)
         }
     }
 
@@ -423,53 +435,51 @@ class MainActivity : AppCompatActivity() {
         val spinnerAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerOptions)
         spinner.adapter = spinnerAdapter
+        spinner.setSelection(0,false)
     }
 
     // UI
-    private fun adjustTableHeaderText(tableHeader: TextView, type1: Int, type2: Int = 0) {
-        if (type1 == 0 && type2 == 0) {
+    private fun adjustTableHeaderText(tableHeader: TextView, type1: String, type2: String = "[none]") {
+        if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)){
             adjustVisibility(tableHeader, 2)
         } else {adjustVisibility(tableHeader, 0)}
-        val arrayOfTypesJiceOrNoJice: Array<String> = resources.getStringArray(R.array.spinner_type_options_1)
-        if (jiceTime) {
-            arrayOfTypesJiceOrNoJice[12] = getString(R.string.jice)
-        }
+
         when (weAreDefending) {
             true -> {
-                if (type1 != 0 && type2 == 0) {
+                if ((type1 != "(choose)" && type1 != Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        arrayOfTypesJiceOrNoJice[type1]
+                        type1
                     )
                 }
-                if (type1 == 0 && type2 != 0) {
+                if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 != "[none]" && type2 != Types.NoType.type)) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        arrayOfTypesJiceOrNoJice[type2]
+                        type2
                     )
                 }
-                if (type1 != 0 && type2 != 0 && type1 != type2) {
+                if ((type1 != "(choose)" && type1 != Types.NoType.type) && (type2 != "[none]" && type2 != Types.NoType.type) && type1 != type2) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_two_types,
                         "_____",
-                        arrayOfTypesJiceOrNoJice[type1],
-                        arrayOfTypesJiceOrNoJice[type2]
+                        type1,
+                        type2
                     )
                 }
-                if (type1 != 0 && type1 == type2) {
+                if ((type1 != "(choose)" && type1 != Types.NoType.type) && type1 == type2) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        arrayOfTypesJiceOrNoJice[type1]
+                        type1
                     )
                 }
             }
             false -> {
                 tableHeader.text = resources.getString(
                     R.string.table_header_one_type,
-                    arrayOfTypesJiceOrNoJice[type1], "_____"
+                    type1, "_____"
                 )
             }
         }
@@ -612,7 +622,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // BL
-    private fun defendingWithTwoTypesCalculator(type1: Int, type2: Int): MutableList<Double> {
+    private fun defendingWithTwoTypesCalculator(type1: String, type2: String): MutableList<Double> {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
         val defenderNetEffectivenessList: MutableList<Double> = mutableListOf()
@@ -702,7 +712,7 @@ class MainActivity : AppCompatActivity() {
                 val body = response.body?.string()
                 val gson = GsonBuilder().create()
                 val typeToken: Type =
-                    object : TypeToken<Map<PokemonType, Map<String, Double>>>() {}.type
+                    object : TypeToken<Map<Types, Map<String, Double>>>() {}.type
                 typeMatchups = gson.fromJson(body, typeToken)
             }
 
@@ -713,8 +723,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // BL
-    private fun checkIfTypingExists(type1: Int, type2: Int) {
-        val currentTypingPair: List<Int> = listOf(type1, type2)
+    private fun checkIfTypingExists(type1: String, type2: String) {
+        val currentTypingPair: List<String> = listOf(type1, type2)
         if (currentTypingPair in listOfNonexistentTypes) {
             adjustVisibility(doesNotExistDisclaimer, 0)
         } else {
@@ -727,14 +737,13 @@ class MainActivity : AppCompatActivity() {
     // @@@nap see onesString(), onesDouble(), and onesInt()
 
     // BL
-    private fun attackingEffectivenessCalculator(attacker: Int): MutableList<Double> {
-        if (attacker == 0) { return onesDouble() }
+    private fun attackingEffectivenessCalculator(attacker: String): MutableList<Double> {
+        if (attacker == "(choose)" || attacker == Types.NoType.type) { return onesDouble() }
 
         var dictOfSelectedTypes: Map<String, Double> = emptyMap()
-        val attackerType: String = resources.getStringArray(R.array.spinner_type_options_1)[attacker]
 
-        for (moveType in PokemonType.values()) {
-            if (attackerType == moveType.type) {
+        for (moveType in Types.values()) {
+            if (attacker == moveType.type && attacker != Types.NoType.type) {
                 dictOfSelectedTypes = typeMatchups.getValue(moveType)
             }
         }
@@ -742,16 +751,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     // BL
-    private fun defendingEffectivenessCalculator(defender: Int): MutableList<Double> {
-        if (defender == 0) {
+    private fun defendingEffectivenessCalculator(defender: String): MutableList<Double> {
+        if (defender == "(choose)" || defender == "[none]" || defender == Types.NoType.type) {
             return onesDouble()
         }
         var dictOfSelectedTypes: Map<String, Double>
         val listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
-        val defendingType: String = resources.getStringArray(R.array.spinner_type_options_1)[defender]
-        for (moveType in PokemonType.values()) {
-            dictOfSelectedTypes = typeMatchups.getValue(moveType)
-            dictOfSelectedTypes[defendingType]?.let { listOfDefendingMatchupCoefficients.add(it) }
+        for (moveType in Types.values()) {
+            if (moveType != Types.NoType) {
+                dictOfSelectedTypes = typeMatchups.getValue(moveType)
+                dictOfSelectedTypes[defender]?.let { listOfDefendingMatchupCoefficients.add(it) }
+            }
         }
         return listOfDefendingMatchupCoefficients
     }
@@ -766,40 +776,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     // BL
-    private val listOfNonexistentTypes: List<List<Int>> = listOf(
-        listOf(13,12), // Normal ice
-        listOf(12,13),
-        listOf(13,14), // Normal poison
-        listOf(14,13),
-        listOf(13,1), // Normal bug
-        listOf(1,13),
-        listOf(13,16), // Normal rock
-        listOf(16,13),
-        listOf(13,9), // Normal ghost
-        listOf(9,13),
-        listOf(13,17), // Normal steel
-        listOf(17,13),
-        listOf(7,5), // Fire fairy
-        listOf(5,7),
-        listOf(7,8), // Fire grass
-        listOf(8,7),
-        listOf(4,6), // Fighting electric
-        listOf(6,4),
-        listOf(12,14), // Ice poison
-        listOf(14,12),
-        listOf(6,11), // Fighting ground
-        listOf(11,6),
-        listOf(6,5), // Fighting fairy
-        listOf(5,6),
-        listOf(14,17), // Steel poison
-        listOf(17,14),
-        listOf(11,5), // Fairy ground
-        listOf(5,11),
-        listOf(1,3), // Bug dragon
-        listOf(3,1),
-        listOf(1,2), // Bug dark
-        listOf(2,1),
-        listOf(16,9), // Rock ghost
-        listOf(9,16)
+    private val listOfNonexistentTypes: List<List<String>> = listOf(
+        listOf("Normal","Ice"), // Normal ice
+        listOf("Ice","Normal"),
+        listOf("Normal","Poison"), // Normal poison
+        listOf("Poison","Normal"),
+        listOf("Normal","Bug"), // Normal bug
+        listOf("Bug","Normal"),
+        listOf("Normal","Rock"), // Normal rock
+        listOf("Rock","Normal"),
+        listOf("Normal","Ghost"), // Normal ghost
+        listOf("Ghost","Normal"),
+        listOf("Normal","Steel"), // Normal steel
+        listOf("Steel","Normal"),
+        listOf("Fire","Fairy"), // Fire fairy
+        listOf("Fairy","Fire"),
+        listOf("Fire","Grass"), // Fire grass
+        listOf("Grass","Fire"),
+        listOf("Electric","Fighting"), // Fighting electric
+        listOf("Fighting","Electric"),
+        listOf("Ice","Poison"), // Ice poison
+        listOf("Poison","Ice"),
+        listOf("Fighting","Ground"), // Fighting ground
+        listOf("Ground","Fighting"),
+        listOf("Fighting","Fairy"), // Fighting fairy
+        listOf("Fairy","Fighting"),
+        listOf("Poison","Steel"), // Steel poison
+        listOf("Steel","Poison"),
+        listOf("Ground","Fairy"), // Fairy ground
+        listOf("Fairy","Ground"),
+        listOf("Bug","Dragon"), // Bug dragon
+        listOf("Dragon","Bug"),
+        listOf("Bug","Dark"), // Bug dark
+        listOf("Dark","Bug"),
+        listOf("Rock","Ghost"), // Rock ghost
+        listOf("Ghost","Rock")
     )
 }

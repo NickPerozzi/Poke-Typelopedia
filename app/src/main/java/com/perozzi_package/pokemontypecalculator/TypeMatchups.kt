@@ -1,6 +1,7 @@
 package com.perozzi_package.pokemontypecalculator
 
-enum class PokemonType(val type: String) {
+enum class Types(val type: String) {
+    NoType("NoType"),
     Bug("Bug"),
     Dark("Dark"),
     Dragon("Dragon"),
