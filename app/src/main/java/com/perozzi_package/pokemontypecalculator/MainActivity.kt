@@ -15,11 +15,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import okhttp3.*
-import java.io.IOException
-import java.lang.reflect.Type
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 @RequiresApi(Build.VERSION_CODES.M)
@@ -31,42 +26,20 @@ class MainActivity : AppCompatActivity() {
     // needed for gridView functionality
     private var recyclerView: RecyclerView? = null
     private var gridLayoutManager: GridLayoutManager? = null
-    private var arrayListForTypeGrid:ArrayList<TypeGrid> ? = null
-    private var typeGridAdapter:TypeGridAdapter ? = null
+    private var arrayListForTypeGrid: ArrayList<TypeGrid> ? = null
+    private var typeGridAdapter: TypeGridAdapter ? = null
 
-    // BL
-    // needed for 3 functions
-    private lateinit var typeMatchups: Map<Types, Map<String, Double>>
-
-    // BL
-    // needed for checkIfTypingExists()
-    private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
-
-    // BL
-    // needed for 2 functions
+    // needed for adjustTypeSpinnersVisibility() and adjustTableHeaderText()
     private var weAreDefending = false
-
-    // UI
-    // needed for adjustTypeSpinnerVisibility()
-    private lateinit var attackingTypeSpinnerAndLabel: LinearLayout
-    private lateinit var defendingType1SpinnerAndLabel: LinearLayout
-    private lateinit var defendingType2SpinnerAndLabel: LinearLayout
-
-    // BL
-    private var defendingType1: String = "(choose)"
-    private var defendingType2: String = "(choose)"
-    private var attackingType: String = "[none]"
 
     @SuppressLint("UseSwitchCompatOrMaterialCode", "ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide() // Hides top bar
 
-        // UI
+        // Binding set-up
         val binding =
             ActivityMainBinding.inflate(layoutInflater); setContentView(binding.root) // Sets up bindings for activity_main
-
-        // UI
         // Night mode compatibility
         val mainLinearLayout = binding.mainLinearLayout
         val gameSwitchText = binding.gameSwitchText
@@ -82,18 +55,16 @@ class MainActivity : AppCompatActivity() {
                 gameSwitchText.setTextColor(Color.BLACK)
             }
         }
-
-        // UI
         // Bindings
         val defendingType1Spinner = binding.type1Spinner
         val defendingType2Spinner = binding.type2Spinner
         val attackingTypeSpinner = binding.attackingTypeSpinner
         val typeSelectionPrompt = binding.secondPrompt
         val tableHeader = binding.tableHeader
-        doesNotExistDisclaimer = binding.doesNotExistDisclaimer
-        attackingTypeSpinnerAndLabel = binding.attackingTypeSpinnerAndLabel
-        defendingType1SpinnerAndLabel = binding.defendingType1SpinnerAndLabel
-        defendingType2SpinnerAndLabel = binding.defendingType2SpinnerAndLabel
+        val doesNotExistDisclaimer = binding.doesNotExistDisclaimer
+        val attackingTypeSpinnerAndLabel = binding.attackingTypeSpinnerAndLabel
+        val defendingType1SpinnerAndLabel = binding.defendingType1SpinnerAndLabel
+        val defendingType2SpinnerAndLabel = binding.defendingType2SpinnerAndLabel
         val povSwitch = binding.povSwitch
         val gameSwitch = binding.gameSwitch
         val iceJiceSwitch = binding.iceJiceSwitch
@@ -129,9 +100,9 @@ class MainActivity : AppCompatActivity() {
 
         // BL
         weAreDefending = false
-        attackingType = "(choose)"
-        defendingType1 = "(choose)"
-        defendingType2 = "[none]"
+        var attackingType = "(choose)"
+        var defendingType1 = "(choose)"
+        var defendingType2 = "[none]"
 
         // Necessary to adjust spinner values when switching between Attacker and Defender
         var atkSpinnerIndex = 0
@@ -144,13 +115,17 @@ class MainActivity : AppCompatActivity() {
         // UI
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
             weAreDefending = onSwitch
-            adjustTypeSpinnersVisibility()
-
             when (weAreDefending) {
                 false -> {
+
+                    // Switch the spinners
+                    attackingTypeSpinnerAndLabel.visibility = View.VISIBLE
+                    defendingType1SpinnerAndLabel.visibility = View.GONE
+                    defendingType2SpinnerAndLabel.visibility = View.GONE
+
+                    // transfer the
                     if (defendingType1 != "(choose)") {
                         attackingType = defendingType1
-                        // This line is the reason defSpinner1Index exists
                         attackingTypeSpinner.setSelection(defSpinner1Index)
                     }
                     if (defendingType1 == "(choose)" && defendingType2 != "[none]") {
@@ -161,11 +136,17 @@ class MainActivity : AppCompatActivity() {
                     povSwitch.text = getString(R.string.pov_switch_to_attacking)
                     typeSelectionPrompt.text = resources.getString(R.string.attacking_prompt)
                     adjustTableHeaderText(tableHeader,attackingType)
-                    adjustVisibility(doesNotExistDisclaimer,1)
+                    doesNotExistDisclaimer.visibility = View.INVISIBLE
 
                     listOfInteractions = mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
                 }
                 true -> {
+
+                    // Switch the spinners
+                    attackingTypeSpinnerAndLabel.visibility = View.GONE
+                    defendingType1SpinnerAndLabel.visibility = View.VISIBLE
+                    defendingType2SpinnerAndLabel.visibility = View.VISIBLE
+
                     defendingType2 = "[none]"
                     defendingType2Spinner.setSelection(0)
                     defendingType1 = attackingType
@@ -190,8 +171,6 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 atkSpinnerIndex = p2
                 attackingType = Types.values()[p2].type
-                // Saving for later in case I need it
-                // attackingType = attackingTypeSpinner.selectedItem.toString()
 
                 // Table header text adjustment
                 adjustTableHeaderText(tableHeader,attackingType)
@@ -213,8 +192,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         defendingType1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            // TODO @@@ktg duplicate code = function-ize
-            // @@@nap functionized much of it, some parts still duplicate but not sure if it's unavoidable/too pyrrhic to fix
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner1Index = p2
                 defendingType1 = Types.values()[p2].type
@@ -243,7 +220,6 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-        // Called when user selects an option in the second type spinner
         defendingType2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner2Index = p2
@@ -275,7 +251,7 @@ class MainActivity : AppCompatActivity() {
 
         // UI
         // TODO(change the switch when the game switch text is selected in addition to the switch itself)
-        // gameSwitchText.setOnClickListener
+        gameSwitchText.setOnClickListener { gameSwitch.toggle() }
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.pogoTime = onSwitch
             run {
@@ -337,27 +313,25 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             // Adjusts the icon in the gridView
-            justChangeJiceInGridView()
-
+            // Not implemented yet; waiting until LiveData implemented
+            // justChangeJiceInGridView()
 
             // Sends information to gridView depending on whether dual type is selected or not
-
             // TODO(Eventually not need these lines of code)
-            if (!weAreDefending) {
-                interactionsToGridView(listOfInteractions)
-            }
             if (weAreDefending) {
                 listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == "(choose)") {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                } else {
-                    mainActivityViewModel.defendingWithTwoTypesCalculator(defendingType1, defendingType2)
-                }
-                interactionsToGridView(listOfInteractions)
+                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
+                    } else if (defendingType1 == "(choose)") {
+                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
+                    } else {
+                        mainActivityViewModel.defendingWithTwoTypesCalculator(
+                            defendingType1,
+                            defendingType2
+                        )
+                    }
             }
+            interactionsToGridView(listOfInteractions)
         }
-
         infoButton.setOnClickListener {
             val intent = Intent(this, TypeTriviaActivity::class.java)
             startActivity(intent)
@@ -368,37 +342,11 @@ class MainActivity : AppCompatActivity() {
     /////////////////////////////////     End of onCreate     ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    // UI
     private fun makeVisibleIfTypeSelected(givenView: View, type1: String, type2: String = "[none]") {
         if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)) {
-            adjustVisibility(givenView, 1)
+            givenView.visibility = View.INVISIBLE
         } else {
-            adjustVisibility(givenView,0)
-        }
-    }
-
-    // UI
-    private fun adjustTypeSpinnersVisibility() {
-        when (weAreDefending) {
-            false -> {
-                adjustVisibility(attackingTypeSpinnerAndLabel, 0)
-                adjustVisibility(defendingType1SpinnerAndLabel, 2)
-                adjustVisibility(defendingType2SpinnerAndLabel, 2)
-            }
-            true -> {
-                adjustVisibility(attackingTypeSpinnerAndLabel, 2)
-                adjustVisibility(defendingType1SpinnerAndLabel, 0)
-                adjustVisibility(defendingType2SpinnerAndLabel, 0)
-            }
-        }
-    }
-
-    // UI
-    private fun adjustVisibility(selectedTextView: View, visibleInvisibleGone: Int) {
-        when (visibleInvisibleGone) {
-            0 -> selectedTextView.visibility = View.VISIBLE
-            1 -> selectedTextView.visibility = View.INVISIBLE
-            2 -> selectedTextView.visibility = View.GONE
+            givenView.visibility = View.VISIBLE
         }
     }
 
@@ -414,8 +362,8 @@ class MainActivity : AppCompatActivity() {
     // UI
     private fun adjustTableHeaderText(tableHeader: TextView, type1: String, type2: String = "[none]") {
         if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)){
-            adjustVisibility(tableHeader, 2)
-        } else {adjustVisibility(tableHeader, 0)}
+            tableHeader.visibility = View.GONE
+        } else {tableHeader.visibility = View.VISIBLE}
         var type1Displayed = type1
         var type2Displayed = type2
         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
@@ -509,16 +457,9 @@ class MainActivity : AppCompatActivity() {
         return listOfCellBackgroundColors
     }
 
-    // @@@ktg there's an easier way to instantiate a list of the same value
-    // hint: loops/in-line functions
-    // @@@nap see onesString(), onesDouble(), and onesInt()
-
-    // ONLY update the jice elements
-    // write a function that replaces setDataInTypeGridList
-
     // BL
-    private fun justChangeJiceInGridView() {
+    /*private fun justChangeJiceInGridView() {
         arrayListForTypeGrid?.get(11)?.iconsInGridView = if (mainActivityViewModel.jiceTime) { R.drawable.jice_icon } else { R.drawable.ice_icon }
         arrayListForTypeGrid?.let { TypeGridAdapter(it).submitList(arrayListForTypeGrid) }
-    }
+    }*/
 }

@@ -34,6 +34,7 @@ class MainActivityViewModel: ViewModel() {
         R.drawable.water_icon
     )
 
+    //data
     private val listOfNonexistentTypeCombinations: List<List<String>> = listOf(
         listOf(Types.Normal.type,Types.Ice.type), // Normal ice
         listOf(Types.Ice.type,Types.Normal.type),
@@ -114,7 +115,6 @@ class MainActivityViewModel: ViewModel() {
                     object : TypeToken<Map<Types, Map<String, Double>>>() {}.type
                 typeMatchups = gson.fromJson(body, typeToken)
             }
-
             override fun onFailure(call: Call, e: IOException) {
                 println("Failed to call request")
             }

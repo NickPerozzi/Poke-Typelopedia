@@ -52,6 +52,7 @@
             android:text="@string/pov_switch_to_attacking"
             android:layout_gravity="center"
             android:textAlignment="center"
+            android:textSize="20sp"
             tools:ignore="UseSwitchCompatOrMaterialXml"
             />
 
@@ -70,7 +71,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:id="@+id/defendingType1SpinnerAndLabel"
@@ -87,7 +89,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/first_type"
-                android:paddingTop="10sp"/>
+                android:paddingTop="10sp"
+                android:textSize="16sp"/>
 
             <Spinner
                 android:id="@+id/type1Spinner"
@@ -112,7 +115,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/second_type"
-                android:paddingTop="10sp" />
+                android:paddingTop="10sp"
+                android:textSize="16sp"/>
 
             <Spinner
                 android:id="@+id/type2Spinner"
@@ -137,7 +141,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/move_type"
-                android:paddingTop="10sp"/>
+                android:paddingTop="10sp"
+                android:textSize="16sp"/>
 
             <Spinner
                 android:id="@+id/attackingTypeSpinner"
