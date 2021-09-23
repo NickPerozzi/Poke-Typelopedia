@@ -1,5 +1,6 @@
 package com.perozzi_package.pokemontypecalculator
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -9,6 +10,8 @@ import java.lang.reflect.Type
 
 class MainActivityViewModel: ViewModel() {
 
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    var jiceTime = false
     var pogoTime = false
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
@@ -195,6 +198,100 @@ class MainActivityViewModel: ViewModel() {
             }
         }
         return (defenderNetEffectivenessList)
+    }
+
+    // BL
+    fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
+        val stringList: MutableList<String> = mutableListOf()
+        for (i in 0 until 18) {
+            if (pogoTime) {
+                when (mutableList[i]) {
+                    2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
+                    1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
+                    1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
+                    0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
+                    0.390625 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
+                    0.244 -> stringList.add(Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)
+                }
+            } else {
+                when (mutableList[i]) {
+                    2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
+                    1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
+                    1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
+                    0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
+                    0.25 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
+                    0.390625 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
+                    0.0 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
+                }
+            }
+        }
+        return stringList
+    }
+    //BL
+    @SuppressLint("SetTextI18n")
+    fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
+        val mutableListOfEffectivenessDoubles: MutableList<String> = mutableListOf()
+        for (i in 0 until 18) {
+            if (!pogoTime) {
+                when (listOfEffectivenesses[i]) {
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2")
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x4")
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.5")
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.25")
+                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0")
+                }
+            } else {
+                when (listOfEffectivenesses[i]) {
+                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
+                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1.6")
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2.56")
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.625")
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.391")
+                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0.244")
+                }
+            }
+        }
+        return mutableListOfEffectivenessDoubles
+    }
+
+    // BL
+    fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<String>,
+                              backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
+            ArrayList<TypeGrid> {
+
+        val items: ArrayList<TypeGrid> = ArrayList()
+        for (i in 0 until 18) {
+            items.add(
+                TypeGrid(
+                    iconMutableList[i],
+                    effectivenessMutableList[i],
+                    backgroundColorList[i],
+                    textColorList[i]
+                )
+            )
+        }
+
+        // Determines whether to add "Ice" or "Jice" icon
+
+        // TODO(eventually not need these lines of code)
+        items[11] = if (jiceTime) {
+            TypeGrid(
+                R.drawable.jice_icon,
+                effectivenessMutableList[11],
+                backgroundColorList[11],
+                textColorList[11]
+            )
+        } else {
+            TypeGrid(
+                R.drawable.ice_icon,
+                effectivenessMutableList[11],
+                backgroundColorList[11],
+                textColorList[11]
+            )
+        }
+
+        return items
     }
 
 }

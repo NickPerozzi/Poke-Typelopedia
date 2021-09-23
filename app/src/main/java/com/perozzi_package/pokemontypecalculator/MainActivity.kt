@@ -39,11 +39,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var typeMatchups: Map<Types, Map<String, Double>>
 
     // BL
-    // needed for 3 functions
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private var jiceTime = false
-
-    // BL
     // needed for checkIfTypingExists()
     private lateinit var doesNotExistDisclaimer: TextView // used by makeVisibleIfTypeSelected()
 
@@ -128,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.layoutManager = gridLayoutManager
         recyclerView?.setHasFixedSize(true)
         arrayListForTypeGrid = ArrayList()
-        arrayListForTypeGrid = setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,mainActivityViewModel.onesString(),listOfCellBackgroundColors,listOfCellTextColors)
+        arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,mainActivityViewModel.onesString(),listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
 
@@ -323,7 +318,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
-            jiceTime = onSwitch
+            mainActivityViewModel.jiceTime = onSwitch
 
             // Adjusts the text on the switch itself
             iceJiceSwitch.text = if (onSwitch) { getString(R.string.jice) } else { getString(R.string.ice) }
@@ -424,10 +419,10 @@ class MainActivity : AppCompatActivity() {
         var type1Displayed = type1
         var type2Displayed = type2
         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
-            type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+            type1Displayed = if (mainActivityViewModel.jiceTime) { "Jice" } else { "Ice" }
         }
         if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
-            type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+            type2Displayed = if (mainActivityViewModel.jiceTime) { "Jice" } else { "Ice" }
         }
 
         when (weAreDefending) {
@@ -473,72 +468,17 @@ class MainActivity : AppCompatActivity() {
 
     // BL to UI
     private fun interactionsToGridView(interactionsList: MutableList<Double>) {
-        val effectivenessList = interactionsToEffectiveness(interactionsList)
-        val displayedListOfInteractions = effectivenessToDisplayedCellValues(effectivenessList)
+        val effectivenessList = mainActivityViewModel.interactionsToEffectiveness(interactionsList)
+        val displayedListOfInteractions = mainActivityViewModel.effectivenessToDisplayedCellValues(effectivenessList)
         val listOfCellTextColors = effectivenessToCellTextColors(effectivenessList)
         val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(effectivenessList)
-        arrayListForTypeGrid = setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
+        arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
     }
 
     // BL
-    private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
-        val stringList: MutableList<String> = mutableListOf()
-        for (i in 0 until 18) {
-            if (mainActivityViewModel.pogoTime) {
-                when (mutableList[i]) {
-                    2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
-                    1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
-                    1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
-                    0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
-                    0.390625 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
-                    0.244 -> stringList.add(Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)
-                }
-            } else {
-                when (mutableList[i]) {
-                    2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
-                    1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
-                    1.0 -> stringList.add(Effectiveness.EFFECTIVE.impact)
-                    0.625 -> stringList.add(Effectiveness.NOT_VERY_EFFECTIVE.impact)
-                    0.25 -> stringList.add(Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact)
-                    0.390625 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
-                    0.0 -> stringList.add(Effectiveness.DOES_NOT_EFFECT.impact)
-                }
-            }
-        }
-        return stringList
-    }
-
-    //BL
-    @SuppressLint("SetTextI18n")
-    private fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
-        val mutableListOfEffectivenessDoubles: MutableList<String> = mutableListOf()
-        for (i in 0 until 18) {
-            if (!mainActivityViewModel.pogoTime) {
-                when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
-                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2")
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x4")
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.5")
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.25")
-                    Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0")
-                }
-            } else {
-                when (listOfEffectivenesses[i]) {
-                    Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
-                    Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1.6")
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2.56")
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.625")
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.391")
-                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0.244")
-                }
-            }
-        }
-        return mutableListOfEffectivenessDoubles
-    }
-
-    // BL
+    // NEEDS COLORS
     private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
@@ -552,6 +492,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // BL
+    // NEEDS COLORS
     private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
@@ -568,45 +509,6 @@ class MainActivity : AppCompatActivity() {
         return listOfCellBackgroundColors
     }
 
-    // BL
-    private fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<String>,
-                                      backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
-            ArrayList<TypeGrid> {
-
-        val items: ArrayList<TypeGrid> = ArrayList()
-        for (i in 0 until 18) {
-            items.add(
-                TypeGrid(
-                    iconMutableList[i],
-                    effectivenessMutableList[i],
-                    backgroundColorList[i],
-                    textColorList[i]
-                )
-            )
-        }
-
-        // Determines whether to add "Ice" or "Jice" icon
-
-        // TODO(eventually not need these lines of code)
-        items[11] = if (jiceTime) {
-            TypeGrid(
-                R.drawable.jice_icon,
-                effectivenessMutableList[11],
-                backgroundColorList[11],
-                textColorList[11]
-            )
-        } else {
-            TypeGrid(
-                R.drawable.ice_icon,
-                effectivenessMutableList[11],
-                backgroundColorList[11],
-                textColorList[11]
-            )
-        }
-
-        return items
-    }
-
     // @@@ktg there's an easier way to instantiate a list of the same value
     // hint: loops/in-line functions
     // @@@nap see onesString(), onesDouble(), and onesInt()
@@ -616,7 +518,7 @@ class MainActivity : AppCompatActivity() {
 
     // BL
     private fun justChangeJiceInGridView() {
-        arrayListForTypeGrid?.get(11)?.iconsInGridView = if (jiceTime) { R.drawable.jice_icon } else { R.drawable.ice_icon }
+        arrayListForTypeGrid?.get(11)?.iconsInGridView = if (mainActivityViewModel.jiceTime) { R.drawable.jice_icon } else { R.drawable.ice_icon }
         arrayListForTypeGrid?.let { TypeGridAdapter(it).submitList(arrayListForTypeGrid) }
     }
 }
