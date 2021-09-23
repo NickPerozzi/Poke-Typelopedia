@@ -32,6 +32,10 @@ class MainActivity : AppCompatActivity() {
     // needed for adjustTypeSpinnersVisibility() and adjustTableHeaderText()
     private var weAreDefending = false
 
+    var attackingType = "(choose)"
+    var defendingType1 = "(choose)"
+    var defendingType2 = "[none]"
+
     @SuppressLint("UseSwitchCompatOrMaterialCode", "ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,17 +104,11 @@ class MainActivity : AppCompatActivity() {
 
         // BL
         weAreDefending = false
-        var attackingType = "(choose)"
-        var defendingType1 = "(choose)"
-        var defendingType2 = "[none]"
 
         // Necessary to adjust spinner values when switching between Attacker and Defender
         var atkSpinnerIndex = 0
         var defSpinner1Index = 0
         var defSpinner2Index = 0
-
-        // BL
-        var listOfInteractions: MutableList<Double> = mainActivityViewModel.onesDouble()
 
         // UI
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
@@ -123,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                     defendingType1SpinnerAndLabel.visibility = View.GONE
                     defendingType2SpinnerAndLabel.visibility = View.GONE
 
-                    // transfer the
+                    // transfer the value from the to-be-invisible spinner to the to-be-visible one
                     if (defendingType1 != "(choose)") {
                         attackingType = defendingType1
                         attackingTypeSpinner.setSelection(defSpinner1Index)
@@ -138,7 +136,11 @@ class MainActivity : AppCompatActivity() {
                     adjustTableHeaderText(tableHeader,attackingType)
                     doesNotExistDisclaimer.visibility = View.INVISIBLE
 
-                    listOfInteractions = mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
+                    refreshTheData()
+
+/*
+                    mainActivityViewModel.listOfInteractions = mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
+*/
                 }
                 true -> {
 
@@ -155,16 +157,9 @@ class MainActivity : AppCompatActivity() {
                     typeSelectionPrompt.text = resources.getString(R.string.defending_prompt)
                     adjustTableHeaderText(tableHeader,defendingType1,defendingType2)
 
-                    listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                    } else if (defendingType1 == "(choose)") {
-                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                    } else {
-                        mainActivityViewModel.defendingWithTwoTypesCalculator(defendingType1, defendingType2)
-                    }
+                    refreshTheData()
                 }
             }
-            interactionsToGridView(listOfInteractions)
         }
 
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -182,11 +177,7 @@ class MainActivity : AppCompatActivity() {
                 makeVisibleIfTypeSelected(iceJiceSwitch,attackingType)
                 makeVisibleIfTypeSelected(tableHeader,attackingType)
 
-                // Gets the values
-                listOfInteractions = mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
-
-                // Makes the values show in GridView (multiple nested functions)
-                interactionsToGridView(listOfInteractions)
+                refreshTheData()
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -207,15 +198,7 @@ class MainActivity : AppCompatActivity() {
                 makeVisibleIfTypeSelected(gameSwitch,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(iceJiceSwitch,defendingType1,defendingType2)
 
-                // Gets values and shows them in GridView if only one type is selected
-                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == "(choose)") {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                } else {
-                    mainActivityViewModel.defendingWithTwoTypesCalculator(defendingType1, defendingType2)
-                }
-                interactionsToGridView(listOfInteractions)
+                refreshTheData()
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -236,61 +219,21 @@ class MainActivity : AppCompatActivity() {
                 makeVisibleIfTypeSelected(gameSwitch,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(iceJiceSwitch,defendingType1,defendingType2)
 
-                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == "(choose)") {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                } else {
-                    mainActivityViewModel.defendingWithTwoTypesCalculator(defendingType1, defendingType2)
-                }
-                interactionsToGridView(listOfInteractions)
+                refreshTheData()
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-        // UI
-        // TODO(change the switch when the game switch text is selected in addition to the switch itself)
-        gameSwitchText.setOnClickListener { gameSwitch.toggle() }
+        gameSwitchText.setOnClickListener { gameSwitch.toggle() } // toggles gameSwitch when text is clicked
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
+
+            // Changes the boolean and adjusts textViews
             mainActivityViewModel.pogoTime = onSwitch
-            run {
-                when (weAreDefending) {
-                    false -> {
-                        listOfInteractions =
-                            mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
-                    }
-                    true -> {
-                        listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                            mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                        } else if (defendingType1 == "(choose)") {
-                            mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                        } else {
-                            mainActivityViewModel.defendingWithTwoTypesCalculator(defendingType1, defendingType2)
-                        }
-                        interactionsToGridView(listOfInteractions)
-                    }
-                }
-            }
+            gameSwitchText.text = if (mainActivityViewModel.pogoTime) {
+                resources.getString(R.string.pogo) } else { resources.getString(R.string.mainGame)}
 
-            // Changes the switch's text between Pogo and Main Game
-            if (mainActivityViewModel.pogoTime) {
-                gameSwitchText.text = resources.getString((R.string.pogo))
-            } else {
-                gameSwitchText.text = resources.getString((R.string.mainGame))
-            }
-
-            // Sends information to gridView depending on whether dual type is selected or not
-            if (weAreDefending) {
-                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                } else if (defendingType1 == "(choose)") {
-                    mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                } else {
-                    mainActivityViewModel.defendingWithTwoTypesCalculator(defendingType1, defendingType2)
-                }
-            }
-            interactionsToGridView(listOfInteractions)
+            refreshTheData()
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
@@ -312,25 +255,8 @@ class MainActivity : AppCompatActivity() {
                     true -> adjustTableHeaderText(tableHeader, defendingType1, defendingType2)
                 }
             }
-            // Adjusts the icon in the gridView
-            // Not implemented yet; waiting until LiveData implemented
-            // justChangeJiceInGridView()
 
-            // Sends information to gridView depending on whether dual type is selected or not
-            // TODO(Eventually not need these lines of code)
-            if (weAreDefending) {
-                listOfInteractions = if (defendingType2 == "[none]" || defendingType1 == defendingType2) {
-                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
-                    } else if (defendingType1 == "(choose)") {
-                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
-                    } else {
-                        mainActivityViewModel.defendingWithTwoTypesCalculator(
-                            defendingType1,
-                            defendingType2
-                        )
-                    }
-            }
-            interactionsToGridView(listOfInteractions)
+            refreshTheData()
         }
         infoButton.setOnClickListener {
             val intent = Intent(this, TypeTriviaActivity::class.java)
@@ -455,6 +381,29 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return listOfCellBackgroundColors
+    }
+
+    private fun refreshTheData() {
+        when (weAreDefending) {
+            false -> {
+                mainActivityViewModel.listOfInteractions =
+                    mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
+            }
+            true -> {
+                mainActivityViewModel.listOfInteractions =
+                    if (defendingType2 == "[none]" || defendingType2 == Types.NoType.type || defendingType1 == defendingType2) {
+                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
+                    } else if (defendingType1 == "(choose)" || defendingType1 == Types.NoType.type) {
+                        mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
+                    } else {
+                        mainActivityViewModel.defendingWithTwoTypesCalculator(
+                            defendingType1,
+                            defendingType2
+                        )
+                    }
+            }
+        }
+        interactionsToGridView(mainActivityViewModel.listOfInteractions)
     }
 
     // BL

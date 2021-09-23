@@ -33,6 +33,8 @@ class MainActivityViewModel: ViewModel() {
         R.drawable.steel_icon,
         R.drawable.water_icon
     )
+    var listOfInteractions: MutableList<Double> = onesDouble()
+
 
     //data
     private val listOfNonexistentTypeCombinations: List<List<String>> = listOf(
