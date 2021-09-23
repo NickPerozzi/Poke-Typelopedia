@@ -25,6 +25,8 @@ import java.lang.reflect.Type
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
 
+    private var mainActivityViewModel = MainActivityViewModel()
+
     // Link between UI and BL
     // needed for gridView functionality
     private var recyclerView: RecyclerView? = null
@@ -121,8 +123,8 @@ class MainActivity : AppCompatActivity() {
 
         // BL
         // Initializes the gridView
-        val listOfCellBackgroundColors: MutableList<Int> = onesInt()
-        val listOfCellTextColors: MutableList<Int> = onesInt()
+        val listOfCellBackgroundColors: MutableList<Int> = mainActivityViewModel.onesInt()
+        val listOfCellTextColors: MutableList<Int> = mainActivityViewModel.onesInt()
 
         // Link between UI and BL
         recyclerView = findViewById(R.id.typeTableRecyclerView)
@@ -130,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.layoutManager = gridLayoutManager
         recyclerView?.setHasFixedSize(true)
         arrayListForTypeGrid = ArrayList()
-        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,onesString(),listOfCellBackgroundColors,listOfCellTextColors)
+        arrayListForTypeGrid = setDataInTypeGridList(arrayOfIcons,mainActivityViewModel.onesString(),listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
 
@@ -146,7 +148,7 @@ class MainActivity : AppCompatActivity() {
         var defSpinner2Index = 0
 
         // BL
-        var listOfInteractions: MutableList<Double> = onesDouble()
+        var listOfInteractions: MutableList<Double> = mainActivityViewModel.onesDouble()
 
         // UI
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
@@ -230,7 +232,7 @@ class MainActivity : AppCompatActivity() {
                 adjustTableHeaderText(tableHeader,defendingType1,defendingType2)
 
                 // Adjusts visibility depending on whether user has selected a type yet
-                checkIfTypingExists(defendingType1,defendingType2)
+                doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(defendingType1,defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
                 makeVisibleIfTypeSelected(tableHeader,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(typeTableRecyclerView,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(gameSwitchText,defendingType1,defendingType2)
@@ -260,7 +262,7 @@ class MainActivity : AppCompatActivity() {
                 adjustTableHeaderText(tableHeader,defendingType1,defendingType2)
 
                 // Adjusts visibility depending on whether user has selected a type yet
-                checkIfTypingExists(defendingType1,defendingType2)
+                doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(defendingType1,defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
                 makeVisibleIfTypeSelected(tableHeader,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(typeTableRecyclerView,defendingType1,defendingType2)
                 makeVisibleIfTypeSelected(gameSwitchText,defendingType1,defendingType2)
@@ -684,33 +686,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // BL
-    private fun onesString(): MutableList<String> {
-        val table = mutableListOf<String>()
-        for (i in 0 until 18) {
-            table.add("1.0")
-        }
-        return table
-    }
-
-    // BL
-    private fun onesDouble(): MutableList<Double> {
-        val table = mutableListOf<Double>()
-        for (i in 0 until 18) {
-            table.add(1.0)
-        }
-        return table
-    }
-
-    // BL
-    private fun onesInt(): MutableList<Int> {
-        val table = mutableListOf<Int>()
-        for (i in 0 until 18) {
-            table.add(1)
-        }
-        return table
-    }
-
-    // BL
     private fun fetchJson() {
         val url = "https://pogoapi.net/api/v1/type_effectiveness.json"
         val request = Request.Builder().url(url).build()
@@ -730,23 +705,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // BL
-    private fun checkIfTypingExists(type1: String, type2: String) {
-        val currentTypingPair: List<String> = listOf(type1, type2)
-        if (currentTypingPair in listOfNonexistentTypes) {
-            adjustVisibility(doesNotExistDisclaimer, 0)
-        } else {
-            adjustVisibility(doesNotExistDisclaimer, 1)
-        }
-    }
-
     // @@@ktg there's an easier way to instantiate a list of the same value
     // hint: loops/in-line functions
     // @@@nap see onesString(), onesDouble(), and onesInt()
 
     // BL
     private fun attackingEffectivenessCalculator(attacker: String): MutableList<Double> {
-        if (attacker == "(choose)" || attacker == Types.NoType.type) { return onesDouble() }
+        if (attacker == "(choose)" || attacker == Types.NoType.type) { return mainActivityViewModel.onesDouble() }
 
         var dictOfSelectedTypes: Map<String, Double> = emptyMap()
 
@@ -761,7 +726,7 @@ class MainActivity : AppCompatActivity() {
     // BL
     private fun defendingEffectivenessCalculator(defender: String): MutableList<Double> {
         if (defender == "(choose)" || defender == "[none]" || defender == Types.NoType.type) {
-            return onesDouble()
+            return mainActivityViewModel.onesDouble()
         }
         var dictOfSelectedTypes: Map<String, Double>
         val listOfDefendingMatchupCoefficients: MutableList<Double> = arrayListOf()
@@ -782,42 +747,4 @@ class MainActivity : AppCompatActivity() {
         arrayListForTypeGrid?.get(11)?.iconsInGridView = if (jiceTime) { R.drawable.jice_icon } else { R.drawable.ice_icon }
         arrayListForTypeGrid?.let { TypeGridAdapter(it).submitList(arrayListForTypeGrid) }
     }
-
-    // BL
-    private val listOfNonexistentTypes: List<List<String>> = listOf(
-        listOf("Normal","Ice"), // Normal ice
-        listOf("Ice","Normal"),
-        listOf("Normal","Poison"), // Normal poison
-        listOf("Poison","Normal"),
-        listOf("Normal","Bug"), // Normal bug
-        listOf("Bug","Normal"),
-        listOf("Normal","Rock"), // Normal rock
-        listOf("Rock","Normal"),
-        listOf("Normal","Ghost"), // Normal ghost
-        listOf("Ghost","Normal"),
-        listOf("Normal","Steel"), // Normal steel
-        listOf("Steel","Normal"),
-        listOf("Fire","Fairy"), // Fire fairy
-        listOf("Fairy","Fire"),
-        listOf("Fire","Grass"), // Fire grass
-        listOf("Grass","Fire"),
-        listOf("Electric","Fighting"), // Fighting electric
-        listOf("Fighting","Electric"),
-        listOf("Ice","Poison"), // Ice poison
-        listOf("Poison","Ice"),
-        listOf("Fighting","Ground"), // Fighting ground
-        listOf("Ground","Fighting"),
-        listOf("Fighting","Fairy"), // Fighting fairy
-        listOf("Fairy","Fighting"),
-        listOf("Poison","Steel"), // Steel poison
-        listOf("Steel","Poison"),
-        listOf("Ground","Fairy"), // Fairy ground
-        listOf("Fairy","Ground"),
-        listOf("Bug","Dragon"), // Bug dragon
-        listOf("Dragon","Bug"),
-        listOf("Bug","Dark"), // Bug dark
-        listOf("Dark","Bug"),
-        listOf("Rock","Ghost"), // Rock ghost
-        listOf("Ghost","Rock")
-    )
 }
