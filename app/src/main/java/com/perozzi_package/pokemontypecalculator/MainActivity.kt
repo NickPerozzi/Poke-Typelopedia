@@ -443,43 +443,51 @@ class MainActivity : AppCompatActivity() {
         if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)){
             adjustVisibility(tableHeader, 2)
         } else {adjustVisibility(tableHeader, 0)}
+        var type1Displayed = type1
+        var type2Displayed = type2
+        if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
+            type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+        }
+        if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
+            type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+        }
 
         when (weAreDefending) {
             true -> {
-                if ((type1 != "(choose)" && type1 != Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)) {
+                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        type1
+                        type1Displayed
                     )
                 }
-                if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 != "[none]" && type2 != Types.NoType.type)) {
+                if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        type2
+                        type2Displayed
                     )
                 }
-                if ((type1 != "(choose)" && type1 != Types.NoType.type) && (type2 != "[none]" && type2 != Types.NoType.type) && type1 != type2) {
+                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_two_types,
                         "_____",
-                        type1,
-                        type2
+                        type1Displayed,
+                        type2Displayed
                     )
                 }
-                if ((type1 != "(choose)" && type1 != Types.NoType.type) && type1 == type2) {
+                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
                     tableHeader.text = resources.getString(
                         R.string.table_header_one_type,
                         "_____",
-                        type1
+                        type1Displayed
                     )
                 }
             }
             false -> {
                 tableHeader.text = resources.getString(
                     R.string.table_header_one_type,
-                    type1, "_____"
+                    type1Displayed, "_____"
                 )
             }
         }
