@@ -83,7 +83,7 @@ class MainActivityViewModel: ViewModel() {
         }
         return table
     }
-    fun onesDouble(): MutableList<Double> {
+    private fun onesDouble(): MutableList<Double> {
         val table = mutableListOf<Double>()
         for (i in 0 until 18) {
             table.add(1.0)
