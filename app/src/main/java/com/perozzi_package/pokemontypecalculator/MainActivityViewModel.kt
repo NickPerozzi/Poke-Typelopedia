@@ -11,11 +11,14 @@ import java.lang.reflect.Type
 
 class MainActivityViewModel: ViewModel() {
 
+    // Switch booleans
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     var jiceTime = false
     var pogoTime = false
 
+    // Live data
     var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")
+    var promptText: MutableLiveData<String> = MutableLiveData("What type is the attack?")
 
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,

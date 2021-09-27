@@ -121,6 +121,8 @@ class MainActivity : AppCompatActivity() {
         // LiveData implemented for the tableHeader
         // but adjustTableHeaderText() still under each onSelectedListener
         mainActivityViewModel.tableHeaderText.observe(this, { tableHeader.text = it })
+        mainActivityViewModel.promptText.observe(this, { typeSelectionPrompt.text = it })
+
 
         // POV SWITCH
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
@@ -131,7 +133,11 @@ class MainActivity : AppCompatActivity() {
             defendingType2SpinnerAndLabel.visibility = if (weAreDefending) { View.VISIBLE } else { View.GONE }
 
             povSwitch.text = if (weAreDefending) { getString(R.string.pov_switch_to_defending) } else { getString(R.string.pov_switch_to_attacking) }
-            typeSelectionPrompt.text = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
+            // old
+            // typeSelectionPrompt.text = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
+            // new
+            mainActivityViewModel.promptText.value = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
+
 
             // QoL: transfers the value from the to-be-invisible spinner to the to-be-visible one
             if (weAreDefending) {
