@@ -123,7 +123,6 @@ class MainActivity : AppCompatActivity() {
         mainActivityViewModel.tableHeaderText.observe(this, { tableHeader.text = it })
         mainActivityViewModel.promptText.observe(this, { typeSelectionPrompt.text = it })
 
-
         // POV SWITCH
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
             weAreDefending = onSwitch
