@@ -1,6 +1,7 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -13,6 +14,9 @@ class MainActivityViewModel: ViewModel() {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     var jiceTime = false
     var pogoTime = false
+
+    var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")
+
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
         R.drawable.dark_icon,
@@ -117,9 +121,7 @@ class MainActivityViewModel: ViewModel() {
                     object : TypeToken<Map<Types, Map<String, Double>>>() {}.type
                 typeMatchups = gson.fromJson(body, typeToken)
             }
-            override fun onFailure(call: Call, e: IOException) {
-                println("Failed to call request")
-            }
+            override fun onFailure(call: Call, e: IOException) {}
         })
     }
 

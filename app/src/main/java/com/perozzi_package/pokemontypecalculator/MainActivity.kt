@@ -20,6 +20,7 @@ import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
 
+    // Worked for me
     private var mainActivityViewModel = MainActivityViewModel()
 
     // Link between UI and BL
@@ -117,7 +118,11 @@ class MainActivity : AppCompatActivity() {
         var defSpinner1Index = 0
         var defSpinner2Index = 0
 
-        // UI
+        // LiveData implemented for the tableHeader
+        // but adjustTableHeaderText() still under each onSelectedListener
+        mainActivityViewModel.tableHeaderText.observe(this, { tableHeader.text = it })
+
+        // POV SWITCH
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
             weAreDefending = onSwitch
             // Swaps the respective spinners in and out
@@ -151,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 atkSpinnerIndex = p2
-                attackingType = Types.values()[p2].type
+                attackingType = Types.values()[atkSpinnerIndex].type
                 adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
                 refreshTheData()
@@ -162,7 +167,7 @@ class MainActivity : AppCompatActivity() {
         defendingType1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner1Index = p2
-                defendingType1 = Types.values()[p2].type
+                defendingType1 = Types.values()[defSpinner1Index].type
                 adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
                 doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(defendingType1,defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
@@ -174,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         defendingType2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner2Index = p2
-                defendingType2 = Types.values()[p2].type
+                defendingType2 = Types.values()[defSpinner2Index].type
                 adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
                 doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(defendingType1,defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
@@ -251,9 +256,6 @@ class MainActivity : AppCompatActivity() {
     private fun adjustTableHeaderText() {
         val type1 = if (weAreDefending) { defendingType1 } else { attackingType }
         val type2 = if (weAreDefending) { defendingType2 } else { "[none]" }
-        if ((type1 == "(choose)" || type1 == Types.NoType.type) && (type2 == "[none]" || type2 == Types.NoType.type)){
-            tableHeader.visibility = View.GONE
-        } else {tableHeader.visibility = View.VISIBLE}
         var type1Displayed = type1
         var type2Displayed = type2
         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
@@ -266,20 +268,20 @@ class MainActivity : AppCompatActivity() {
         when (weAreDefending) {
             true -> {
                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
-                    tableHeader.text = resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
+                    mainActivityViewModel.tableHeaderText.value = resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
                 }
                 if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
-                    tableHeader.text = resources.getString(R.string.table_header_one_type, "_____", type2Displayed)
+                    mainActivityViewModel.tableHeaderText.value = resources.getString(R.string.table_header_one_type, "_____", type2Displayed)
                 }
                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
-                    tableHeader.text = resources.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)
+                    mainActivityViewModel.tableHeaderText.value = resources.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)
                 }
                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
-                    tableHeader.text = resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
+                    mainActivityViewModel.tableHeaderText.value = resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
                 }
             }
             false -> {
-                tableHeader.text = resources.getString(R.string.table_header_one_type, type1Displayed, "_____")
+                mainActivityViewModel.tableHeaderText.value = resources.getString(R.string.table_header_one_type, type1Displayed, "_____")
             }
         }
     }
@@ -329,15 +331,19 @@ class MainActivity : AppCompatActivity() {
     private fun refreshTheData() {
         when (weAreDefending) {
             false -> {
+                // if attacking
                 mainActivityViewModel.listOfInteractions =
                     mainActivityViewModel.attackingEffectivenessCalculator(attackingType)
             }
             true -> {
                 mainActivityViewModel.listOfInteractions =
+                    // if defending with type 1 only
                     if (defendingType2 == "[none]" || defendingType2 == Types.NoType.type || defendingType1 == defendingType2) {
                         mainActivityViewModel.defendingEffectivenessCalculator(defendingType1)
+                        // if defending with type 2 only
                     } else if (defendingType1 == "(choose)" || defendingType1 == Types.NoType.type) {
                         mainActivityViewModel.defendingEffectivenessCalculator(defendingType2)
+                        // if defending with both type1 and type 2
                     } else {
                         mainActivityViewModel.defendingWithTwoTypesCalculator(
                             defendingType1,
