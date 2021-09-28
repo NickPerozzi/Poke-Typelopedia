@@ -166,40 +166,40 @@ class MainActivityViewModel: ViewModel() {
             when (pogoTime) {
                 true -> {
                     when (types) {
-                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56)
-                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.390625)
-                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.390625)
-                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.390625)
-                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.244)
-                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.244)
+                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56) // same for both
+                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
+                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
+                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
+                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
                     }
                 }
                 false -> {
                     when (types) {
-                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56)
-                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.25)
-                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56) // same for both
+                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.25) // main game-exclusive
+                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
                     }
                 }
             }
@@ -297,8 +297,6 @@ class MainActivityViewModel: ViewModel() {
                 textColorList[11]
             )
         }
-
         return items
     }
-
 }
