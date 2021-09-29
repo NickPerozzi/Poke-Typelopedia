@@ -1,246 +1,250 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    tools:context=".MainActivity"
-    android:background="@drawable/main_header_selector"
-    android:id="@+id/mainLinearLayout"
-    tools:ignore="InvalidId">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <ImageView
-            android:id="@+id/app_logo"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="3"
-            android:padding="5dp"
-            android:contentDescription="@string/pok_mon_type_calculator_app_logo"
-            android:src="@drawable/p_t_one_line_cropped" />
+    <data>
+        <variable
+            name="mainActivityViewModel"
+            type="com.perozzi_package.pokemontypecalculator.MainActivityViewModel"/>
+    </data>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:orientation="horizontal"
-        android:paddingHorizontal="20sp"
-        android:paddingVertical="5sp">
-
-        <TextView
-            android:id="@+id/initialPrompt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textAlignment="center"
-            android:text="@string/pov"
-            android:textSize="20sp"
-            android:textStyle="italic"
-            />
-
-        <Switch
-            android:id="@+id/povSwitch"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/pov_switch_to_attacking"
-            android:layout_gravity="center"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            tools:ignore="UseSwitchCompatOrMaterialXml"
-            />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/secondPrompt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="italic"
-        android:text="@string/attacking_prompt"
-        android:textSize="20sp" />
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:baselineAligned="false">
-
-        <LinearLayout
-            android:id="@+id/defendingType1SpinnerAndLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone"
-            >
-
-            <TextView
-                android:id="@+id/type1Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/first_type"
-                android:paddingTop="10sp"
-                android:textSize="16sp"/>
-
-            <Spinner
-                android:id="@+id/type1Spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10sp"
-                android:spinnerMode="dropdown" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/defendingType2SpinnerAndLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/type2Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/second_type"
-                android:paddingTop="10sp"
-                android:textSize="16sp"/>
-
-            <Spinner
-                android:id="@+id/type2Spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10sp"
-                android:spinnerMode="dropdown" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/attackingTypeSpinnerAndLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            >
-
-            <TextView
-                android:id="@+id/attackingTypeLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/move_type"
-                android:paddingTop="10sp"
-                android:textSize="16sp"/>
-
-            <Spinner
-                android:id="@+id/attackingTypeSpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10sp"
-                android:spinnerMode="dropdown" />
-
-        </LinearLayout>
-
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/doesNotExistDisclaimer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:text="@string/does_not_exist_disclaimer"
-        android:textAlignment="center"
-        android:gravity="bottom"
-        android:textStyle="italic"
-        android:visibility="invisible"
-        tools:ignore="RtlCompat" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <Switch
-            android:id="@+id/gameSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:textSize="20sp"
-            android:visibility="invisible"
-            android:paddingLeft="10dp"
-            android:paddingStart="10dp"
-            tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
-
-        <TextView
-            android:id="@+id/gameSwitchText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text="@string/mainGame"
-            android:textSize="20sp"
-            android:textColor="@color/white"
-            android:visibility="invisible"
-            android:paddingLeft="10dp"
-            android:paddingStart="10dp"
-            tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
-            />
-
-        <Switch
-            android:id="@+id/iceJiceSwitch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:textAlignment="textEnd"
-            android:text="@string/ice"
-            android:textSize="20sp"
-            android:visibility="invisible"
-            android:paddingEnd="10dp"
-            android:paddingRight="10dp"
-            tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml"
-            />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/tableHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:gravity="bottom"
-        android:padding="8sp"
-        android:textStyle="bold"
-        android:visibility="invisible" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/typeTableRecyclerView"
+    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/mainLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="12dp"
-        android:visibility="invisible"
-        android:paddingBottom="30dp"/>
+        android:background="@drawable/main_header_selector"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        tools:context=".MainActivity"
+        tools:ignore="InvalidId">
 
-    <!--Type table-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-    <ImageView
-        android:id="@+id/infoButton"
-        android:layout_width="30dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:src="@drawable/info_button_transparent"
-        android:layout_marginTop="-30dp"
-        android:contentDescription="@string/info_button" />
+            <ImageView
+                android:id="@+id/app_logo"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="3"
+                android:contentDescription="@string/pok_mon_type_calculator_app_logo"
+                android:padding="5dp"
+                android:src="@drawable/p_t_one_line_cropped" />
 
-</LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20sp"
+            android:paddingVertical="5sp">
+
+            <TextView
+                android:id="@+id/initialPrompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/pov"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textStyle="italic" />
+
+            <Switch
+                android:id="@+id/povSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:text="@string/pov_switch_to_attacking"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/secondPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/attacking_prompt"
+            android:textSize="20sp"
+            android:textStyle="italic" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/defendingType1SpinnerAndLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/type1Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10sp"
+                    android:text="@string/first_type"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/type1Spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10sp"
+                    android:spinnerMode="dropdown" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/defendingType2SpinnerAndLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/type2Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10sp"
+                    android:text="@string/second_type"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/type2Spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10sp"
+                    android:spinnerMode="dropdown" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/attackingTypeSpinnerAndLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/attackingTypeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10sp"
+                    android:text="@string/move_type"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/attackingTypeSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10sp"
+                    android:spinnerMode="dropdown" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/doesNotExistDisclaimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:text="@string/does_not_exist_disclaimer"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:visibility="invisible"
+            tools:ignore="RtlCompat" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Switch
+                android:id="@+id/gameSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:paddingStart="10dp"
+                android:paddingLeft="10dp"
+                android:textSize="20sp"
+                android:visibility="invisible"
+                tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+            <TextView
+                android:id="@+id/gameSwitchText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:paddingStart="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/mainGame"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:visibility="invisible"
+                tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+            />
+
+            <Switch
+                android:id="@+id/iceJiceSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:paddingEnd="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/ice"
+                android:textAlignment="textEnd"
+                android:textSize="20sp"
+                android:visibility="invisible"
+                tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tableHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:padding="8sp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/typeTableRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp"
+            android:paddingBottom="30dp"
+            android:visibility="invisible" />
+
+        <!--Type table-->
+
+        <ImageView
+            android:id="@+id/infoButton"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="-30dp"
+            android:contentDescription="@string/info_button"
+            android:src="@drawable/info_button_transparent" />
+
+    </LinearLayout>
+</layout>
