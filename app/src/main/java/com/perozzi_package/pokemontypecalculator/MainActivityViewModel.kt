@@ -15,6 +15,8 @@ class MainActivityViewModel: ViewModel() {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     var jiceTime = false
     var pogoTime = false
+    var weAreDefending = false
+
 
     // Live data
     var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")

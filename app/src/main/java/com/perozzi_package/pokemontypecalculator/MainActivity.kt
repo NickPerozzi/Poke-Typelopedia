@@ -30,9 +30,6 @@ class MainActivity : AppCompatActivity() {
     private var arrayListForTypeGrid: ArrayList<TypeGrid> ? = null
     private var typeGridAdapter: TypeGridAdapter ? = null
 
-    // needed for adjustTypeSpinnersVisibility() and adjustTableHeaderText()
-    private var weAreDefending = false
-
     var attackingType = "(choose)"
     var defendingType1 = "(choose)"
     var defendingType2 = "[none]"
@@ -113,7 +110,6 @@ class MainActivity : AppCompatActivity() {
         recyclerView?.adapter = typeGridAdapter
 
         // BL
-        weAreDefending = false
 
         // Necessary to adjust spinner values when switching between Attacker and Defender
         var atkSpinnerIndex = 0
@@ -128,21 +124,21 @@ class MainActivity : AppCompatActivity() {
 
         // POV SWITCH
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
-            weAreDefending = onSwitch
+            mainActivityViewModel.weAreDefending = onSwitch
             // Swaps the respective spinners in and out
-            attackingTypeSpinnerAndLabel.visibility = if (weAreDefending) { View.GONE } else { View.VISIBLE }
-            defendingType1SpinnerAndLabel.visibility = if (weAreDefending) { View.VISIBLE } else { View.GONE }
-            defendingType2SpinnerAndLabel.visibility = if (weAreDefending) { View.VISIBLE } else { View.GONE }
+            attackingTypeSpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending) { View.GONE } else { View.VISIBLE }
+            defendingType1SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending) { View.VISIBLE } else { View.GONE }
+            defendingType2SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending) { View.VISIBLE } else { View.GONE }
 
-            povSwitch.text = if (weAreDefending) { getString(R.string.pov_switch_to_defending) } else { getString(R.string.pov_switch_to_attacking) }
+            povSwitch.text = if (mainActivityViewModel.weAreDefending) { getString(R.string.pov_switch_to_defending) } else { getString(R.string.pov_switch_to_attacking) }
             // old
             // typeSelectionPrompt.text = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
             // new
-            mainActivityViewModel.promptText.value = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
+            mainActivityViewModel.promptText.value = if (mainActivityViewModel.weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
 
 
             // QoL: transfers the value from the to-be-invisible spinner to the to-be-visible one
-            if (weAreDefending) {
+            if (mainActivityViewModel.weAreDefending) {
                 defendingType2 = "[none]"
                 defendingType2Spinner.setSelection(0)
                 defendingType1 = attackingType
@@ -241,8 +237,8 @@ class MainActivity : AppCompatActivity() {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun makeGridAndSwitchesVisibleIfATypeIsSelected() {
-        val type1 = if (weAreDefending) { defendingType1 } else { attackingType }
-        val type2 = if (weAreDefending) { defendingType2 } else { "[none]" }
+        val type1 = if (mainActivityViewModel.weAreDefending) { defendingType1 } else { attackingType }
+        val type2 = if (mainActivityViewModel.weAreDefending) { defendingType2 } else { "[none]" }
                 if ((type1 == "(choose)" || type1 == Types.NoType.type) &&
                     (type2 == "[none]" || type2 == Types.NoType.type)) {
                     typeTableRecyclerView.visibility = View.INVISIBLE
@@ -270,8 +266,8 @@ class MainActivity : AppCompatActivity() {
 
     // UI
     private fun adjustTableHeaderText() {
-        val type1 = if (weAreDefending) { defendingType1 } else { attackingType }
-        val type2 = if (weAreDefending) { defendingType2 } else { "[none]" }
+        val type1 = if (mainActivityViewModel.weAreDefending) { defendingType1 } else { attackingType }
+        val type2 = if (mainActivityViewModel.weAreDefending) { defendingType2 } else { "[none]" }
         var type1Displayed = type1
         var type2Displayed = type2
         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
@@ -281,7 +277,7 @@ class MainActivity : AppCompatActivity() {
             type2Displayed = if (mainActivityViewModel.jiceTime) { "Jice" } else { "Ice" }
         }
 
-        when (weAreDefending) {
+        when (mainActivityViewModel.weAreDefending) {
             true -> {
                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
                     mainActivityViewModel.tableHeaderText.value = resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
@@ -345,7 +341,7 @@ class MainActivity : AppCompatActivity() {
 
     // Strikes me as BL, but I don't want to call in attackingType, defendingType1, defendingType2 from MainActivity
     private fun refreshTheData() {
-        when (weAreDefending) {
+        when (mainActivityViewModel.weAreDefending) {
             false -> {
                 // if attacking
                 mainActivityViewModel.listOfInteractions =
