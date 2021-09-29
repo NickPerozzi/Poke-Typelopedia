@@ -1,6 +1,7 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -10,9 +11,15 @@ import java.lang.reflect.Type
 
 class MainActivityViewModel: ViewModel() {
 
+    // Switch booleans
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     var jiceTime = false
     var pogoTime = false
+
+    // Live data
+    var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")
+    var promptText: MutableLiveData<String> = MutableLiveData("What type is the attack?")
+
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
         R.drawable.dark_icon,
@@ -75,6 +82,12 @@ class MainActivityViewModel: ViewModel() {
     )
 
     private lateinit var typeMatchups: Map<Types, Map<String, Double>>
+    private lateinit var masterURLFetch: Map<String,List<Map<String,String>>>
+    private lateinit var pokemonURLFetch: Map<String,Any>
+    private lateinit var pokemonNamesAndURLs: List<Map<String,String>>
+    lateinit var listOfPossibleTypes: MutableList<MutableList<String>>
+    private lateinit var pokemonNames: MutableList<String>
+    private lateinit var pokemonURLs: MutableList<String>
 
     fun onesString(): MutableList<String> {
         val table = mutableListOf<String>()
@@ -98,29 +111,9 @@ class MainActivityViewModel: ViewModel() {
         return table
     }
 
-
     fun doesThisTypingExist(type1: String, type2: String): Boolean {
         val currentTypingPair: List<String> = listOf(type1, type2)
         return currentTypingPair in listOfNonexistentTypeCombinations
-    }
-
-    // BL
-    fun fetchJson() {
-        val url = "https://pogoapi.net/api/v1/type_effectiveness.json"
-        val request = Request.Builder().url(url).build()
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onResponse(call: Call, response: Response) {
-                val body = response.body?.string()
-                val gson = GsonBuilder().create()
-                val typeToken: Type =
-                    object : TypeToken<Map<Types, Map<String, Double>>>() {}.type
-                typeMatchups = gson.fromJson(body, typeToken)
-            }
-            override fun onFailure(call: Call, e: IOException) {
-                println("Failed to call request")
-            }
-        })
     }
 
     fun attackingEffectivenessCalculator(attacker: String): MutableList<Double> {
@@ -161,40 +154,40 @@ class MainActivityViewModel: ViewModel() {
             when (pogoTime) {
                 true -> {
                     when (types) {
-                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56)
-                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.390625)
-                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.390625)
-                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.390625)
-                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.244)
-                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.244)
+                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56) // same for both
+                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
+                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
+                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
+                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
                     }
                 }
                 false -> {
                     when (types) {
-                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56)
-                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6)
-                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0)
-                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625)
-                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.25)
-                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.0)
-                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.0)
+                        listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56) // same for both
+                        listOf(1.6, 1.0) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.6) -> defenderNetEffectivenessList.add(1.6) // same for both
+                        listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0) // same for both
+                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.25) // main game-exclusive
+                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
                     }
                 }
             }
@@ -292,8 +285,77 @@ class MainActivityViewModel: ViewModel() {
                 textColorList[11]
             )
         }
-
         return items
     }
 
+    // BL
+    fun fetchJson() {
+        val url = "https://pogoapi.net/api/v1/type_effectiveness.json"
+        val request = Request.Builder().url(url).build()
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onResponse(call: Call, response: Response) {
+                val body = response.body?.string()
+                val gson = GsonBuilder().create()
+                val typeToken: Type =
+                    object : TypeToken<Map<Types, Map<String, Double>>>() {}.type
+                typeMatchups = gson.fromJson(body, typeToken)
+            }
+            override fun onFailure(call: Call, e: IOException) {}
+        })
+    }
+
+    // TODO(work on doesNotExistDisclaimer stuff after liveData)
+/*    fun fetchAllPokemonNamesAndURLs() {
+        val masterURL = "https://pokeapi.co/api/v2/pokemon?limit=898"
+        val request = Request.Builder().url(masterURL).build()
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onResponse(call: Call, response: Response) {
+                val body = response.body?.string()
+                val gson = GsonBuilder().create()
+                val typeToken: Type =
+                    object : TypeToken<Map<String,List<Map<String,String>>>>() {}.type
+                masterURLFetch = gson.fromJson(body, typeToken)
+                pokemonNamesAndURLs = masterURLFetch.getValue("results")
+                for (i in pokemonNamesAndURLs) {
+                    pokemonNames.add(i.getValue("name"))
+                    pokemonURLs.add(i.getValue("url"))
+                }
+            }
+            override fun onFailure(call: Call, e: IOException) {}
+        })
+    }
+    fun fetchAllTypingPossibilities() {
+        for (url in pokemonURLs) {
+            val request = Request.Builder().url(url).build()
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onResponse(call: Call, response: Response) {
+                    val body = response.body?.string()
+                    val gson = GsonBuilder().create()
+                    val typeToken: Type =
+                        object : TypeToken<Map<String,Any>>() {}.type
+                    pokemonURLFetch = gson.fromJson(body, typeToken)
+                    val pokemonTypesList: List<Map<String, Any>> =
+                        pokemonURLFetch.getValue("types") as List<Map<String, Any>>
+                    val typeCombo: MutableList<String> = mutableListOf()
+                    val typeComboFlipped: MutableList<String> = mutableListOf()
+                    val type1 = pokemonTypesList[0].getValue("type") as String
+                    val type2 = if (pokemonTypesList.size == 2) {
+                        pokemonTypesList[1].getValue("type") as String
+                    } else { "(none)" }
+                    typeCombo.add(type1)
+                    typeCombo.add(type2)
+                    typeComboFlipped.add(type2)
+                    typeComboFlipped.add(type1)
+                    if (typeCombo !in listOfPossibleTypes && typeComboFlipped !in listOfPossibleTypes) {
+                        listOfPossibleTypes.add(typeCombo)
+                        listOfPossibleTypes.add(typeComboFlipped)
+                    }
+                }
+                override fun onFailure(call: Call, e: IOException) {}
+            })
+        }
+    }*/
 }
