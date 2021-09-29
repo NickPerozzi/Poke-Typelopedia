@@ -209,7 +209,7 @@
                 android:layout_gravity="end"
                 android:paddingEnd="10dp"
                 android:paddingRight="10dp"
-                android:text="@string/ice"
+                android:text="@{mainActivityViewModel.jiceSwitchText}"
                 android:textAlignment="textEnd"
                 android:textSize="20sp"
                 android:visibility="invisible"

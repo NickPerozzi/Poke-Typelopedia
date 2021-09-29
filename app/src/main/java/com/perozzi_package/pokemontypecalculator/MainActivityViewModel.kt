@@ -110,6 +110,14 @@ class MainActivityViewModel: ViewModel() {
         }
     }
 
+    var jiceSwitchText = jiceTime.map { jiceTime ->
+        if (jiceTime) {
+            App.context?.getString(R.string.jice)
+        } else {
+            App.context?.getString(R.string.ice)
+        }
+    }
+
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
         R.drawable.dark_icon,
