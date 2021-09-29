@@ -11,6 +11,9 @@ import java.io.IOException
 import java.lang.reflect.Type
 import android.app.Application
 import android.content.Context
+import android.view.View
+import androidx.lifecycle.map
+import androidx.lifecycle.switchMap
 
 
 class MainActivityViewModel: ViewModel() {
@@ -21,14 +24,40 @@ class MainActivityViewModel: ViewModel() {
     var pogoTime = false
     var weAreDefending = false
 
-    var attackingType = "(choose)"
-    var defendingType1 = "(choose)"
-    var defendingType2 = "[none]"
+    var attackingType: MutableLiveData<String> = MutableLiveData("(choose)")
+    var defendingType1: MutableLiveData<String> = MutableLiveData("(choose)")
+    var defendingType2: MutableLiveData<String> = MutableLiveData("[none]")
 
 
     // Live data
-    var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")
+    // var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")
     var promptText: MutableLiveData<String> = MutableLiveData("What type is the attack?")
+
+    var tableHeaderVisibility = attackingType.switchMap { atk ->
+        defendingType1.map { def1 ->
+            defendingType2.map { def2 ->
+                when (weAreDefending) {
+                    true -> {
+                        if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
+                            (def2 == "[none]" || def2 == Types.NoType.type)
+                        ) { View.INVISIBLE } else { View.VISIBLE }
+                    }
+                    false -> {
+                        if (atk == "(choose)" || atk == Types.NoType.type) {
+                            View.INVISIBLE } else { View.VISIBLE }
+                    }
+                }
+            }
+        }
+    }
+
+    var tableHeaderText = attackingType.switchMap { _ ->
+        defendingType1.map { _ ->
+            defendingType2.map { _ ->
+                adjustTableHeaderText()
+            }
+        }
+    }
 
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
@@ -55,8 +84,8 @@ class MainActivityViewModel: ViewModel() {
     fun adjustTableHeaderText(): String {
         val type1 = if (weAreDefending) { defendingType1 } else { attackingType }
         val type2 = if (weAreDefending) { defendingType2 } else { "[none]" }
-        var type1Displayed = type1
-        var type2Displayed = type2
+        var type1Displayed = type1.toString()
+        var type2Displayed = type2.toString()
         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
             type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
         }

@@ -225,7 +225,8 @@
             android:padding="8sp"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:visibility="invisible" />
+            android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
+            android:text="@{mainActivityViewModel.tableHeaderText}"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/typeTableRecyclerView"
