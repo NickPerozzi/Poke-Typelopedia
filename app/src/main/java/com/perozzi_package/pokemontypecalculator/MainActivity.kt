@@ -94,6 +94,8 @@ class MainActivity : AppCompatActivity() {
 
         // BL
         mainActivityViewModel.fetchJson() //gets .json file
+        // mainActivityViewModel.fetchAllPokemonNamesAndURLs()
+        // mainActivityViewModel.fetchAllTypingPossibilities()
 
         // BL
         // Initializes the gridView
@@ -120,7 +122,8 @@ class MainActivity : AppCompatActivity() {
 
         // LiveData implemented for the tableHeader
         // but adjustTableHeaderText() still under each onSelectedListener
-        mainActivityViewModel.tableHeaderText.observe(this, { tableHeader.text = it })
+        mainActivityViewModel.tableHeaderText.observe(
+            this,{tableHeader.text = it } )
         mainActivityViewModel.promptText.observe(this, { typeSelectionPrompt.text = it })
 
         // POV SWITCH
@@ -175,6 +178,14 @@ class MainActivity : AppCompatActivity() {
                 defendingType1 = Types.values()[defSpinner1Index].type
                 adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
+
+                // TODO(Work on doesNotExistDisclaimer rework after liveData is worked out)
+                /*doesNotExistDisclaimer.visibility = if (mutableListOf(
+                        defendingType1,
+                        defendingType2
+                    ) !in mainActivityViewModel.listOfPossibleTypes
+                ) { View.VISIBLE } else { View.INVISIBLE }*/
+
                 doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(defendingType1,defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
                 refreshTheData()
             }
