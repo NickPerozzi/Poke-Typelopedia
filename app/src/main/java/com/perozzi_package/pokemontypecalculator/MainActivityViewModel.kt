@@ -7,13 +7,11 @@ import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
-import android.app.Application
-import android.content.Context
 import android.view.View
 import androidx.lifecycle.*
 
 
-class MainActivityViewModel: ViewModel() {
+class MainActivityViewModel(private val resources: Resources): ViewModel() {
 
     // Switch booleans
     @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -27,12 +25,11 @@ class MainActivityViewModel: ViewModel() {
 
 
     // Live data
-    // var tableHeaderText: MutableLiveData<String> = MutableLiveData("Initializer. If you see this then you have encountered a bug. Neat!")
     var promptText: MutableLiveData<String> = MutableLiveData("What type is the attack?")
 
     var tableHeaderVisibility = attackingType.switchMap { atk ->
-        defendingType1.map { def1 ->
-            defendingType2.map { def2 ->
+        defendingType1.switchMap { def1 ->
+            defendingType2.switchMap { def2 ->
                 weAreDefending.map {weAreDefending ->
                 when (weAreDefending) {
                     true -> {
@@ -58,43 +55,42 @@ class MainActivityViewModel: ViewModel() {
     }
 
     fun tableHeaderText() = attackingType.switchMap { atk ->
-        defendingType1.map { def1 ->
-            defendingType2.map { def2 ->
-                jiceTime.map {jiceTime ->
+        defendingType1.switchMap { def1 ->
+            defendingType2.switchMap { def2 ->
+                jiceTime.switchMap {jiceTime ->
                     weAreDefending.map {weAreDefending ->
-                    val type1 = if (weAreDefending) { def1 } else { atk }
-                    val type2 = if (weAreDefending) { def2 } else { "[none]" }
-                    var type1Displayed = type1.toString()
-                    var type2Displayed = type2.toString()
-                    if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
-                        type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
-                    }
-                    if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
-                        type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
-                    }
-                    when (weAreDefending) {
-                        true -> {
-                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
-                                App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return@let it }
-                                // return Resources.getSystem().getString(R.string.table_header_one_type, "_____", type1Displayed)
-                            }
-                            if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
-                                App.context?.getString(R.string.table_header_one_type, "_____", type2Displayed)?.let { return@let it }
-                            }
-                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
-                                App.context?.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)?.let { return@let it }
-                            }
-                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
-                                App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return@let it }
-                            } else {"Initializer. If you see this then you have encountered a bug. Neat!"}
+                        val type1 = if (weAreDefending) { def1 } else { atk }
+                        val type2 = if (weAreDefending) { def2 } else { "[none]" }
+                        var type1Displayed = type1.toString()
+                        var type2Displayed = type2.toString()
+                        if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
+                            type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
                         }
-                        false -> {
-                            App.context?.getString(
-                                R.string.table_header_one_type,
-                                type1Displayed,
-                                "_____"
-                            )?.let { return@let it }
+                        if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
+                            type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
                         }
+                        when (weAreDefending) {
+                            true -> {
+                                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
+                                    resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
+                                }
+                                if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
+                                    resources.getString(R.string.table_header_one_type, "_____", type2Displayed)
+                                }
+                                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
+                                    resources.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)
+                                }
+                                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
+                                    resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
+                                } else {"Initializer. If you see this then you have encountered a bug. Neat!"}
+                            }
+                            false -> {
+                                resources.getString(
+                                    R.string.table_header_one_type,
+                                    type1Displayed,
+                                    "_____"
+                                )
+                            }
                         }
                     }
                 }
@@ -104,17 +100,17 @@ class MainActivityViewModel: ViewModel() {
 
     var gameSwitchText = pogoTime.map { pogoTime ->
             if (pogoTime) {
-                App.context?.getString(R.string.pogo)
+                resources.getString(R.string.pogo)
             } else {
-                App.context?.getString(R.string.mainGame)
+                resources.getString(R.string.mainGame)
         }
     }
 
     var jiceSwitchText = jiceTime.map { jiceTime ->
         if (jiceTime) {
-            App.context?.getString(R.string.jice)
+            resources.getString(R.string.jice)
         } else {
-            App.context?.getString(R.string.ice)
+            resources.getString(R.string.ice)
         }
     }
 
@@ -246,7 +242,7 @@ class MainActivityViewModel: ViewModel() {
         // @@@nap believe this comment is dated but there is still room to improve efficiency
         for (i in 0 until 18) {
             val types: List<Double> = listOf(defenderType1List[i],defenderType2List[i])
-            when (pogoTime) {
+            when (pogoTime.value) {
                 true -> {
                     when (types) {
                         listOf(1.6, 1.6) -> defenderNetEffectivenessList.add(2.56) // same for both
@@ -294,7 +290,7 @@ class MainActivityViewModel: ViewModel() {
     fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
-            if (pogoTime) {
+            if (pogoTime.value == true) {
                 when (mutableList[i]) {
                     2.56 -> stringList.add(Effectiveness.ULTRA_SUPER_EFFECTIVE.impact)
                     1.6 -> stringList.add(Effectiveness.SUPER_EFFECTIVE.impact)
@@ -322,7 +318,7 @@ class MainActivityViewModel: ViewModel() {
     fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
         val mutableListOfEffectivenessDoubles: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
-            if (!pogoTime) {
+            if (pogoTime.value == false) {
                 when (listOfEffectivenesses[i]) {
                     Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
                     Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2")
@@ -365,7 +361,7 @@ class MainActivityViewModel: ViewModel() {
         // Determines whether to add "Ice" or "Jice" icon
 
         // TODO(eventually not need these lines of code)
-        items[11] = if (jiceTime) {
+        items[11] = if (jiceTime.value!!) {
             TypeGrid(
                 R.drawable.jice_icon,
                 effectivenessMutableList[11],
@@ -381,6 +377,36 @@ class MainActivityViewModel: ViewModel() {
             )
         }
         return items
+    }
+
+    // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
+    fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
+        val listOfCellTextColors: MutableList<Int> = mutableListOf()
+        for (i in 0 until 18) {
+            if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
+                listOfCellTextColors.add(resources.getColor(R.color.white))
+            } else {
+                listOfCellTextColors.add(resources.getColor(R.color.black))
+            }
+        }
+        return listOfCellTextColors
+    }
+
+    // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
+    fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
+        val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
+        for (i in 0 until 18) {
+            when (mutableList[i]) {
+                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x1color))
+                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x2color))
+                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x4color))
+                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_5color))
+                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_25color))
+                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x0color))
+                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.UDNEcolor))
+            }
+        }
+        return listOfCellBackgroundColors
     }
 
     // BL
@@ -461,17 +487,4 @@ class MainActivityViewModel: ViewModel() {
             })
         }
     }*/
-}
-
-class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        mContext = this
-    }
-
-    companion object {
-        private var mContext: Context? = null
-        val context: Context?
-            get() = mContext
-    }
 }

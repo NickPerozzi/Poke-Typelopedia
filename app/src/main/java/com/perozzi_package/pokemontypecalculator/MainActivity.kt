@@ -198,9 +198,6 @@ class MainActivity : AppCompatActivity() {
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.jiceTime = onSwitch
 
-            // Adjusts the text on the switch itself
-            iceJiceSwitch.text = if (onSwitch) { getString(R.string.jice) } else { getString(R.string.ice) }
-
             // Adjusts the text in the spinners
             attackingSpinnerTypeOptions[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
             defendingSpinnerType1Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
@@ -252,41 +249,11 @@ class MainActivity : AppCompatActivity() {
     private fun interactionsToGridView(interactionsList: MutableList<Double>) {
         val effectivenessList = mainActivityViewModel.interactionsToEffectiveness(interactionsList)
         val displayedListOfInteractions = mainActivityViewModel.effectivenessToDisplayedCellValues(effectivenessList)
-        val listOfCellTextColors = effectivenessToCellTextColors(effectivenessList)
-        val listOfCellBackgroundColors = effectivenessToCellBackgroundColors(effectivenessList)
+        val listOfCellTextColors = mainActivityViewModel.effectivenessToCellTextColors(effectivenessList)
+        val listOfCellBackgroundColors = mainActivityViewModel.effectivenessToCellBackgroundColors(effectivenessList)
         arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
         recyclerView?.adapter = typeGridAdapter
-    }
-
-    // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
-    private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
-        val listOfCellTextColors: MutableList<Int> = mutableListOf()
-        for (i in 0 until 18) {
-            if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
-                listOfCellTextColors.add(getColor(R.color.white))
-            } else {
-                listOfCellTextColors.add(getColor(R.color.black))
-            }
-        }
-        return listOfCellTextColors
-    }
-
-    // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
-    private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
-        val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
-        for (i in 0 until 18) {
-            when (mutableList[i]) {
-                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x1color))
-                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x2color))
-                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x4color))
-                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x_5color))
-                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(getColor(R.color.x_25color))
-                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(getColor(R.color.x0color))
-                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(getColor(R.color.UDNEcolor))
-            }
-        }
-        return listOfCellBackgroundColors
     }
 
     // Strikes me as BL, but I don't want to call in attackingType, defendingType1, defendingType2 from MainActivity
@@ -295,21 +262,21 @@ class MainActivity : AppCompatActivity() {
             false -> {
                 // if attacking
                 mainActivityViewModel.listOfInteractions =
-                    mainActivityViewModel.attackingEffectivenessCalculator(mainActivityViewModel.attackingType)
+                    mainActivityViewModel.attackingEffectivenessCalculator(mainActivityViewModel.attackingType.value!!)
             }
             true -> {
                 mainActivityViewModel.listOfInteractions =
                     // if defending with type 1 only
-                    if (mainActivityViewModel.defendingType2 == "[none]" || mainActivityViewModel.defendingType2 == Types.NoType.type || mainActivityViewModel.defendingType1 == mainActivityViewModel.defendingType2) {
-                        mainActivityViewModel.defendingEffectivenessCalculator(mainActivityViewModel.defendingType1)
+                    if (mainActivityViewModel.defendingType2.value == "[none]" || mainActivityViewModel.defendingType2.value == Types.NoType.type || mainActivityViewModel.defendingType1 == mainActivityViewModel.defendingType2) {
+                        mainActivityViewModel.defendingEffectivenessCalculator(mainActivityViewModel.defendingType1.value!!)
                         // if defending with type 2 only
-                    } else if (mainActivityViewModel.defendingType1 == "(choose)" || mainActivityViewModel.defendingType1 == Types.NoType.type) {
-                        mainActivityViewModel.defendingEffectivenessCalculator(mainActivityViewModel.defendingType2)
+                    } else if (mainActivityViewModel.defendingType1.value == "(choose)" || mainActivityViewModel.defendingType1.value == Types.NoType.type) {
+                        mainActivityViewModel.defendingEffectivenessCalculator(mainActivityViewModel.defendingType2.value!!)
                         // if defending with both type1 and type 2
                     } else {
                         mainActivityViewModel.defendingWithTwoTypesCalculator(
-                            mainActivityViewModel.defendingType1,
-                            mainActivityViewModel.defendingType2
+                            mainActivityViewModel.defendingType1.value!!,
+                            mainActivityViewModel.defendingType2.value!!
                         )
                     }
             }
