@@ -20,9 +20,9 @@ class MainActivityViewModel: ViewModel() {
 
     // Switch booleans
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    var jiceTime = false
+    var jiceTime: MutableLiveData<Boolean> = MutableLiveData(false)
     var pogoTime = false
-    var weAreDefending = false
+    var weAreDefending: MutableLiveData<Boolean> = MutableLiveData(false)
 
     var attackingType: MutableLiveData<String> = MutableLiveData("(choose)")
     var defendingType1: MutableLiveData<String> = MutableLiveData("(choose)")
@@ -36,25 +36,71 @@ class MainActivityViewModel: ViewModel() {
     var tableHeaderVisibility = attackingType.switchMap { atk ->
         defendingType1.map { def1 ->
             defendingType2.map { def2 ->
+                weAreDefending.map {weAreDefending ->
                 when (weAreDefending) {
                     true -> {
                         if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
                             (def2 == "[none]" || def2 == Types.NoType.type)
-                        ) { View.INVISIBLE } else { View.VISIBLE }
+                        ) {
+                            View.INVISIBLE
+                        } else {
+                            View.VISIBLE
+                        }
                     }
                     false -> {
                         if (atk == "(choose)" || atk == Types.NoType.type) {
-                            View.INVISIBLE } else { View.VISIBLE }
+                            View.INVISIBLE
+                        } else {
+                            View.VISIBLE
+                        }
                     }
+                }
                 }
             }
         }
     }
 
-    var tableHeaderText = attackingType.switchMap { _ ->
-        defendingType1.map { _ ->
-            defendingType2.map { _ ->
-                adjustTableHeaderText()
+    fun tableHeaderText() = attackingType.switchMap { atk ->
+        defendingType1.map { def1 ->
+            defendingType2.map { def2 ->
+                jiceTime.map {jiceTime ->
+                    weAreDefending.map {weAreDefending ->
+                    val type1 = if (weAreDefending) { def1 } else { atk }
+                    val type2 = if (weAreDefending) { def2 } else { "[none]" }
+                    var type1Displayed = type1.toString()
+                    var type2Displayed = type2.toString()
+                    if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
+                        type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+                    }
+                    if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
+                        type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+                    }
+                    when (weAreDefending) {
+                        true -> {
+                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
+                                App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return@let it }
+                                // return Resources.getSystem().getString(R.string.table_header_one_type, "_____", type1Displayed)
+                            }
+                            if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
+                                App.context?.getString(R.string.table_header_one_type, "_____", type2Displayed)?.let { return@let it }
+                            }
+                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
+                                App.context?.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)?.let { return@let it }
+                            }
+                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
+                                App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return@let it }
+                            } else {"Initializer. If you see this then you have encountered a bug. Neat!"}
+                        }
+                        false -> {
+                            App.context?.getString(
+                                R.string.table_header_one_type,
+                                type1Displayed,
+                                "_____"
+                            )?.let { return@let it }
+                        }
+                        }
+                    }
+                }
             }
         }
     }
@@ -82,36 +128,6 @@ class MainActivityViewModel: ViewModel() {
     var listOfInteractions: MutableList<Double> = onesDouble()
     // UI
     fun adjustTableHeaderText(): String {
-        val type1 = if (weAreDefending) { defendingType1 } else { attackingType }
-        val type2 = if (weAreDefending) { defendingType2 } else { "[none]" }
-        var type1Displayed = type1.toString()
-        var type2Displayed = type2.toString()
-        if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
-            type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
-        }
-        if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
-            type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
-        }
-        when (weAreDefending) {
-            true -> {
-                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
-                    App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return it }
-                   // return Resources.getSystem().getString(R.string.table_header_one_type, "_____", type1Displayed)
-                }
-                if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
-                    App.context?.getString(R.string.table_header_one_type, "_____", type2Displayed)?.let { return it }
-                }
-                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
-                    App.context?.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)?.let { return it }
-                }
-                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
-                    App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return it }
-                }
-            }
-            false -> {
-                App.context?.getString(R.string.table_header_one_type, type1Displayed, "_____")?.let { return it }
-            }
-        }
         return "You're not supposed to see this. You found a bug. Neat!"
     }
 

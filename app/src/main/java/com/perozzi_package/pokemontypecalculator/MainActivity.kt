@@ -114,8 +114,6 @@ class MainActivity : AppCompatActivity() {
 
         // LiveData implemented for the tableHeader
         // but adjustTableHeaderText() still under each onSelectedListener
-        mainActivityViewModel.tableHeaderText.observe(
-            this,{tableHeader.text = it } )
         mainActivityViewModel.promptText.observe(this, { typeSelectionPrompt.text = it })
 
         // POV SWITCH
