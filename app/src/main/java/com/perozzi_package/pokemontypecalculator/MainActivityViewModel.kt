@@ -1,6 +1,7 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
@@ -8,6 +9,9 @@ import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
+import android.app.Application
+import android.content.Context
+
 
 class MainActivityViewModel: ViewModel() {
 
@@ -16,6 +20,10 @@ class MainActivityViewModel: ViewModel() {
     var jiceTime = false
     var pogoTime = false
     var weAreDefending = false
+
+    var attackingType = "(choose)"
+    var defendingType1 = "(choose)"
+    var defendingType2 = "[none]"
 
 
     // Live data
@@ -43,7 +51,40 @@ class MainActivityViewModel: ViewModel() {
         R.drawable.water_icon
     )
     var listOfInteractions: MutableList<Double> = onesDouble()
-
+    // UI
+    fun adjustTableHeaderText(): String {
+        val type1 = if (weAreDefending) { defendingType1 } else { attackingType }
+        val type2 = if (weAreDefending) { defendingType2 } else { "[none]" }
+        var type1Displayed = type1
+        var type2Displayed = type2
+        if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
+            type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+        }
+        if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
+            type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+        }
+        when (weAreDefending) {
+            true -> {
+                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
+                    App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return it }
+                   // return Resources.getSystem().getString(R.string.table_header_one_type, "_____", type1Displayed)
+                }
+                if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
+                    App.context?.getString(R.string.table_header_one_type, "_____", type2Displayed)?.let { return it }
+                }
+                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
+                    App.context?.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)?.let { return it }
+                }
+                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
+                    App.context?.getString(R.string.table_header_one_type, "_____", type1Displayed)?.let { return it }
+                }
+            }
+            false -> {
+                App.context?.getString(R.string.table_header_one_type, type1Displayed, "_____")?.let { return it }
+            }
+        }
+        return "You're not supposed to see this. You found a bug. Neat!"
+    }
 
     //data
     private val listOfNonexistentTypeCombinations: List<List<String>> = listOf(
@@ -360,4 +401,17 @@ class MainActivityViewModel: ViewModel() {
             })
         }
     }*/
+}
+
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        mContext = this
+    }
+
+    companion object {
+        private var mContext: Context? = null
+        val context: Context?
+            get() = mContext
+    }
 }

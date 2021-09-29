@@ -12,7 +12,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PokemonTypeCalculator">
+        android:theme="@style/Theme.PokemonTypeCalculator"
+        android:name=".App">
         <activity
             android:name="com.perozzi_package.pokemontypecalculator.TypeTriviaActivity"
             android:exported="true"
