@@ -2,8 +2,6 @@ package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
@@ -12,8 +10,7 @@ import java.lang.reflect.Type
 import android.app.Application
 import android.content.Context
 import android.view.View
-import androidx.lifecycle.map
-import androidx.lifecycle.switchMap
+import androidx.lifecycle.*
 
 
 class MainActivityViewModel: ViewModel() {
@@ -21,7 +18,7 @@ class MainActivityViewModel: ViewModel() {
     // Switch booleans
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     var jiceTime: MutableLiveData<Boolean> = MutableLiveData(false)
-    var pogoTime = false
+    var pogoTime: MutableLiveData<Boolean> = MutableLiveData(false)
     var weAreDefending: MutableLiveData<Boolean> = MutableLiveData(false)
 
     var attackingType: MutableLiveData<String> = MutableLiveData("(choose)")
@@ -105,6 +102,14 @@ class MainActivityViewModel: ViewModel() {
         }
     }
 
+    var gameSwitchText = pogoTime.map { pogoTime ->
+            if (pogoTime) {
+                App.context?.getString(R.string.pogo)
+            } else {
+                App.context?.getString(R.string.mainGame)
+        }
+    }
+
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
         R.drawable.dark_icon,
@@ -170,12 +175,6 @@ class MainActivityViewModel: ViewModel() {
     )
 
     private lateinit var typeMatchups: Map<Types, Map<String, Double>>
-    private lateinit var masterURLFetch: Map<String,List<Map<String,String>>>
-    private lateinit var pokemonURLFetch: Map<String,Any>
-    private lateinit var pokemonNamesAndURLs: List<Map<String,String>>
-    lateinit var listOfPossibleTypes: MutableList<MutableList<String>>
-    private lateinit var pokemonNames: MutableList<String>
-    private lateinit var pokemonURLs: MutableList<String>
 
     fun onesString(): MutableList<String> {
         val table = mutableListOf<String>()
@@ -394,7 +393,15 @@ class MainActivityViewModel: ViewModel() {
     }
 
     // TODO(work on doesNotExistDisclaimer stuff after liveData)
-/*    fun fetchAllPokemonNamesAndURLs() {
+/*
+    private lateinit var masterURLFetch: Map<String,List<Map<String,String>>>
+    private lateinit var pokemonURLFetch: Map<String,Any>
+    private lateinit var pokemonNamesAndURLs: List<Map<String,String>>
+    lateinit var listOfPossibleTypes: MutableList<MutableList<String>>
+    private lateinit var pokemonNames: MutableList<String>
+    private lateinit var pokemonURLs: MutableList<String>
+
+    fun fetchAllPokemonNamesAndURLs() {
         val masterURL = "https://pokeapi.co/api/v2/pokemon?limit=898"
         val request = Request.Builder().url(masterURL).build()
         val client = OkHttpClient()

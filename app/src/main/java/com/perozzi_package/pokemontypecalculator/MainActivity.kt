@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gameSwitchText: TextView
     private lateinit var gameSwitch: Switch
     private lateinit var iceJiceSwitch: Switch
-    private lateinit var tableHeader: TextView
 
     @SuppressLint("UseSwitchCompatOrMaterialCode", "ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +64,6 @@ class MainActivity : AppCompatActivity() {
         val defendingType2Spinner = binding.type2Spinner
         val attackingTypeSpinner = binding.attackingTypeSpinner
         val typeSelectionPrompt = binding.secondPrompt
-        tableHeader = binding.tableHeader
         val doesNotExistDisclaimer = binding.doesNotExistDisclaimer
         val attackingTypeSpinnerAndLabel = binding.attackingTypeSpinnerAndLabel
         val defendingType1SpinnerAndLabel = binding.defendingType1SpinnerAndLabel
@@ -113,7 +111,6 @@ class MainActivity : AppCompatActivity() {
         var defSpinner2Index = 0
 
         // LiveData implemented for the tableHeader
-        // but adjustTableHeaderText() still under each onSelectedListener
         mainActivityViewModel.promptText.observe(this, { typeSelectionPrompt.text = it })
 
         // POV SWITCH
@@ -148,14 +145,12 @@ class MainActivity : AppCompatActivity() {
                 doesNotExistDisclaimer.visibility = View.INVISIBLE
             }
             refreshTheData()
-            mainActivityViewModel.adjustTableHeaderText()
         }
 
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 atkSpinnerIndex = p2
                 mainActivityViewModel.attackingType = Types.values()[atkSpinnerIndex].type
-                var string = mainActivityViewModel.adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
                 refreshTheData()
             }
@@ -166,7 +161,6 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner1Index = p2
                 mainActivityViewModel.defendingType1 = Types.values()[defSpinner1Index].type
-                mainActivityViewModel.adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
 
                 // TODO(Work on doesNotExistDisclaimer rework after liveData is worked out)
@@ -186,7 +180,6 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner2Index = p2
                 mainActivityViewModel.defendingType2 = Types.values()[defSpinner2Index].type
-                mainActivityViewModel.adjustTableHeaderText()
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
                 doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(mainActivityViewModel.defendingType1,mainActivityViewModel.defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
                 refreshTheData()
@@ -216,7 +209,6 @@ class MainActivity : AppCompatActivity() {
             // Adjusts the text in the table header (only if Ice/Jice is currently selected)
             if ((mainActivityViewModel.attackingType == "Ice" || mainActivityViewModel.defendingType1 == "Ice" || mainActivityViewModel.defendingType2 == "Ice")
                 || (mainActivityViewModel.attackingType == "Jice" || mainActivityViewModel.defendingType1 == "Jice" || mainActivityViewModel.defendingType2 == "Jice")) {
-                mainActivityViewModel.adjustTableHeaderText()
             }
             refreshTheData()
         }
@@ -239,13 +231,11 @@ class MainActivity : AppCompatActivity() {
                     gameSwitchText.visibility = View.INVISIBLE
                     gameSwitch.visibility = View.INVISIBLE
                     iceJiceSwitch.visibility = View.INVISIBLE
-                    tableHeader.visibility = View.INVISIBLE
                 } else {
                     typeTableRecyclerView.visibility = View.VISIBLE
                     gameSwitchText.visibility = View.VISIBLE
                     gameSwitch.visibility = View.VISIBLE
                     iceJiceSwitch.visibility = View.VISIBLE
-                    tableHeader.visibility = View.VISIBLE
                 }
     }
 

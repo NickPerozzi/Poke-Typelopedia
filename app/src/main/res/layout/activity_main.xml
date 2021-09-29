@@ -195,7 +195,7 @@
                 android:layout_gravity="left"
                 android:paddingStart="10dp"
                 android:paddingLeft="10dp"
-                android:text="@string/mainGame"
+                android:text="@{mainActivityViewModel.gameSwitchText}"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:visibility="invisible"
