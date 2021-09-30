@@ -3,6 +3,7 @@ package com.perozzi_package.pokemontypecalculator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,14 +23,9 @@ import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     // Worked for me
-    private var mainActivityViewModel = MainActivityViewModel()
+    private var mainActivityViewModel = MainActivityViewModel(Resources.getSystem())
 
-    // Link between UI and BL
-    // needed for gridView functionality
-    private var recyclerView: RecyclerView? = null
-    private var gridLayoutManager: GridLayoutManager? = null
-    private var arrayListForTypeGrid: ArrayList<TypeGrid> ? = null
-    private var typeGridAdapter: TypeGridAdapter ? = null
+    var recyclerView: RecyclerView? = null
 
     // needed for makeDataVisibleIfATypeIsSelected()
     private lateinit var typeTableRecyclerView: RecyclerView
@@ -95,13 +92,13 @@ class MainActivity : AppCompatActivity() {
 
         // Link between UI and BL
         recyclerView = findViewById(R.id.typeTableRecyclerView)
-        gridLayoutManager = GridLayoutManager(applicationContext, 3, LinearLayoutManager.VERTICAL,false)
-        recyclerView?.layoutManager = gridLayoutManager
+        mainActivityViewModel.gridLayoutManager = GridLayoutManager(applicationContext, 3, LinearLayoutManager.VERTICAL,false)
+        recyclerView?.layoutManager = mainActivityViewModel.gridLayoutManager
         recyclerView?.setHasFixedSize(true)
-        arrayListForTypeGrid = ArrayList()
-        arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,mainActivityViewModel.onesString(),listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
-        recyclerView?.adapter = typeGridAdapter
+        mainActivityViewModel.arrayListForTypeGrid = ArrayList()
+        mainActivityViewModel.arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,mainActivityViewModel.onesString(),listOfCellBackgroundColors,listOfCellTextColors)
+        mainActivityViewModel.typeGridAdapter = TypeGridAdapter(mainActivityViewModel.arrayListForTypeGrid!!)
+        recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
 
         // BL
 
@@ -115,44 +112,48 @@ class MainActivity : AppCompatActivity() {
 
         // POV SWITCH
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
-            mainActivityViewModel.weAreDefending = onSwitch
+            mainActivityViewModel.weAreDefending.value = onSwitch
             // Swaps the respective spinners in and out
-            attackingTypeSpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending) { View.GONE } else { View.VISIBLE }
-            defendingType1SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending) { View.VISIBLE } else { View.GONE }
-            defendingType2SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending) { View.VISIBLE } else { View.GONE }
+            attackingTypeSpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending.value!!) { View.GONE } else { View.VISIBLE }
+            defendingType1SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending.value!!) { View.VISIBLE } else { View.GONE }
+            defendingType2SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending.value!!) { View.VISIBLE } else { View.GONE }
 
-            povSwitch.text = if (mainActivityViewModel.weAreDefending) { getString(R.string.pov_switch_to_defending) } else { getString(R.string.pov_switch_to_attacking) }
+            povSwitch.text = if (mainActivityViewModel.weAreDefending.value!!) { getString(R.string.pov_switch_to_defending) } else { getString(R.string.pov_switch_to_attacking) }
             // old
             // typeSelectionPrompt.text = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
             // new
-            mainActivityViewModel.promptText.value = if (mainActivityViewModel.weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
+            mainActivityViewModel.promptText.value = if (mainActivityViewModel.weAreDefending.value!!) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
 
 
             // QoL: transfers the value from the to-be-invisible spinner to the to-be-visible one
-            if (mainActivityViewModel.weAreDefending) {
-                mainActivityViewModel.defendingType2 = "[none]"
+            if (mainActivityViewModel.weAreDefending.value!!) {
+                mainActivityViewModel.defendingType2.value = "[none]"
                 defendingType2Spinner.setSelection(0)
                 mainActivityViewModel.defendingType1 = mainActivityViewModel.attackingType
                 defendingType1Spinner.setSelection(atkSpinnerIndex)
             } else {
                 mainActivityViewModel.attackingType = mainActivityViewModel.defendingType1
                 attackingTypeSpinner.setSelection(defSpinner1Index)
-                if ((mainActivityViewModel.defendingType1 == "(choose)" || mainActivityViewModel.defendingType1 == Types.NoType.type) &&
-                    (mainActivityViewModel.defendingType2 != "[none]" && mainActivityViewModel.defendingType2 != Types.NoType.type)) {
+                if ((mainActivityViewModel.defendingType1.value!! == "(choose)" || mainActivityViewModel.defendingType1.value!! == Types.NoType.type) &&
+                    (mainActivityViewModel.defendingType2.value!! != "[none]" && mainActivityViewModel.defendingType2.value!! != Types.NoType.type)) {
                     mainActivityViewModel.attackingType = mainActivityViewModel.defendingType2
                     attackingTypeSpinner.setSelection(defSpinner2Index)
                 }
                 doesNotExistDisclaimer.visibility = View.INVISIBLE
             }
-            refreshTheData()
+            mainActivityViewModel.refreshTheData()
+            recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
+
         }
 
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 atkSpinnerIndex = p2
-                mainActivityViewModel.attackingType = Types.values()[atkSpinnerIndex].type
+                mainActivityViewModel.attackingType.value = Types.values()[atkSpinnerIndex].type
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
-                refreshTheData()
+                mainActivityViewModel.refreshTheData()
+                recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
+
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -160,7 +161,7 @@ class MainActivity : AppCompatActivity() {
         defendingType1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner1Index = p2
-                mainActivityViewModel.defendingType1 = Types.values()[defSpinner1Index].type
+                mainActivityViewModel.defendingType1.value = Types.values()[defSpinner1Index].type
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
 
                 // TODO(Work on doesNotExistDisclaimer rework after liveData is worked out)
@@ -169,9 +170,8 @@ class MainActivity : AppCompatActivity() {
                         defendingType2
                     ) !in mainActivityViewModel.listOfPossibleTypes
                 ) { View.VISIBLE } else { View.INVISIBLE }*/
-
-                doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(mainActivityViewModel.defendingType1,mainActivityViewModel.defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
-                refreshTheData()
+                mainActivityViewModel.refreshTheData()
+                recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -179,35 +179,35 @@ class MainActivity : AppCompatActivity() {
         defendingType2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner2Index = p2
-                mainActivityViewModel.defendingType2 = Types.values()[defSpinner2Index].type
+                mainActivityViewModel.defendingType2.value = Types.values()[defSpinner2Index].type
                 makeGridAndSwitchesVisibleIfATypeIsSelected()
-                doesNotExistDisclaimer.visibility = if (mainActivityViewModel.doesThisTypingExist(mainActivityViewModel.defendingType1,mainActivityViewModel.defendingType2)) {View.VISIBLE} else {View.INVISIBLE}
-                refreshTheData()
+                mainActivityViewModel.refreshTheData()
+                recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
+
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
         gameSwitchText.setOnClickListener { gameSwitch.toggle() } // toggles gameSwitch when text is clicked
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
-            mainActivityViewModel.pogoTime = onSwitch
-            gameSwitchText.text = if (mainActivityViewModel.pogoTime) {
+            mainActivityViewModel.pogoTime.value = onSwitch
+            gameSwitchText.text = if (mainActivityViewModel.pogoTime.value!!) {
                 resources.getString(R.string.pogo) } else { resources.getString(R.string.mainGame)}
-            refreshTheData()
+            mainActivityViewModel.refreshTheData()
+            recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
+
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
-            mainActivityViewModel.jiceTime = onSwitch
+            mainActivityViewModel.jiceTime.value = onSwitch
 
             // Adjusts the text in the spinners
             attackingSpinnerTypeOptions[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
             defendingSpinnerType1Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
             defendingSpinnerType2Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
 
-            // Adjusts the text in the table header (only if Ice/Jice is currently selected)
-            if ((mainActivityViewModel.attackingType == "Ice" || mainActivityViewModel.defendingType1 == "Ice" || mainActivityViewModel.defendingType2 == "Ice")
-                || (mainActivityViewModel.attackingType == "Jice" || mainActivityViewModel.defendingType1 == "Jice" || mainActivityViewModel.defendingType2 == "Jice")) {
-            }
-            refreshTheData()
+            mainActivityViewModel.refreshTheData()
+            recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
         }
         infoButton.setOnClickListener {
             val intent = Intent(this, TypeTriviaActivity::class.java)
@@ -220,10 +220,10 @@ class MainActivity : AppCompatActivity() {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun makeGridAndSwitchesVisibleIfATypeIsSelected() {
-        val type1 = if (mainActivityViewModel.weAreDefending) { mainActivityViewModel.defendingType1 } else { mainActivityViewModel.attackingType }
-        val type2 = if (mainActivityViewModel.weAreDefending) { mainActivityViewModel.defendingType2 } else { "[none]" }
-                if ((type1 == "(choose)" || type1 == Types.NoType.type) &&
-                    (type2 == "[none]" || type2 == Types.NoType.type)) {
+        val type1: MutableLiveData<String> = if (mainActivityViewModel.weAreDefending.value!!) { mainActivityViewModel.defendingType1 } else { mainActivityViewModel.attackingType }
+        val type2: MutableLiveData<String> = if (mainActivityViewModel.weAreDefending.value!!) { mainActivityViewModel.defendingType2 } else { MutableLiveData("[none]") }
+                if ((type1.value == "(choose)" || type1.value == Types.NoType.type) &&
+                    (type2.value == "[none]" || type2.value == Types.NoType.type)) {
                     typeTableRecyclerView.visibility = View.INVISIBLE
                     gameSwitchText.visibility = View.INVISIBLE
                     gameSwitch.visibility = View.INVISIBLE
@@ -243,45 +243,6 @@ class MainActivity : AppCompatActivity() {
             ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerOptions)
         spinner.adapter = spinnerAdapter
         spinner.setSelection(0,false)
-    }
-
-    // BL BUT IT USES THE TWO FUNCTIONS THAT NEED COLORS
-    private fun interactionsToGridView(interactionsList: MutableList<Double>) {
-        val effectivenessList = mainActivityViewModel.interactionsToEffectiveness(interactionsList)
-        val displayedListOfInteractions = mainActivityViewModel.effectivenessToDisplayedCellValues(effectivenessList)
-        val listOfCellTextColors = mainActivityViewModel.effectivenessToCellTextColors(effectivenessList)
-        val listOfCellBackgroundColors = mainActivityViewModel.effectivenessToCellBackgroundColors(effectivenessList)
-        arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(mainActivityViewModel.arrayOfTypeIcons,displayedListOfInteractions,listOfCellBackgroundColors,listOfCellTextColors)
-        typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
-        recyclerView?.adapter = typeGridAdapter
-    }
-
-    // Strikes me as BL, but I don't want to call in attackingType, defendingType1, defendingType2 from MainActivity
-    private fun refreshTheData() {
-        when (mainActivityViewModel.weAreDefending) {
-            false -> {
-                // if attacking
-                mainActivityViewModel.listOfInteractions =
-                    mainActivityViewModel.attackingEffectivenessCalculator(mainActivityViewModel.attackingType.value!!)
-            }
-            true -> {
-                mainActivityViewModel.listOfInteractions =
-                    // if defending with type 1 only
-                    if (mainActivityViewModel.defendingType2.value == "[none]" || mainActivityViewModel.defendingType2.value == Types.NoType.type || mainActivityViewModel.defendingType1 == mainActivityViewModel.defendingType2) {
-                        mainActivityViewModel.defendingEffectivenessCalculator(mainActivityViewModel.defendingType1.value!!)
-                        // if defending with type 2 only
-                    } else if (mainActivityViewModel.defendingType1.value == "(choose)" || mainActivityViewModel.defendingType1.value == Types.NoType.type) {
-                        mainActivityViewModel.defendingEffectivenessCalculator(mainActivityViewModel.defendingType2.value!!)
-                        // if defending with both type1 and type 2
-                    } else {
-                        mainActivityViewModel.defendingWithTwoTypesCalculator(
-                            mainActivityViewModel.defendingType1.value!!,
-                            mainActivityViewModel.defendingType2.value!!
-                        )
-                    }
-            }
-        }
-        interactionsToGridView(mainActivityViewModel.listOfInteractions)
     }
 
     // BL, to be implemented later when LiveData is a thing

@@ -9,9 +9,17 @@ import java.io.IOException
 import java.lang.reflect.Type
 import android.view.View
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 
-class MainActivityViewModel(private val resources: Resources): ViewModel() {
+class MainActivityViewModel(private val resources: Resources) : ViewModel() {
+
+    // For the grid
+
+    var gridLayoutManager: GridLayoutManager? = null
+    var arrayListForTypeGrid: ArrayList<TypeGrid> ? = null
+    var typeGridAdapter: TypeGridAdapter ? = null
 
     // Switch booleans
     @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -30,25 +38,25 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
     var tableHeaderVisibility = attackingType.switchMap { atk ->
         defendingType1.switchMap { def1 ->
             defendingType2.switchMap { def2 ->
-                weAreDefending.map {weAreDefending ->
-                when (weAreDefending) {
-                    true -> {
-                        if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
-                            (def2 == "[none]" || def2 == Types.NoType.type)
-                        ) {
-                            View.INVISIBLE
-                        } else {
-                            View.VISIBLE
+                weAreDefending.map { weAreDefending ->
+                    when (weAreDefending) {
+                        true -> {
+                            if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
+                                (def2 == "[none]" || def2 == Types.NoType.type)
+                            ) {
+                                View.INVISIBLE
+                            } else {
+                                View.VISIBLE
+                            }
+                        }
+                        false -> {
+                            if (atk == "(choose)" || atk == Types.NoType.type) {
+                                View.INVISIBLE
+                            } else {
+                                View.VISIBLE
+                            }
                         }
                     }
-                    false -> {
-                        if (atk == "(choose)" || atk == Types.NoType.type) {
-                            View.INVISIBLE
-                        } else {
-                            View.VISIBLE
-                        }
-                    }
-                }
                 }
             }
         }
@@ -57,32 +65,67 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
     fun tableHeaderText() = attackingType.switchMap { atk ->
         defendingType1.switchMap { def1 ->
             defendingType2.switchMap { def2 ->
-                jiceTime.switchMap {jiceTime ->
-                    weAreDefending.map {weAreDefending ->
-                        val type1 = if (weAreDefending) { def1 } else { atk }
-                        val type2 = if (weAreDefending) { def2 } else { "[none]" }
+                jiceTime.switchMap { jiceTime ->
+                    weAreDefending.map { weAreDefending ->
+                        val type1 = if (weAreDefending) {
+                            def1
+                        } else {
+                            atk
+                        }
+                        val type2 = if (weAreDefending) {
+                            def2
+                        } else {
+                            "[none]"
+                        }
                         var type1Displayed = type1.toString()
                         var type2Displayed = type2.toString()
                         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
-                            type1Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+                            type1Displayed = if (jiceTime) {
+                                "Jice"
+                            } else {
+                                "Ice"
+                            }
                         }
                         if ((type2Displayed == "Ice" || type2Displayed == "Jice")) {
-                            type2Displayed = if (jiceTime) { "Jice" } else { "Ice" }
+                            type2Displayed = if (jiceTime) {
+                                "Jice"
+                            } else {
+                                "Ice"
+                            }
                         }
                         when (weAreDefending) {
                             true -> {
                                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed == "[none]" || type2Displayed == Types.NoType.type)) {
-                                    resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
+                                    resources.getString(
+                                        R.string.table_header_one_type,
+                                        "_____",
+                                        type1Displayed
+                                    )
                                 }
                                 if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
-                                    resources.getString(R.string.table_header_one_type, "_____", type2Displayed)
+                                    resources.getString(
+                                        R.string.table_header_one_type,
+                                        "_____",
+                                        type2Displayed
+                                    )
                                 }
                                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
-                                    resources.getString(R.string.table_header_two_types, "_____", type1Displayed, type2Displayed)
+                                    resources.getString(
+                                        R.string.table_header_two_types,
+                                        "_____",
+                                        type1Displayed,
+                                        type2Displayed
+                                    )
                                 }
                                 if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
-                                    resources.getString(R.string.table_header_one_type, "_____", type1Displayed)
-                                } else {"Initializer. If you see this then you have encountered a bug. Neat!"}
+                                    resources.getString(
+                                        R.string.table_header_one_type,
+                                        "_____",
+                                        type1Displayed
+                                    )
+                                } else {
+                                    "Initializer. If you see this then you have encountered a bug. Neat!"
+                                }
                             }
                             false -> {
                                 resources.getString(
@@ -99,10 +142,10 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
     }
 
     var gameSwitchText = pogoTime.map { pogoTime ->
-            if (pogoTime) {
-                resources.getString(R.string.pogo)
-            } else {
-                resources.getString(R.string.mainGame)
+        if (pogoTime) {
+            resources.getString(R.string.pogo)
+        } else {
+            resources.getString(R.string.mainGame)
         }
     }
 
@@ -111,6 +154,17 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
             resources.getString(R.string.jice)
         } else {
             resources.getString(R.string.ice)
+        }
+    }
+
+    var doesNotExistVisibility = defendingType1.switchMap { def1 ->
+        defendingType2.map { def2 ->
+            val currentTypingPair: List<String> = listOf(def1, def2)
+            if (currentTypingPair in listOfNonexistentTypeCombinations) {
+                View.VISIBLE
+            } else {
+                View.INVISIBLE
+            }
         }
     }
 
@@ -134,7 +188,9 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         R.drawable.steel_icon,
         R.drawable.water_icon
     )
+
     var listOfInteractions: MutableList<Double> = onesDouble()
+
     // UI
     fun adjustTableHeaderText(): String {
         return "You're not supposed to see this. You found a bug. Neat!"
@@ -142,40 +198,40 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
 
     //data
     private val listOfNonexistentTypeCombinations: List<List<String>> = listOf(
-        listOf(Types.Normal.type,Types.Ice.type), // Normal ice
-        listOf(Types.Ice.type,Types.Normal.type),
-        listOf(Types.Normal.type,Types.Poison.type), // Normal poison
-        listOf(Types.Poison.type,Types.Normal.type),
-        listOf(Types.Normal.type,Types.Bug.type), // Normal bug
-        listOf(Types.Bug.type,Types.Normal.type),
-        listOf(Types.Normal.type,Types.Rock.type), // Normal rock
-        listOf(Types.Rock.type,Types.Normal.type),
-        listOf(Types.Normal.type,Types.Ghost.type), // Normal ghost
-        listOf(Types.Ghost.type,Types.Normal.type),
-        listOf(Types.Normal.type,Types.Steel.type), // Normal steel
-        listOf(Types.Steel.type,Types.Normal.type),
-        listOf(Types.Fire.type,Types.Fairy.type), // Fire fairy
-        listOf(Types.Fairy.type,Types.Fire.type),
-        listOf(Types.Fire.type,Types.Grass.type), // Fire grass
-        listOf(Types.Grass.type,Types.Fire.type),
-        listOf(Types.Electric.type,Types.Fighting.type), // Fighting electric
-        listOf(Types.Fighting.type,Types.Electric.type),
-        listOf(Types.Ice.type,Types.Poison.type), // Ice poison
-        listOf(Types.Poison.type,Types.Ice.type),
-        listOf(Types.Fighting.type,Types.Ground.type), // Fighting ground
-        listOf(Types.Ground.type,Types.Fighting.type),
-        listOf(Types.Fighting.type,Types.Fairy.type), // Fighting fairy
-        listOf(Types.Fairy.type,Types.Fighting.type),
-        listOf(Types.Poison.type,Types.Steel.type), // Steel poison
-        listOf(Types.Steel.type,Types.Poison.type),
-        listOf(Types.Ground.type,Types.Fairy.type), // Fairy ground
-        listOf(Types.Fairy.type,Types.Ground.type),
-        listOf(Types.Bug.type,Types.Dragon.type), // Bug dragon
-        listOf(Types.Dragon.type,Types.Bug.type),
-        listOf(Types.Bug.type,Types.Dark.type), // Bug dark
-        listOf(Types.Dark.type,Types.Bug.type),
-        listOf(Types.Rock.type,Types.Ghost.type), // Rock ghost
-        listOf(Types.Ghost.type,Types.Rock.type)
+        listOf(Types.Normal.type, Types.Ice.type), // Normal ice
+        listOf(Types.Ice.type, Types.Normal.type),
+        listOf(Types.Normal.type, Types.Poison.type), // Normal poison
+        listOf(Types.Poison.type, Types.Normal.type),
+        listOf(Types.Normal.type, Types.Bug.type), // Normal bug
+        listOf(Types.Bug.type, Types.Normal.type),
+        listOf(Types.Normal.type, Types.Rock.type), // Normal rock
+        listOf(Types.Rock.type, Types.Normal.type),
+        listOf(Types.Normal.type, Types.Ghost.type), // Normal ghost
+        listOf(Types.Ghost.type, Types.Normal.type),
+        listOf(Types.Normal.type, Types.Steel.type), // Normal steel
+        listOf(Types.Steel.type, Types.Normal.type),
+        listOf(Types.Fire.type, Types.Fairy.type), // Fire fairy
+        listOf(Types.Fairy.type, Types.Fire.type),
+        listOf(Types.Fire.type, Types.Grass.type), // Fire grass
+        listOf(Types.Grass.type, Types.Fire.type),
+        listOf(Types.Electric.type, Types.Fighting.type), // Fighting electric
+        listOf(Types.Fighting.type, Types.Electric.type),
+        listOf(Types.Ice.type, Types.Poison.type), // Ice poison
+        listOf(Types.Poison.type, Types.Ice.type),
+        listOf(Types.Fighting.type, Types.Ground.type), // Fighting ground
+        listOf(Types.Ground.type, Types.Fighting.type),
+        listOf(Types.Fighting.type, Types.Fairy.type), // Fighting fairy
+        listOf(Types.Fairy.type, Types.Fighting.type),
+        listOf(Types.Poison.type, Types.Steel.type), // Steel poison
+        listOf(Types.Steel.type, Types.Poison.type),
+        listOf(Types.Ground.type, Types.Fairy.type), // Fairy ground
+        listOf(Types.Fairy.type, Types.Ground.type),
+        listOf(Types.Bug.type, Types.Dragon.type), // Bug dragon
+        listOf(Types.Dragon.type, Types.Bug.type),
+        listOf(Types.Bug.type, Types.Dark.type), // Bug dark
+        listOf(Types.Dark.type, Types.Bug.type),
+        listOf(Types.Rock.type, Types.Ghost.type), // Rock ghost
+        listOf(Types.Ghost.type, Types.Rock.type)
     )
 
     private lateinit var typeMatchups: Map<Types, Map<String, Double>>
@@ -187,6 +243,7 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         }
         return table
     }
+
     private fun onesDouble(): MutableList<Double> {
         val table = mutableListOf<Double>()
         for (i in 0 until 18) {
@@ -194,6 +251,7 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         }
         return table
     }
+
     fun onesInt(): MutableList<Int> {
         val table = mutableListOf<Int>()
         for (i in 0 until 18) {
@@ -202,13 +260,10 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         return table
     }
 
-    fun doesThisTypingExist(type1: String, type2: String): Boolean {
-        val currentTypingPair: List<String> = listOf(type1, type2)
-        return currentTypingPair in listOfNonexistentTypeCombinations
-    }
-
     fun attackingEffectivenessCalculator(attacker: String): MutableList<Double> {
-        if (attacker == "(choose)" || attacker == Types.NoType.type) { return onesDouble() }
+        if (attacker == "(choose)" || attacker == Types.NoType.type) {
+            return onesDouble()
+        }
 
         var dictOfSelectedTypes: Map<String, Double> = emptyMap()
 
@@ -219,6 +274,7 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         }
         return dictOfSelectedTypes.values.toMutableList()
     }
+
     fun defendingEffectivenessCalculator(defender: String): MutableList<Double> {
         if (defender == "(choose)" || defender == "[none]" || defender == Types.NoType.type) {
             return onesDouble()
@@ -233,6 +289,7 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         }
         return listOfDefendingMatchupCoefficients
     }
+
     fun defendingWithTwoTypesCalculator(type1: String, type2: String): MutableList<Double> {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
@@ -241,7 +298,7 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         // Just use PoGo numbers
         // @@@nap believe this comment is dated but there is still room to improve efficiency
         for (i in 0 until 18) {
-            val types: List<Double> = listOf(defenderType1List[i],defenderType2List[i])
+            val types: List<Double> = listOf(defenderType1List[i], defenderType2List[i])
             when (pogoTime.value) {
                 true -> {
                     when (types) {
@@ -251,15 +308,42 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
                         listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0) // same for both
                         listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0) // same for both
                         listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0) // same for both
-                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625) // same for both
-                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625) // same for both
-                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
-                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
-                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
-                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
-                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
-                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
-                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
+                        listOf(
+                            1.0,
+                            0.625
+                        ) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(
+                            0.625,
+                            1.0
+                        ) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(
+                            1.6,
+                            0.390625
+                        ) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
+                        listOf(
+                            0.390625,
+                            1.6
+                        ) -> defenderNetEffectivenessList.add(0.625) // Pogo-exclusive
+                        listOf(
+                            0.625,
+                            0.625
+                        ) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(
+                            1.0,
+                            0.390625
+                        ) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(
+                            0.390625,
+                            1.0
+                        ) -> defenderNetEffectivenessList.add(0.390625) // Pogo-exclusive
+                        listOf(
+                            0.625,
+                            0.390625
+                        ) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
+                        listOf(
+                            0.390625,
+                            0.625
+                        ) -> defenderNetEffectivenessList.add(0.244) // Pogo-exclusive
                     }
                 }
                 false -> {
@@ -270,15 +354,42 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
                         listOf(1.0, 1.0) -> defenderNetEffectivenessList.add(1.0) // same for both
                         listOf(1.6, 0.625) -> defenderNetEffectivenessList.add(1.0) // same for both
                         listOf(0.625, 1.6) -> defenderNetEffectivenessList.add(1.0) // same for both
-                        listOf(1.0, 0.625) -> defenderNetEffectivenessList.add(0.625) // same for both
-                        listOf(0.625, 1.0) -> defenderNetEffectivenessList.add(0.625) // same for both
-                        listOf(0.625, 0.625) -> defenderNetEffectivenessList.add(0.25) // main game-exclusive
-                        listOf(1.6, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
-                        listOf(0.390625, 1.6) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
-                        listOf(1.0, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
-                        listOf(0.390625, 1.0) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
-                        listOf(0.625, 0.390625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
-                        listOf(0.390625, 0.625) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(
+                            1.0,
+                            0.625
+                        ) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(
+                            0.625,
+                            1.0
+                        ) -> defenderNetEffectivenessList.add(0.625) // same for both
+                        listOf(
+                            0.625,
+                            0.625
+                        ) -> defenderNetEffectivenessList.add(0.25) // main game-exclusive
+                        listOf(
+                            1.6,
+                            0.390625
+                        ) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(
+                            0.390625,
+                            1.6
+                        ) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(
+                            1.0,
+                            0.390625
+                        ) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(
+                            0.390625,
+                            1.0
+                        ) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(
+                            0.625,
+                            0.390625
+                        ) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
+                        listOf(
+                            0.390625,
+                            0.625
+                        ) -> defenderNetEffectivenessList.add(0.0) // main game-exclusive
                     }
                 }
             }
@@ -313,6 +424,7 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         }
         return stringList
     }
+
     //BL
     @SuppressLint("SetTextI18n")
     fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
@@ -322,19 +434,33 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
                 when (listOfEffectivenesses[i]) {
                     Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
                     Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2")
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x4")
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.5")
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.25")
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x4"
+                    )
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x0.5"
+                    )
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x0.25"
+                    )
                     Effectiveness.DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0")
                 }
             } else {
                 when (listOfEffectivenesses[i]) {
                     Effectiveness.EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1")
                     Effectiveness.SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x1.6")
-                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x2.56")
-                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.625")
-                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add("x0.391")
-                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add("x0.244")
+                    Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x2.56"
+                    )
+                    Effectiveness.NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x0.625"
+                    )
+                    Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x0.391"
+                    )
+                    Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> mutableListOfEffectivenessDoubles.add(
+                        "x0.244"
+                    )
                 }
             }
         }
@@ -342,8 +468,10 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
     }
 
     // BL
-    fun setDataInTypeGridList(iconMutableList: MutableList<Int>, effectivenessMutableList:MutableList<String>,
-                              backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>):
+    fun setDataInTypeGridList(
+        iconMutableList: MutableList<Int>, effectivenessMutableList: MutableList<String>,
+        backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>
+    ):
             ArrayList<TypeGrid> {
 
         val items: ArrayList<TypeGrid> = ArrayList()
@@ -379,8 +507,54 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
         return items
     }
 
+    // BL BUT IT USES THE TWO FUNCTIONS THAT NEED COLORS
+    fun interactionsToGridView(interactionsList: MutableList<Double>) {
+        val effectivenessList = interactionsToEffectiveness(interactionsList)
+        val displayedListOfInteractions =
+            effectivenessToDisplayedCellValues(effectivenessList)
+        val listOfCellTextColors =
+            effectivenessToCellTextColors(effectivenessList)
+        val listOfCellBackgroundColors =
+            effectivenessToCellBackgroundColors(effectivenessList)
+        arrayListForTypeGrid = setDataInTypeGridList(
+            arrayOfTypeIcons,
+            displayedListOfInteractions,
+            listOfCellBackgroundColors,
+            listOfCellTextColors
+        )
+        typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
+    }
+
+    // Strikes me as BL, but I don't want to call in attackingType, defendingType1, defendingType2 from MainActivity
+    fun refreshTheData() {
+        when (weAreDefending.value) {
+            false -> {
+                // if attacking
+                listOfInteractions =
+                    attackingEffectivenessCalculator(attackingType.value!!)
+            }
+            true -> {
+                listOfInteractions =
+                        // if defending with type 1 only
+                    if (defendingType2.value == "[none]" || defendingType2.value == Types.NoType.type || defendingType1 == defendingType2) {
+                        defendingEffectivenessCalculator(defendingType1.value!!)
+                        // if defending with type 2 only
+                    } else if (defendingType1.value == "(choose)" || defendingType1.value == Types.NoType.type) {
+                        defendingEffectivenessCalculator(defendingType2.value!!)
+                        // if defending with both type1 and type 2
+                    } else {
+                        defendingWithTwoTypesCalculator(
+                            defendingType1.value!!,
+                            defendingType2.value!!
+                        )
+                    }
+            }
+        }
+        interactionsToGridView(listOfInteractions)
+    }
+
     // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
-    fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
+    private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
@@ -393,17 +567,43 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
     }
 
     // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
-    fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
+    private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             when (mutableList[i]) {
-                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x1color))
-                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x2color))
-                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x4color))
-                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_5color))
-                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_25color))
-                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x0color))
-                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.UDNEcolor))
+                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(
+                        R.color.x1color
+                    )
+                )
+                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(
+                        R.color.x2color
+                    )
+                )
+                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(
+                        R.color.x4color
+                    )
+                )
+                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(
+                        R.color.x_5color
+                    )
+                )
+                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(R.color.x_25color)
+                )
+                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(
+                        R.color.x0color
+                    )
+                )
+                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(
+                    resources.getColor(
+                        R.color.UDNEcolor
+                    )
+                )
             }
         }
         return listOfCellBackgroundColors
@@ -422,11 +622,12 @@ class MainActivityViewModel(private val resources: Resources): ViewModel() {
                     object : TypeToken<Map<Types, Map<String, Double>>>() {}.type
                 typeMatchups = gson.fromJson(body, typeToken)
             }
+
             override fun onFailure(call: Call, e: IOException) {}
         })
     }
 
-    // TODO(work on doesNotExistDisclaimer stuff after liveData)
+// TODO(work on doesNotExistDisclaimer stuff after liveData)
 /*
     private lateinit var masterURLFetch: Map<String,List<Map<String,String>>>
     private lateinit var pokemonURLFetch: Map<String,Any>

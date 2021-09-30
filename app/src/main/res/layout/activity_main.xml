@@ -169,7 +169,7 @@
             android:textAlignment="center"
             android:textSize="14sp"
             android:textStyle="italic"
-            android:visibility="invisible"
+            android:visibility="@{mainActivityViewModel.doesNotExistVisibility}"
             tools:ignore="RtlCompat" />
 
         <LinearLayout
@@ -248,4 +248,5 @@
             android:src="@drawable/info_button_transparent" />
 
     </LinearLayout>
+
 </layout>
