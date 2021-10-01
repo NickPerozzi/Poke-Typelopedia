@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:text="@string/pov_switch_to_attacking"
+                android:text="@{mainActivityViewModel.povSwitchText}"
                 android:textAlignment="center"
                 android:textSize="20sp"
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
@@ -68,7 +68,7 @@
             android:id="@+id/secondPrompt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/attacking_prompt"
+            android:text="@{mainActivityViewModel.promptText}"
             android:textSize="20sp"
             android:textStyle="italic" />
 
@@ -87,7 +87,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="@{mainActivityViewModel.defendingSpinnersVisibility}">
 
                 <TextView
                     android:id="@+id/type1Label"
@@ -113,7 +113,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="@{mainActivityViewModel.defendingSpinnersVisibility}">
 
                 <TextView
                     android:id="@+id/type2Label"
@@ -138,7 +138,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="@{mainActivityViewModel.attackingSpinnerVisibility}">
 
                 <TextView
                     android:id="@+id/attackingTypeLabel"
@@ -185,7 +186,7 @@
                 android:paddingStart="10dp"
                 android:paddingLeft="10dp"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
                 tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
             <TextView
@@ -198,9 +199,8 @@
                 android:text="@{mainActivityViewModel.gameSwitchText}"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
                 tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
-            />
 
             <Switch
                 android:id="@+id/iceJiceSwitch"
@@ -212,7 +212,7 @@
                 android:text="@{mainActivityViewModel.jiceSwitchText}"
                 android:textAlignment="textEnd"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
                 tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
         </LinearLayout>
@@ -234,7 +234,7 @@
             android:layout_height="match_parent"
             android:padding="12dp"
             android:paddingBottom="30dp"
-            android:visibility="invisible" />
+            android:visibility="@{mainActivityViewModel.tableHeaderVisibility}" />
 
         <!--Type table-->
 

@@ -1,6 +1,7 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Resources
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -8,6 +9,7 @@ import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,9 +33,37 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     var defendingType1: MutableLiveData<String> = MutableLiveData("(choose)")
     var defendingType2: MutableLiveData<String> = MutableLiveData("[none]")
 
+    var povSwitchText = weAreDefending.map { weAreDefending ->
+        if (weAreDefending) {
+            resources.getString(R.string.pov_switch_to_defending)
+        } else {
+            resources.getString(R.string.pov_switch_to_attacking)
+        }
+    }
 
-    // Live data
-    var promptText: MutableLiveData<String> = MutableLiveData("What type is the attack?")
+    var promptText = weAreDefending.map { weAreDefending ->
+        if (weAreDefending) {
+            resources.getString(R.string.defending_prompt)
+        } else {
+            resources.getString(R.string.attacking_prompt)
+        }
+    }
+
+    var attackingSpinnerVisibility = weAreDefending.map { weAreDefending ->
+        if (weAreDefending) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
+    }
+
+    var defendingSpinnersVisibility = weAreDefending.map { weAreDefending ->
+        if (weAreDefending) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
 
     var tableHeaderVisibility = attackingType.switchMap { atk ->
         defendingType1.switchMap { def1 ->
@@ -141,11 +171,70 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
+    // identical to tableHeaderVisibility. These do not intend to change. Can I delete?
+    var gameSwitchVisibility = attackingType.switchMap { atk ->
+        defendingType1.switchMap { def1 ->
+            defendingType2.switchMap { def2 ->
+                weAreDefending.map { weAreDefending ->
+                    when (weAreDefending) {
+                        true -> {
+                            if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
+                                (def2 == "[none]" || def2 == Types.NoType.type)
+                            ) { View.INVISIBLE } else { View.VISIBLE }
+                        }
+                        false -> {
+                            if (atk == "(choose)" || atk == Types.NoType.type) {
+                                View.INVISIBLE } else { View.VISIBLE }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     var gameSwitchText = pogoTime.map { pogoTime ->
         if (pogoTime) {
             resources.getString(R.string.pogo)
         } else {
             resources.getString(R.string.mainGame)
+        }
+    }
+
+    // identical to tableHeaderVisibility. These do not intend to change. Can I delete?
+    var jiceSwitchVisibility = attackingType.switchMap { atk ->
+        defendingType1.switchMap { def1 ->
+            defendingType2.switchMap { def2 ->
+                weAreDefending.map { weAreDefending ->
+                    when (weAreDefending) {
+                        true -> {
+                            if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
+                                (def2 == "[none]" || def2 == Types.NoType.type)
+                            ) { View.INVISIBLE } else { View.VISIBLE } }
+                        false -> {
+                            if (atk == "(choose)" || atk == Types.NoType.type) {
+                                View.INVISIBLE } else { View.VISIBLE } }
+                    }
+                }
+            }
+        }
+    }
+
+    // identical to tableHeaderVisibility. These do not intend to change. Can I delete?
+    var recyclerViewVisibility = attackingType.switchMap { atk ->
+        defendingType1.switchMap { def1 ->
+            defendingType2.switchMap { def2 ->
+                weAreDefending.map { weAreDefending ->
+                    when (weAreDefending) {
+                        true -> {
+                            if ((def1 == "(choose)" || def1 == Types.NoType.type) &&
+                                (def2 == "[none]" || def2 == Types.NoType.type)
+                            ) { View.INVISIBLE } else { View.VISIBLE } }
+                        false -> {
+                            if (atk == "(choose)" || atk == Types.NoType.type) {
+                                View.INVISIBLE } else { View.VISIBLE } }
+                    }
+                }
+            }
         }
     }
 
@@ -190,11 +279,6 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     )
 
     var listOfInteractions: MutableList<Double> = onesDouble()
-
-    // UI
-    fun adjustTableHeaderText(): String {
-        return "You're not supposed to see this. You found a bug. Neat!"
-    }
 
     //data
     private val listOfNonexistentTypeCombinations: List<List<String>> = listOf(
@@ -260,7 +344,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return table
     }
 
-    fun attackingEffectivenessCalculator(attacker: String): MutableList<Double> {
+    private fun attackingEffectivenessCalculator(attacker: String): MutableList<Double> {
         if (attacker == "(choose)" || attacker == Types.NoType.type) {
             return onesDouble()
         }
@@ -275,7 +359,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return dictOfSelectedTypes.values.toMutableList()
     }
 
-    fun defendingEffectivenessCalculator(defender: String): MutableList<Double> {
+    private fun defendingEffectivenessCalculator(defender: String): MutableList<Double> {
         if (defender == "(choose)" || defender == "[none]" || defender == Types.NoType.type) {
             return onesDouble()
         }
@@ -290,7 +374,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return listOfDefendingMatchupCoefficients
     }
 
-    fun defendingWithTwoTypesCalculator(type1: String, type2: String): MutableList<Double> {
+    private fun defendingWithTwoTypesCalculator(type1: String, type2: String): MutableList<Double> {
         val defenderType1List = defendingEffectivenessCalculator(type1)
         val defenderType2List = defendingEffectivenessCalculator(type2)
         val defenderNetEffectivenessList: MutableList<Double> = mutableListOf()
@@ -397,8 +481,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return (defenderNetEffectivenessList)
     }
 
-    // BL
-    fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
+    private fun interactionsToEffectiveness(mutableList: MutableList<Double>): MutableList<String> {
         val stringList: MutableList<String> = mutableListOf()
         for (i in 0 until 18) {
             if (pogoTime.value == true) {
@@ -425,7 +508,6 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return stringList
     }
 
-    //BL
     @SuppressLint("SetTextI18n")
     fun effectivenessToDisplayedCellValues(listOfEffectivenesses: MutableList<String>): MutableList<String> {
         val mutableListOfEffectivenessDoubles: MutableList<String> = mutableListOf()
@@ -467,7 +549,6 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return mutableListOfEffectivenessDoubles
     }
 
-    // BL
     fun setDataInTypeGridList(
         iconMutableList: MutableList<Int>, effectivenessMutableList: MutableList<String>,
         backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>
@@ -507,8 +588,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return items
     }
 
-    // BL BUT IT USES THE TWO FUNCTIONS THAT NEED COLORS
-    fun interactionsToGridView(interactionsList: MutableList<Double>) {
+    private fun interactionsToGridView(interactionsList: MutableList<Double>) {
         val effectivenessList = interactionsToEffectiveness(interactionsList)
         val displayedListOfInteractions =
             effectivenessToDisplayedCellValues(effectivenessList)
@@ -525,7 +605,6 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
     }
 
-    // Strikes me as BL, but I don't want to call in attackingType, defendingType1, defendingType2 from MainActivity
     fun refreshTheData() {
         when (weAreDefending.value) {
             false -> {
@@ -553,63 +632,36 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         interactionsToGridView(listOfInteractions)
     }
 
-    // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
     private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
-                listOfCellTextColors.add(resources.getColor(R.color.white))
+                listOfCellTextColors.add(R.color.white)
+                // listOfCellTextColors.add(resources.getColor(R.color.white))
             } else {
-                listOfCellTextColors.add(resources.getColor(R.color.black))
+                listOfCellTextColors.add(R.color.black)
+                // listOfCellTextColors.add(resources.getColor(R.color.black))
             }
         }
         return listOfCellTextColors
     }
 
-    // BL BUT NEEDS COLORS, which I can't get in MainActivityViewModel yet
     private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             when (mutableList[i]) {
-                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(
-                        R.color.x1color
-                    )
-                )
-                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(
-                        R.color.x2color
-                    )
-                )
-                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(
-                        R.color.x4color
-                    )
-                )
-                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(
-                        R.color.x_5color
-                    )
-                )
-                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(R.color.x_25color)
-                )
-                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(
-                        R.color.x0color
-                    )
-                )
-                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(
-                    resources.getColor(
-                        R.color.UDNEcolor
-                    )
-                )
+                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x1color)
+                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x2color)
+                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x4color)
+                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x_5color)
+                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x_25color)
+                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(R.color.x0color)
+                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(R.color.UDNEcolor)
             }
         }
         return listOfCellBackgroundColors
     }
 
-    // BL
     fun fetchJson() {
         val url = "https://pogoapi.net/api/v1/type_effectiveness.json"
         val request = Request.Builder().url(url).build()

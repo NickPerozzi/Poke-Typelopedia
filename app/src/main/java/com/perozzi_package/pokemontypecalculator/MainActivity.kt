@@ -3,7 +3,6 @@ package com.perozzi_package.pokemontypecalculator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -22,8 +21,7 @@ import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
 @RequiresApi(Build.VERSION_CODES.M)
 class MainActivity : AppCompatActivity() {
 
-    // Worked for me
-    private var mainActivityViewModel = MainActivityViewModel(Resources.getSystem())
+    private var mainActivityViewModel = MainActivityViewModel(resources)
 
     var recyclerView: RecyclerView? = null
 
@@ -107,23 +105,9 @@ class MainActivity : AppCompatActivity() {
         var defSpinner1Index = 0
         var defSpinner2Index = 0
 
-        // LiveData implemented for the tableHeader
-        mainActivityViewModel.promptText.observe(this, { typeSelectionPrompt.text = it })
-
         // POV SWITCH
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.weAreDefending.value = onSwitch
-            // Swaps the respective spinners in and out
-            attackingTypeSpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending.value!!) { View.GONE } else { View.VISIBLE }
-            defendingType1SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending.value!!) { View.VISIBLE } else { View.GONE }
-            defendingType2SpinnerAndLabel.visibility = if (mainActivityViewModel.weAreDefending.value!!) { View.VISIBLE } else { View.GONE }
-
-            povSwitch.text = if (mainActivityViewModel.weAreDefending.value!!) { getString(R.string.pov_switch_to_defending) } else { getString(R.string.pov_switch_to_attacking) }
-            // old
-            // typeSelectionPrompt.text = if (weAreDefending) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
-            // new
-            mainActivityViewModel.promptText.value = if (mainActivityViewModel.weAreDefending.value!!) {resources.getString(R.string.defending_prompt) } else { resources.getString(R.string.attacking_prompt) }
-
 
             // QoL: transfers the value from the to-be-invisible spinner to the to-be-visible one
             if (mainActivityViewModel.weAreDefending.value!!) {
@@ -143,14 +127,12 @@ class MainActivity : AppCompatActivity() {
             }
             mainActivityViewModel.refreshTheData()
             recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
-
         }
 
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 atkSpinnerIndex = p2
                 mainActivityViewModel.attackingType.value = Types.values()[atkSpinnerIndex].type
-                makeGridAndSwitchesVisibleIfATypeIsSelected()
                 mainActivityViewModel.refreshTheData()
                 recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
 
@@ -162,7 +144,6 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner1Index = p2
                 mainActivityViewModel.defendingType1.value = Types.values()[defSpinner1Index].type
-                makeGridAndSwitchesVisibleIfATypeIsSelected()
 
                 // TODO(Work on doesNotExistDisclaimer rework after liveData is worked out)
                 /*doesNotExistDisclaimer.visibility = if (mutableListOf(
@@ -180,10 +161,8 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 defSpinner2Index = p2
                 mainActivityViewModel.defendingType2.value = Types.values()[defSpinner2Index].type
-                makeGridAndSwitchesVisibleIfATypeIsSelected()
                 mainActivityViewModel.refreshTheData()
                 recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
-
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -191,11 +170,8 @@ class MainActivity : AppCompatActivity() {
         gameSwitchText.setOnClickListener { gameSwitch.toggle() } // toggles gameSwitch when text is clicked
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.pogoTime.value = onSwitch
-            gameSwitchText.text = if (mainActivityViewModel.pogoTime.value!!) {
-                resources.getString(R.string.pogo) } else { resources.getString(R.string.mainGame)}
             mainActivityViewModel.refreshTheData()
             recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
-
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
@@ -219,24 +195,6 @@ class MainActivity : AppCompatActivity() {
     /////////////////////////////////     End of onCreate     ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    private fun makeGridAndSwitchesVisibleIfATypeIsSelected() {
-        val type1: MutableLiveData<String> = if (mainActivityViewModel.weAreDefending.value!!) { mainActivityViewModel.defendingType1 } else { mainActivityViewModel.attackingType }
-        val type2: MutableLiveData<String> = if (mainActivityViewModel.weAreDefending.value!!) { mainActivityViewModel.defendingType2 } else { MutableLiveData("[none]") }
-                if ((type1.value == "(choose)" || type1.value == Types.NoType.type) &&
-                    (type2.value == "[none]" || type2.value == Types.NoType.type)) {
-                    typeTableRecyclerView.visibility = View.INVISIBLE
-                    gameSwitchText.visibility = View.INVISIBLE
-                    gameSwitch.visibility = View.INVISIBLE
-                    iceJiceSwitch.visibility = View.INVISIBLE
-                } else {
-                    typeTableRecyclerView.visibility = View.VISIBLE
-                    gameSwitchText.visibility = View.VISIBLE
-                    gameSwitch.visibility = View.VISIBLE
-                    iceJiceSwitch.visibility = View.VISIBLE
-                }
-    }
-
-    // UI
     private fun setupSpinner(spinnerOptions: Array<String>, spinner: Spinner) {
         // Assigning the povSpinner options to an adapter value, which is then assigned to the povSpinner
         val spinnerAdapter =
@@ -245,7 +203,6 @@ class MainActivity : AppCompatActivity() {
         spinner.setSelection(0,false)
     }
 
-    // BL, to be implemented later when LiveData is a thing
     /*private fun justChangeJiceInGridView() {
         arrayListForTypeGrid?.get(11)?.iconsInGridView = if (mainActivityViewModel.jiceTime) { R.drawable.jice_icon } else { R.drawable.ice_icon }
         arrayListForTypeGrid?.let { TypeGridAdapter(it).submitList(arrayListForTypeGrid) }
