@@ -58,25 +58,17 @@ class MainActivity : AppCompatActivity() {
         val defendingType1Spinner = binding.type1Spinner
         val defendingType2Spinner = binding.type2Spinner
         val attackingTypeSpinner = binding.attackingTypeSpinner
-        val typeSelectionPrompt = binding.secondPrompt
         val doesNotExistDisclaimer = binding.doesNotExistDisclaimer
-        val attackingTypeSpinnerAndLabel = binding.attackingTypeSpinnerAndLabel
-        val defendingType1SpinnerAndLabel = binding.defendingType1SpinnerAndLabel
-        val defendingType2SpinnerAndLabel = binding.defendingType2SpinnerAndLabel
         val povSwitch = binding.povSwitch
         gameSwitch = binding.gameSwitch
         iceJiceSwitch = binding.iceJiceSwitch
         typeTableRecyclerView = binding.typeTableRecyclerView
         val infoButton = binding.infoButton
 
-        // UI
         // Populates spinner options
-        val attackingSpinnerTypeOptions = resources.getStringArray(R.array.spinner_type_options_1)
-        setupSpinner(attackingSpinnerTypeOptions, attackingTypeSpinner)
-        val defendingSpinnerType1Options = resources.getStringArray(R.array.spinner_type_options_1)
-        setupSpinner(defendingSpinnerType1Options, defendingType1Spinner)
-        val defendingSpinnerType2Options = resources.getStringArray(R.array.spinner_type_options_2)
-        setupSpinner(defendingSpinnerType2Options, defendingType2Spinner)
+        mainActivityViewModel.attackingSpinnerOptions.value?.let { setupSpinner(it, attackingTypeSpinner) }
+        mainActivityViewModel.defendingSpinner1Options.value?.let { setupSpinner(it, defendingType1Spinner) }
+        mainActivityViewModel.defendingSpinner2Options.value?.let { setupSpinner(it, defendingType2Spinner) }
 
         // BL
         mainActivityViewModel.fetchJson() //gets .json file
@@ -170,17 +162,13 @@ class MainActivity : AppCompatActivity() {
         gameSwitchText.setOnClickListener { gameSwitch.toggle() } // toggles gameSwitch when text is clicked
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.pogoTime.value = onSwitch
+
             mainActivityViewModel.refreshTheData()
             recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.jiceTime.value = onSwitch
-
-            // Adjusts the text in the spinners
-            attackingSpinnerTypeOptions[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
-            defendingSpinnerType1Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
-            defendingSpinnerType2Options[12] = if (onSwitch) { getString(R.string.jice ) } else { getString(R.string.ice) }
 
             mainActivityViewModel.refreshTheData()
             recyclerView?.adapter = mainActivityViewModel.typeGridAdapter

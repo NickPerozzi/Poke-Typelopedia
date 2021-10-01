@@ -33,6 +33,38 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     var defendingType1: MutableLiveData<String> = MutableLiveData("(choose)")
     var defendingType2: MutableLiveData<String> = MutableLiveData("[none]")
 
+    var attackingSpinnerOptions = jiceTime.map { jiceTime ->
+        val returnedArray: Array<String>
+        if (!jiceTime) {
+            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+        } else {
+            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+            returnedArray[12] = resources.getString(R.string.jice)
+        }
+        returnedArray
+    }
+    // Identical to attackingSpinnerOptions. Could delete
+    var defendingSpinner1Options = jiceTime.map { jiceTime ->
+        val returnedArray: Array<String>
+        if (!jiceTime) {
+            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+        } else {
+            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+            returnedArray[12] = resources.getString(R.string.jice)
+        }
+        returnedArray
+    }
+    var defendingSpinner2Options = jiceTime.map { jiceTime ->
+        val returnedArray: Array<String>
+        if (!jiceTime) {
+            returnedArray = resources.getStringArray(R.array.spinner_type_options_2)
+        } else {
+            returnedArray = resources.getStringArray(R.array.spinner_type_options_2)
+            returnedArray[12] = resources.getString(R.string.jice)
+        }
+        returnedArray
+    }
+
     var povSwitchText = weAreDefending.map { weAreDefending ->
         if (weAreDefending) {
             resources.getString(R.string.pov_switch_to_defending)
