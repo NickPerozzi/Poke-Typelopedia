@@ -1,7 +1,7 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -9,10 +9,8 @@ import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 
 
 class MainActivityViewModel(private val resources: Resources) : ViewModel() {
@@ -29,9 +27,23 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     var pogoTime: MutableLiveData<Boolean> = MutableLiveData(false)
     var weAreDefending: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    var attackingType: MutableLiveData<String> = MutableLiveData("(choose)")
-    var defendingType1: MutableLiveData<String> = MutableLiveData("(choose)")
-    var defendingType2: MutableLiveData<String> = MutableLiveData("[none]")
+    var attackType: MutableLiveData<String> = MutableLiveData("(choose)")
+    var defendType1: MutableLiveData<String> = MutableLiveData("(choose)")
+    var defendType2: MutableLiveData<String> = MutableLiveData("[none]")
+
+    var atkIndex: MutableLiveData<Int> = MutableLiveData(0)
+    var def1Index: MutableLiveData<Int> = MutableLiveData(0)
+    var def2Index: MutableLiveData<Int> = MutableLiveData(0)
+
+    var attackTypex = atkIndex.map {atkIndex -> Types.values()[atkIndex].type }
+    var defendType1x = def1Index.map {def1Index -> Types.values()[def1Index].type }
+    var defendType2x = def2Index.map {def2Index -> Types.values()[def2Index].type }
+
+    var backgroundColor = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+        Configuration.UI_MODE_NIGHT_YES -> { R.drawable.main_header_selector_night }
+        Configuration.UI_MODE_NIGHT_NO -> { R.drawable.main_header_selector }
+        else -> { R.drawable.main_header_selector }
+    }
 
     var attackingSpinnerOptions = jiceTime.map { jiceTime ->
         val returnedArray: Array<String>
@@ -97,9 +109,9 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
-    var tableHeaderVisibility = attackingType.switchMap { atk ->
-        defendingType1.switchMap { def1 ->
-            defendingType2.switchMap { def2 ->
+    var tableHeaderVisibility = attackType.switchMap { atk ->
+        defendType1.switchMap { def1 ->
+            defendType2.switchMap { def2 ->
                 weAreDefending.map { weAreDefending ->
                     when (weAreDefending) {
                         true -> {
@@ -124,9 +136,9 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
-    fun tableHeaderText() = attackingType.switchMap { atk ->
-        defendingType1.switchMap { def1 ->
-            defendingType2.switchMap { def2 ->
+    fun tableHeaderText() = attackType.switchMap { atk ->
+        defendType1.switchMap { def1 ->
+            defendType2.switchMap { def2 ->
                 jiceTime.switchMap { jiceTime ->
                     weAreDefending.map { weAreDefending ->
                         val type1 = if (weAreDefending) {
@@ -203,10 +215,10 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
-    // identical to tableHeaderVisibility. These do not intend to change. Can I delete?
-    var gameSwitchVisibility = attackingType.switchMap { atk ->
-        defendingType1.switchMap { def1 ->
-            defendingType2.switchMap { def2 ->
+    // identical to tableHeaderVisibility. Could delete
+    var gameSwitchVisibility = attackType.switchMap { atk ->
+        defendType1.switchMap { def1 ->
+            defendType2.switchMap { def2 ->
                 weAreDefending.map { weAreDefending ->
                     when (weAreDefending) {
                         true -> {
@@ -231,11 +243,16 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
             resources.getString(R.string.mainGame)
         }
     }
+    var gameSwitchTextColor = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+        Configuration.UI_MODE_NIGHT_YES -> { R.color.white }
+        Configuration.UI_MODE_NIGHT_NO -> { R.color.black }
+        else -> { R.drawable.main_header_selector }
+    }
 
-    // identical to tableHeaderVisibility. These do not intend to change. Can I delete?
-    var jiceSwitchVisibility = attackingType.switchMap { atk ->
-        defendingType1.switchMap { def1 ->
-            defendingType2.switchMap { def2 ->
+    // identical to tableHeaderVisibility. Could delete
+    var jiceSwitchVisibility = attackType.switchMap { atk ->
+        defendType1.switchMap { def1 ->
+            defendType2.switchMap { def2 ->
                 weAreDefending.map { weAreDefending ->
                     when (weAreDefending) {
                         true -> {
@@ -251,10 +268,10 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
-    // identical to tableHeaderVisibility. These do not intend to change. Can I delete?
-    var recyclerViewVisibility = attackingType.switchMap { atk ->
-        defendingType1.switchMap { def1 ->
-            defendingType2.switchMap { def2 ->
+    // identical to tableHeaderVisibility. Could delete
+    var recyclerViewVisibility = attackType.switchMap { atk ->
+        defendType1.switchMap { def1 ->
+            defendType2.switchMap { def2 ->
                 weAreDefending.map { weAreDefending ->
                     when (weAreDefending) {
                         true -> {
@@ -278,8 +295,8 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
-    var doesNotExistVisibility = defendingType1.switchMap { def1 ->
-        defendingType2.map { def2 ->
+    var doesNotExistVisibility = defendType1.switchMap { def1 ->
+        defendType2.map { def2 ->
             val currentTypingPair: List<String> = listOf(def1, def2)
             if (currentTypingPair in listOfNonexistentTypeCombinations) {
                 View.VISIBLE
@@ -584,8 +601,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     fun setDataInTypeGridList(
         iconMutableList: MutableList<Int>, effectivenessMutableList: MutableList<String>,
         backgroundColorList: MutableList<Int>, textColorList: MutableList<Int>
-    ):
-            ArrayList<TypeGrid> {
+    ): ArrayList<TypeGrid> {
 
         val items: ArrayList<TypeGrid> = ArrayList()
         for (i in 0 until 18) {
@@ -642,21 +658,21 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
             false -> {
                 // if attacking
                 listOfInteractions =
-                    attackingEffectivenessCalculator(attackingType.value!!)
+                    attackingEffectivenessCalculator(attackType.value!!)
             }
             true -> {
                 listOfInteractions =
                         // if defending with type 1 only
-                    if (defendingType2.value == "[none]" || defendingType2.value == Types.NoType.type || defendingType1 == defendingType2) {
-                        defendingEffectivenessCalculator(defendingType1.value!!)
+                    if (defendType2.value == "[none]" || defendType2.value == Types.NoType.type || defendType1 == defendType2) {
+                        defendingEffectivenessCalculator(defendType1.value!!)
                         // if defending with type 2 only
-                    } else if (defendingType1.value == "(choose)" || defendingType1.value == Types.NoType.type) {
-                        defendingEffectivenessCalculator(defendingType2.value!!)
+                    } else if (defendType1.value == "(choose)" || defendType1.value == Types.NoType.type) {
+                        defendingEffectivenessCalculator(defendType2.value!!)
                         // if defending with both type1 and type 2
                     } else {
                         defendingWithTwoTypesCalculator(
-                            defendingType1.value!!,
-                            defendingType2.value!!
+                            defendType1.value!!,
+                            defendType2.value!!
                         )
                     }
             }
