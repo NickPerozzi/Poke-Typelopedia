@@ -27,17 +27,21 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     var pogoTime: MutableLiveData<Boolean> = MutableLiveData(false)
     var weAreDefending: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    var attackType: MutableLiveData<String> = MutableLiveData("(choose)")
-    var defendType1: MutableLiveData<String> = MutableLiveData("(choose)")
-    var defendType2: MutableLiveData<String> = MutableLiveData("[none]")
-
     var atkIndex: MutableLiveData<Int> = MutableLiveData(0)
     var def1Index: MutableLiveData<Int> = MutableLiveData(0)
     var def2Index: MutableLiveData<Int> = MutableLiveData(0)
 
-    var attackTypex = atkIndex.map {atkIndex -> Types.values()[atkIndex].type }
-    var defendType1x = def1Index.map {def1Index -> Types.values()[def1Index].type }
-    var defendType2x = def2Index.map {def2Index -> Types.values()[def2Index].type }
+    var attackType: MutableLiveData<String> =
+        atkIndex.switchMap { atkIndex ->
+            weAreDefending.map {
+
+                Types.values()[atkIndex].type
+            }
+        }as MutableLiveData<String>
+    var defendType1: MutableLiveData<String> =
+        def1Index.map { def1Index -> Types.values()[def1Index].type } as MutableLiveData<String>
+    var defendType2: MutableLiveData<String> =
+        def2Index.map { def2Index -> Types.values()[def2Index].type } as MutableLiveData<String>
 
     var backgroundColor = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
         Configuration.UI_MODE_NIGHT_YES -> { R.drawable.main_header_selector_night }
@@ -243,11 +247,13 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
             resources.getString(R.string.mainGame)
         }
     }
-    var gameSwitchTextColor = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-        Configuration.UI_MODE_NIGHT_YES -> { R.color.white }
-        Configuration.UI_MODE_NIGHT_NO -> { R.color.black }
-        else -> { R.drawable.main_header_selector }
-    }
+
+    var gameSwitchTextColor =
+        when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> { R.color.white }
+            Configuration.UI_MODE_NIGHT_NO -> { R.color.black }
+            else -> { R.color.white }
+        }
 
     // identical to tableHeaderVisibility. Could delete
     var jiceSwitchVisibility = attackType.switchMap { atk ->
@@ -327,7 +333,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         R.drawable.water_icon
     )
 
-    var listOfInteractions: MutableList<Double> = onesDouble()
+    private var listOfInteractions: MutableList<Double> = onesDouble()
 
     //data
     private val listOfNonexistentTypeCombinations: List<List<String>> = listOf(

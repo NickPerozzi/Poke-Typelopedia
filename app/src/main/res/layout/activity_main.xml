@@ -58,7 +58,7 @@
                 android:textStyle="italic"
                 />
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/povSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -201,7 +201,7 @@
             android:orientation="horizontal"
             >
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/gameSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -209,7 +209,7 @@
                 android:paddingStart="10dp"
                 android:paddingLeft="10dp"
                 android:textSize="20sp"
-                android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
+                android:visibility="@{mainActivityViewModel.gameSwitchVisibility}"
                 tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml"
                 />
 
@@ -221,13 +221,13 @@
                 android:paddingStart="10dp"
                 android:paddingLeft="10dp"
                 android:text="@{mainActivityViewModel.gameSwitchText}"
-                android:textColor="@{mainActivityViewModel.gameSwitchTextColor"
+                android:textColor="@{mainActivityViewModel.gameSwitchTextColor}"
                 android:textSize="20sp"
-                android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
+                android:visibility="@{mainActivityViewModel.gameSwitchVisibility}"
                 tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml"
                 />
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/iceJiceSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -237,7 +237,7 @@
                 android:text="@{mainActivityViewModel.jiceSwitchText}"
                 android:textAlignment="textEnd"
                 android:textSize="20sp"
-                android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
+                android:visibility="@{mainActivityViewModel.jiceSwitchVisibility}"
                 tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml"
                 />
 
@@ -261,7 +261,7 @@
             android:layout_height="match_parent"
             android:padding="12dp"
             android:paddingBottom="30dp"
-            android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
+            android:visibility="@{mainActivityViewModel.recyclerViewVisibility}"
             />
 
         <!--Type table-->
