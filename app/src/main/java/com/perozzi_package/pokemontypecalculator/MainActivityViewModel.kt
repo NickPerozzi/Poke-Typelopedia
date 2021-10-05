@@ -3,20 +3,22 @@ package com.perozzi_package.pokemontypecalculator
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
+import android.os.Build
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 
 
 class MainActivityViewModel(private val resources: Resources) : ViewModel() {
 
-    // For the grid
-
+    // For the recyclerView
     var gridLayoutManager: GridLayoutManager? = null
     var arrayListForTypeGrid: ArrayList<TypeGrid> ? = null
     var typeGridAdapter: TypeGridAdapter ? = null
@@ -31,51 +33,44 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
     var def1Index: MutableLiveData<Int> = MutableLiveData(0)
     var def2Index: MutableLiveData<Int> = MutableLiveData(0)
 
-    var attackType: MutableLiveData<String> =
-        atkIndex.switchMap { atkIndex ->
+    var attackType: MutableLiveData<String> = atkIndex.switchMap { atkIndex ->
             weAreDefending.map {
-
                 Types.values()[atkIndex].type
             }
-        }as MutableLiveData<String>
-    var defendType1: MutableLiveData<String> =
-        def1Index.map { def1Index -> Types.values()[def1Index].type } as MutableLiveData<String>
-    var defendType2: MutableLiveData<String> =
-        def2Index.map { def2Index -> Types.values()[def2Index].type } as MutableLiveData<String>
+        } as MutableLiveData<String>
+    var defendType1: MutableLiveData<String> = def1Index.map { def1Index ->
+            Types.values()[def1Index].type
+        } as MutableLiveData<String>
 
-    var backgroundColor = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-        Configuration.UI_MODE_NIGHT_YES -> { R.drawable.main_header_selector_night }
-        Configuration.UI_MODE_NIGHT_NO -> { R.drawable.main_header_selector }
-        else -> { R.drawable.main_header_selector }
+    var defendType2: MutableLiveData<String> = def2Index.map { def2Index ->
+            Types.values()[def2Index].type
+        } as MutableLiveData<String>
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    var backgroundColor: Drawable? = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+        Configuration.UI_MODE_NIGHT_YES -> { resources.getDrawable(R.drawable.main_header_selector_night, null) }
+        Configuration.UI_MODE_NIGHT_NO -> { resources.getDrawable(R.drawable.main_header_selector,null) }
+        else -> { resources.getDrawable(R.drawable.main_header_selector,null) }
     }
 
     var attackingSpinnerOptions = jiceTime.map { jiceTime ->
-        val returnedArray: Array<String>
-        if (!jiceTime) {
-            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
-        } else {
-            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+        val returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+        if (jiceTime) {
             returnedArray[12] = resources.getString(R.string.jice)
         }
         returnedArray
     }
-    // Identical to attackingSpinnerOptions. Could delete
     var defendingSpinner1Options = jiceTime.map { jiceTime ->
-        val returnedArray: Array<String>
-        if (!jiceTime) {
-            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
-        } else {
-            returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+        val returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
+        if (jiceTime) {
             returnedArray[12] = resources.getString(R.string.jice)
         }
         returnedArray
     }
     var defendingSpinner2Options = jiceTime.map { jiceTime ->
-        val returnedArray: Array<String>
-        if (!jiceTime) {
-            returnedArray = resources.getStringArray(R.array.spinner_type_options_2)
-        } else {
-            returnedArray = resources.getStringArray(R.array.spinner_type_options_2)
+        val returnedArray = resources.getStringArray(R.array.spinner_type_options_2)
+        if (jiceTime) {
             returnedArray[12] = resources.getString(R.string.jice)
         }
         returnedArray
@@ -155,8 +150,8 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
                         } else {
                             "[none]"
                         }
-                        var type1Displayed = type1.toString()
-                        var type2Displayed = type2.toString()
+                        var type1Displayed = type1
+                        var type2Displayed = type2
                         if ((type1Displayed == "Ice" || type1Displayed == "Jice")) {
                             type1Displayed = if (jiceTime) {
                                 "Jice"
@@ -179,31 +174,31 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
                                         "_____",
                                         type1Displayed
                                     )
-                                }
-                                if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
-                                    resources.getString(
-                                        R.string.table_header_one_type,
-                                        "_____",
-                                        type2Displayed
-                                    )
-                                }
-                                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
-                                    resources.getString(
-                                        R.string.table_header_two_types,
-                                        "_____",
-                                        type1Displayed,
-                                        type2Displayed
-                                    )
-                                }
-                                if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
-                                    resources.getString(
-                                        R.string.table_header_one_type,
-                                        "_____",
-                                        type1Displayed
-                                    )
-                                } else {
-                                    "Initializer. If you see this then you have encountered a bug. Neat!"
-                                }
+                                } else
+                                    if ((type1Displayed == "(choose)" || type1Displayed == Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type)) {
+                                        resources.getString(
+                                            R.string.table_header_one_type,
+                                            "_____",
+                                            type2Displayed
+                                        )
+                                    } else
+                                        if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && (type2Displayed != "[none]" && type2Displayed != Types.NoType.type) && type1Displayed != type2Displayed) {
+                                            resources.getString(
+                                                R.string.table_header_two_types,
+                                                "_____",
+                                                type1Displayed,
+                                                type2Displayed
+                                            )
+                                        } else
+                                            if ((type1Displayed != "(choose)" && type1Displayed != Types.NoType.type) && type1Displayed == type2Displayed) {
+                                                resources.getString(
+                                                    R.string.table_header_one_type,
+                                                    "_____",
+                                                    type1Displayed
+                                                )
+                                            } else {
+                                                "Wow! If you're seeing this, you have encountered a bug. Neat!"
+                                            }
                             }
                             false -> {
                                 resources.getString(
@@ -248,10 +243,11 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     var gameSwitchTextColor =
         when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> { R.color.white }
-            Configuration.UI_MODE_NIGHT_NO -> { R.color.black }
+            Configuration.UI_MODE_NIGHT_YES -> { resources.getColor(R.color.white,null) }
+            Configuration.UI_MODE_NIGHT_NO -> { resources.getColor(R.color.black, null) }
             else -> { R.color.white }
         }
 
@@ -301,6 +297,10 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
+//    fun setDoesNotExistVisibility(doesNotExistVisibility: Int) {
+//        this.doesNotExistVisibility.setValue
+//    }
+
     var doesNotExistVisibility = defendType1.switchMap { def1 ->
         defendType2.map { def2 ->
             val currentTypingPair: List<String> = listOf(def1, def2)
@@ -310,7 +310,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
                 View.INVISIBLE
             }
         }
-    }
+    } as MutableLiveData<Int>
 
     var arrayOfTypeIcons: MutableList<Int> = mutableListOf(
         R.drawable.bug_icon,
@@ -642,6 +642,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return items
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun interactionsToGridView(interactionsList: MutableList<Double>) {
         val effectivenessList = interactionsToEffectiveness(interactionsList)
         val displayedListOfInteractions =
@@ -659,6 +660,7 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun refreshTheData() {
         when (weAreDefending.value) {
             false -> {
@@ -686,31 +688,31 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         interactionsToGridView(listOfInteractions)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
-                listOfCellTextColors.add(R.color.white)
-                // listOfCellTextColors.add(resources.getColor(R.color.white))
+                listOfCellTextColors.add(resources.getColor(R.color.white,null))
             } else {
-                listOfCellTextColors.add(R.color.black)
-                // listOfCellTextColors.add(resources.getColor(R.color.black))
+                listOfCellTextColors.add(resources.getColor(R.color.black,null))
             }
         }
         return listOfCellTextColors
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             when (mutableList[i]) {
-                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x1color)
-                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x2color)
-                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x4color)
-                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x_5color)
-                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(R.color.x_25color)
-                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(R.color.x0color)
-                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(R.color.UDNEcolor)
+                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x1color,null))
+                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x2color,null))
+                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x4color,null))
+                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_5color,null))
+                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_25color,null))
+                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x0color,null))
+                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.UDNEcolor,null))
             }
         }
         return listOfCellBackgroundColors
