@@ -1,22 +1,22 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import android.os.Build
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
 import android.view.View
-import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 
 
-class MainActivityViewModel(private val resources: Resources) : ViewModel() {
+class MainActivityViewModel(private val resources: Resources, private val app: Application) : ViewModel() {
 
     // For the recyclerView
     var gridLayoutManager: GridLayoutManager? = null
@@ -46,33 +46,37 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
             Types.values()[def2Index].type
         } as MutableLiveData<String>
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     var backgroundColor: Drawable? = when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-        Configuration.UI_MODE_NIGHT_YES -> { resources.getDrawable(R.drawable.main_header_selector_night, null) }
-        Configuration.UI_MODE_NIGHT_NO -> { resources.getDrawable(R.drawable.main_header_selector,null) }
-        else -> { resources.getDrawable(R.drawable.main_header_selector,null) }
+        Configuration.UI_MODE_NIGHT_YES -> ContextCompat.getDrawable(app, R.drawable.main_header_selector_night)
+        Configuration.UI_MODE_NIGHT_NO -> ContextCompat.getDrawable(app, R.drawable.main_header_selector)
+        else -> ContextCompat.getDrawable(app, R.drawable.main_header_selector)
     }
 
-    var attackingSpinnerOptions = jiceTime.map { jiceTime ->
+    var attackingSpinnerOptions = jiceTime.map {
         val returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
-        if (jiceTime) {
+        // Can't change the string in the spinners without resetting the spinner value, which
+        // would be annoying at best for the user
+        /*if (jiceTime) {
             returnedArray[12] = resources.getString(R.string.jice)
-        }
+        }*/
         returnedArray
     }
-    var defendingSpinner1Options = jiceTime.map { jiceTime ->
+    var defendingSpinner1Options = jiceTime.map {
         val returnedArray = resources.getStringArray(R.array.spinner_type_options_1)
-        if (jiceTime) {
+        // Can't change the string in the spinners without resetting the spinner value, which
+        // would be annoying at best for the user
+        /*if (jiceTime) {
             returnedArray[12] = resources.getString(R.string.jice)
-        }
+        }*/
         returnedArray
     }
-    var defendingSpinner2Options = jiceTime.map { jiceTime ->
+    var defendingSpinner2Options = jiceTime.map {
         val returnedArray = resources.getStringArray(R.array.spinner_type_options_2)
-        if (jiceTime) {
+        // Can't change the string in the spinners without resetting the spinner value, which
+        // would be annoying at best for the user
+        /*if (jiceTime) {
             returnedArray[12] = resources.getString(R.string.jice)
-        }
+        }*/
         returnedArray
     }
 
@@ -243,12 +247,12 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     var gameSwitchTextColor =
         when (this.resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> { resources.getColor(R.color.white,null) }
-            Configuration.UI_MODE_NIGHT_NO -> { resources.getColor(R.color.black, null) }
-            else -> { R.color.white }
+            Configuration.UI_MODE_NIGHT_YES -> ContextCompat.getColor(app, R.color.white)
+            // Configuration.UI_MODE_NIGHT_YES -> { resources.getColor(R.color.white) }
+            Configuration.UI_MODE_NIGHT_NO -> ContextCompat.getColor(app, R.color.black)
+            else -> ContextCompat.getColor(app, R.color.black)
         }
 
     // identical to tableHeaderVisibility. Could delete
@@ -642,7 +646,6 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         return items
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun interactionsToGridView(interactionsList: MutableList<Double>) {
         val effectivenessList = interactionsToEffectiveness(interactionsList)
         val displayedListOfInteractions =
@@ -660,7 +663,6 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         typeGridAdapter = TypeGridAdapter(arrayListForTypeGrid!!)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun refreshTheData() {
         when (weAreDefending.value) {
             false -> {
@@ -688,31 +690,29 @@ class MainActivityViewModel(private val resources: Resources) : ViewModel() {
         interactionsToGridView(listOfInteractions)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun effectivenessToCellTextColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellTextColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             if ((mutableList[i] == Effectiveness.DOES_NOT_EFFECT.impact) || (mutableList[i] == Effectiveness.ULTRA_DOES_NOT_EFFECT.impact)) {
-                listOfCellTextColors.add(resources.getColor(R.color.white,null))
+                listOfCellTextColors.add(ContextCompat.getColor(app, R.color.white))
             } else {
-                listOfCellTextColors.add(resources.getColor(R.color.black,null))
+                listOfCellTextColors.add(ContextCompat.getColor(app, R.color.black))
             }
         }
         return listOfCellTextColors
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun effectivenessToCellBackgroundColors(mutableList: MutableList<String>): MutableList<Int> {
         val listOfCellBackgroundColors: MutableList<Int> = mutableListOf()
         for (i in 0 until 18) {
             when (mutableList[i]) {
-                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x1color,null))
-                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x2color,null))
-                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x4color,null))
-                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_5color,null))
-                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x_25color,null))
-                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.x0color,null))
-                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(resources.getColor(R.color.UDNEcolor,null))
+                Effectiveness.EFFECTIVE.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.x1color))
+                Effectiveness.SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.x2color))
+                Effectiveness.ULTRA_SUPER_EFFECTIVE.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.x4color))
+                Effectiveness.NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.x_5color))
+                Effectiveness.ULTRA_NOT_VERY_EFFECTIVE.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.x_25color))
+                Effectiveness.DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.x0color))
+                Effectiveness.ULTRA_DOES_NOT_EFFECT.impact -> listOfCellBackgroundColors.add(ContextCompat.getColor(app, R.color.UDNEcolor))
             }
         }
         return listOfCellBackgroundColors
