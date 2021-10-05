@@ -1,22 +1,19 @@
 package com.perozzi_package.pokemontypecalculator
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
-import okhttp3.internal.wait
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mainActivityViewModel = MainActivityViewModel(resources)
+        val mainActivityViewModel = MainActivityViewModel(resources,application)
         supportActionBar?.hide() // Hides top bar
 
         // Bindings
@@ -164,12 +161,6 @@ class MainActivity : AppCompatActivity() {
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.jiceTime.value = onSwitch
-            if (onSwitch) {
-                if (!mainActivityViewModel.weAreDefending.value!!) {
-                    attackingTypeSpinner.setSelection(mainActivityViewModel.atkIndex.value!!)
-                }
-
-            }
 
             mainActivityViewModel.refreshTheData()
             recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
