@@ -34,6 +34,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        dataBinding true
     }
 
     packagingOptions {
@@ -58,6 +59,7 @@ dependencies {
     //Lifecycle components and ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
+    implementation 'com.android.support:support-annotations:28.0.0'
 
 
     testImplementation 'junit:junit:4.+'
