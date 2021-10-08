@@ -66,7 +66,6 @@
                 android:text="@{mainActivityViewModel.povSwitchText}"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                tools:ignore="UseSwitchCompatOrMaterialXml"
                 />
 
         </LinearLayout>
@@ -192,45 +191,49 @@
             android:textSize="14sp"
             android:textStyle="italic"
             android:visibility="@{mainActivityViewModel.doesNotExistVisibility}"
-            tools:ignore="RtlCompat"
-            />
+            tools:ignore="RtlCompat" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/gameSwitch"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:paddingStart="10dp"
-                android:paddingLeft="10dp"
-                android:textSize="20sp"
-                android:visibility="@{mainActivityViewModel.gameSwitchVisibility}"
-                tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml"
-                />
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/gameSwitchText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textAlignment="center"
-                android:paddingStart="10dp"
-                android:paddingLeft="10dp"
-                android:text="@{mainActivityViewModel.gameSwitchText}"
-                android:textColor="@{mainActivityViewModel.gameSwitchTextColor}"
-                android:textSize="20sp"
-                android:visibility="@{mainActivityViewModel.gameSwitchVisibility}"
-                tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml"
-                />
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/gameSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:textSize="20sp"
+                    android:visibility="@{mainActivityViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+                    tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+                <TextView
+                    android:id="@+id/gameSwitchText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:text="@{mainActivityViewModel.gameSwitchText}"
+                    android:textAlignment="center"
+                    android:textColor="@{mainActivityViewModel.gameSwitchTextColor}"
+                    android:textSize="20sp"
+                    android:visibility="@{mainActivityViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+                    tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+            </LinearLayout>
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/iceJiceSwitch"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:paddingEnd="10dp"
@@ -238,7 +241,8 @@
                 android:text="@{mainActivityViewModel.jiceSwitchText}"
                 android:textAlignment="textEnd"
                 android:textSize="20sp"
-                android:visibility="@{mainActivityViewModel.jiceSwitchVisibility}"
+                android:visibility="@{mainActivityViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+                android:layout_weight="1"
                 tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml"
                 />
 
@@ -252,7 +256,7 @@
             android:padding="8sp"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:visibility="@{mainActivityViewModel.tableHeaderVisibility}"
+            android:visibility="@{mainActivityViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
             android:text="@{mainActivityViewModel.tableHeaderText}"
             />
 
@@ -262,7 +266,7 @@
             android:layout_height="match_parent"
             android:padding="12dp"
             android:paddingBottom="30dp"
-            android:visibility="@{mainActivityViewModel.recyclerViewVisibility}"
+            android:visibility="@{mainActivityViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
             />
 
         <!--Type table-->

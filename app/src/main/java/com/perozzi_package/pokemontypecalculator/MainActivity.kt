@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.perozzi_package.pokemontypecalculator.databinding.ActivityMainBinding
 
@@ -20,25 +18,26 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
         binding.mainActivityViewModel = mainActivityViewModel
+
         setContentView(binding.root)
-        val clickableGameSwitchText = binding.gameSwitchText
-        val attackingTypeSpinner = binding.attackingTypeSpinner
-        attackingTypeSpinner.setSelection(0)
-        mainActivityViewModel.atkIndex.value = 0
-        val defendingType1Spinner = binding.type1Spinner
-        defendingType1Spinner.setSelection(0)
-        mainActivityViewModel.def1Index.value = 0
-        val defendingType2Spinner = binding.type2Spinner
-        defendingType2Spinner.setSelection(0)
-        mainActivityViewModel.def2Index.value = 0
+
         val povSwitch = binding.povSwitch
         val gameSwitch = binding.gameSwitch
+        val clickableGameSwitchText = binding.gameSwitchText
         val iceJiceSwitch = binding.iceJiceSwitch
         val infoButton = binding.infoButton
 
-//        mainActivityViewModel.doesNotExistVisibility.observe(this, { isVisible ->
-//            binding.doesNotExistDisclaimer.visibility = isVisible
-//        })
+        val attackingTypeSpinner = binding.attackingTypeSpinner
+        attackingTypeSpinner.setSelection(0)
+        mainActivityViewModel.atkIndex.value = 0
+
+        val defendingType1Spinner = binding.type1Spinner
+        defendingType1Spinner.setSelection(0)
+        mainActivityViewModel.def1Index.value = 0
+
+        val defendingType2Spinner = binding.type2Spinner
+        defendingType2Spinner.setSelection(0)
+        mainActivityViewModel.def2Index.value = 0
 
         // Populates spinner options
         mainActivityViewModel.attackingSpinnerOptions.value?.let {
@@ -59,23 +58,16 @@ class MainActivity : AppCompatActivity() {
         mainActivityViewModel.defendType2.value = "[none]"
 
         // RecyclerView
-        val listOfCellBackgroundColors: MutableList<Int> = mainActivityViewModel.onesInt()
-        val listOfCellTextColors: MutableList<Int> = mainActivityViewModel.onesInt()
-        val recyclerView: RecyclerView? = findViewById(R.id.typeTableRecyclerView)
-        mainActivityViewModel.gridLayoutManager =
-            GridLayoutManager(applicationContext, 3, LinearLayoutManager.VERTICAL, false)
-        recyclerView?.layoutManager = mainActivityViewModel.gridLayoutManager
-        recyclerView?.setHasFixedSize(true)
-        mainActivityViewModel.arrayListForTypeGrid = ArrayList()
-        mainActivityViewModel.arrayListForTypeGrid = mainActivityViewModel.setDataInTypeGridList(
-            mainActivityViewModel.arrayOfTypeIcons,
-            mainActivityViewModel.onesString(),
-            listOfCellBackgroundColors,
-            listOfCellTextColors
-        )
-        mainActivityViewModel.typeGridAdapter =
-            TypeGridAdapter(mainActivityViewModel.arrayListForTypeGrid!!)
-        recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
+        val recyclerView: RecyclerView = binding.typeTableRecyclerView
+        recyclerView.layoutManager = mainActivityViewModel.gridLayoutManager
+        recyclerView.setHasFixedSize(true)
+
+        val listAdapter = TypeGridAdapter()
+        recyclerView.adapter = listAdapter
+
+        mainActivityViewModel.arrayForTypeGrid.observe(this, { data ->
+            listAdapter.submitList(data)
+        })
 
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.weAreDefending.value = onSwitch
@@ -117,17 +109,12 @@ class MainActivity : AppCompatActivity() {
                 mainActivityViewModel.defendType1.value = "[none]"
                 mainActivityViewModel.def1Index.value = 0
                 defendingType1Spinner.setSelection(0)
-
             }
-            mainActivityViewModel.refreshTheData()
-            recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
         }
 
         attackingTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 mainActivityViewModel.atkIndex.value = p2
-                mainActivityViewModel.refreshTheData()
-                recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -135,8 +122,6 @@ class MainActivity : AppCompatActivity() {
         defendingType1Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 mainActivityViewModel.def1Index.value = p2
-                mainActivityViewModel.refreshTheData()
-                recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -144,31 +129,25 @@ class MainActivity : AppCompatActivity() {
         defendingType2Spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>, p1: View, p2: Int, p3: Long) {
                 mainActivityViewModel.def2Index.value = p2
-                mainActivityViewModel.refreshTheData()
-                recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
         // This text is attached to gameSwitch; clicking on text will also toggle gameSwitch
         clickableGameSwitchText.setOnClickListener { gameSwitch.toggle() }
-
         gameSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.pogoTime.value = onSwitch
-            mainActivityViewModel.refreshTheData()
-            recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
         }
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
             mainActivityViewModel.jiceTime.value = onSwitch
-
-            mainActivityViewModel.refreshTheData()
-            recyclerView?.adapter = mainActivityViewModel.typeGridAdapter
         }
+
         infoButton.setOnClickListener {
             val intent = Intent(this, TypeTriviaActivity::class.java)
             startActivity(intent)
         }
+
     } // End of onCreate
 
     private fun setupSpinner(spinnerOptions: Array<String>, spinner: Spinner) {
