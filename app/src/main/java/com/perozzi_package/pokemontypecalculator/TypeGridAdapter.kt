@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
+class TypeGridAdapter :
     ListAdapter<TypeGrid, TypeGridAdapter.ItemHolder>(TypeGridDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
@@ -20,13 +20,11 @@ class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
         return ItemHolder(itemHolder)
     }
 
-    override fun getItemCount(): Int { return arrayListForTypeGrid.size }
-
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
-        val typeGrid:TypeGrid = arrayListForTypeGrid[position]
+        val typeGrid:TypeGrid = getItem(position)
         holder.icons.setImageResource(typeGrid.iconsInGridView!!)
-        holder.alphas.text = arrayListForTypeGrid[position].textInGridView
+        holder.alphas.text = getItem(position).textInGridView
         typeGrid.backgroundColorInGridView?.let { holder.backgrounds?.setBackgroundColor(it) }
         typeGrid.textColorInGridView?.let { holder.alphas.setTextColor(it) }
     }
@@ -40,11 +38,14 @@ class TypeGridAdapter(private var arrayListForTypeGrid: ArrayList<TypeGrid>) :
 
 class TypeGridDiffUtil : DiffUtil.ItemCallback<TypeGrid>() {
     override fun areItemsTheSame(oldItem: TypeGrid, newItem: TypeGrid): Boolean {
-        return oldItem.iconsInGridView == newItem.iconsInGridView
+        val sameBackgroundColors = oldItem.backgroundColorInGridView == newItem.backgroundColorInGridView
+        val sameTextColors = oldItem.textColorInGridView == newItem.textColorInGridView
+        val sameIcons = oldItem.iconsInGridView == newItem.iconsInGridView
+        val sameText = oldItem.textInGridView == newItem.textInGridView
+        return sameBackgroundColors && sameTextColors && sameIcons && sameText
     }
 
     override fun areContentsTheSame(oldItem: TypeGrid, newItem: TypeGrid): Boolean {
-        return oldItem.iconsInGridView == newItem.iconsInGridView
+        return oldItem == newItem
     }
-
 }
