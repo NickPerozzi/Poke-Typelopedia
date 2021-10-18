@@ -30,14 +30,14 @@ class TypeTriviaActivity : AppCompatActivity() {
         recyclerView.adapter = funFactAdapter
 
         val actionBar = supportActionBar
-        actionBar!!.title = "Some fun facts about types!"
+        actionBar!!.title = resources.getString(R.string.trivia_action_bar_title)
         actionBar.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun setDataInFunFactList(funFactTitles: Array<String>, funFactText: Array<String>):
             ArrayList<FunFact> {
         val items: ArrayList<FunFact> = ArrayList()
-        for (i in 0 until 9) {
+        for (i in 0 until 10) {
             items.add(
                 FunFact(
                     funFactTitles[i],

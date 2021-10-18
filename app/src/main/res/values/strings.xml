@@ -46,7 +46,9 @@
     <string name="icon_of_respective_types_of_pok_mon">Icon of respective types of mons</string>
     <string name="pov_switch_to_attacking">Attacking move (1 type)</string>
     <string name="pov_switch_to_defending">Defender (1 or 2 types)</string>
+    <string name="trivia_action_bar_title">Fun Facts About Types!</string>
     <string-array name="fun_fact_contents">
+        <item name="dual_type_main_game_vs_pogo">In the main game, any dual type with immunity to the attacking type would deal no damage, regardless of the second type. In PoGo, the method of calculating damage is to multiply by (8/5) for super effective, (5/8) for not very effective, and (5/8)^2 for does not effect. With dual typing, the two respective coefficients are multiplied. For examples of these differences, switch between "Main Game" and "PoGo" when defending with Steel and Fairy dual typing.</item>
         <item name="gen_i_ghost_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic types, but due to a coding error they instead did not effect them.</item>
         <item name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the defender would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</item>
         <item name="gen_i_third_error_fun_fact">In Generation I, if an attack was super effective or not very effective against one type but did no damage against another type (eg. Dig against Charizard), the defender would never receive any damage but the game will erroneously state that the attack "missed".</item>
@@ -59,6 +61,7 @@
     </string-array>
     
     <string-array name="fun_fact_titles">
+        <item>PoGo: Dual-type Interactions</item>
         <item>Gen I: Ghost-type coding error</item>
         <item>Gen I: Displayed text error 1</item>
         <item>Gen I: Displayed text error 2</item>

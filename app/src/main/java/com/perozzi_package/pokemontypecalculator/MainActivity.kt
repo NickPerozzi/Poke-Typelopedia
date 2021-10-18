@@ -18,9 +18,7 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
         binding.mainActivityViewModel = mainActivityViewModel
-
         setContentView(binding.root)
-
         val povSwitch = binding.povSwitch
         val gameSwitch = binding.gameSwitch
         val clickableGameSwitchText = binding.gameSwitchText

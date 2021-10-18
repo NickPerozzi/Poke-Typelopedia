@@ -32,6 +32,7 @@
             android:id="@+id/type_table_text"
             android:layout_width="match_parent"
             android:layout_height="24dp"
+            android:gravity="center"
             android:layout_gravity="center"
             android:layout_toEndOf="@+id/type_table_icons"
             android:layout_toRightOf="@+id/type_table_icons"
@@ -39,7 +40,8 @@
             app:autoSizeMaxTextSize="40sp"
             app:autoSizeMinTextSize="6sp"
             app:autoSizeStepGranularity="2sp"
-            app:autoSizeTextType="uniform" />
+            app:autoSizeTextType="uniform"
+            android:maxLines="1"/>
 
     </RelativeLayout>
 
