@@ -1,21 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:id="@+id/triviaCardView"
-tools:context=".FunFactFragment"
-tools:ignore="InvalidId">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-<androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/recyclerView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintRight_toRightOf="parent" />
+    <data>
+        <variable
+            name="typeCalculatorViewModel"
+            type="com.perozzi_package.pokemontypecalculator.TypeCalculatorViewModel" />
+    </data>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/triviaCardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@{typeCalculatorViewModel.backgroundColor}"
+        tools:context=".FunFactFragment"
+        tools:ignore="InvalidId">
+
+        <ImageView
+            android:id="@+id/fun_fact_text_image"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="3"
+            android:contentDescription="@string/pok_mon_type_calculator_app_logo"
+            android:padding="5dp"
+            android:paddingBottom="-5dp"
+            android:src="@drawable/fun_facts_one_line"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fun_fact_text_image" />
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="-60dp"
+            android:contentDescription="@string/info_button"
+            android:padding="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recyclerView"
+            app:srcCompat="@drawable/back_button"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

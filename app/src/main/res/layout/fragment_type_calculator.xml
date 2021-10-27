@@ -273,12 +273,13 @@
 
     <ImageView
         android:id="@+id/infoButton"
-        android:layout_width="30dp"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginTop="-30dp"
+        android:layout_marginTop="-60dp"
+        android:padding="5dp"
         android:contentDescription="@string/info_button"
-        android:src="@drawable/info_button_transparent"
+        android:src="@drawable/question_mark_icon"
         />
 
 </LinearLayout>
