@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav"
+    app:startDestination="@id/typeCalculatorFragment">
+
+    <fragment
+        android:id="@+id/typeCalculatorFragment"
+        android:name="com.perozzi_package.pokemontypecalculator.TypeCalculatorFragment"
+        android:label="fragment_type_calculator"
+        tools:layout="@layout/fragment_type_calculator" >
+
+        <action
+            android:id="@+id/action_typeCalculatorFragment_to_funFactFragment"
+            app:destination="@id/funFactFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/funFactFragment"
+        android:name="com.perozzi_package.pokemontypecalculator.FunFactFragment"
+        android:label="fragment_fun_fact"
+        tools:layout="@layout/fragment_fun_fact" />
+
+</navigation>

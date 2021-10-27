@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+<data>
+    <variable
+        name="typeCalculatorViewModel"
+        type="com.perozzi_package.pokemontypecalculator.TypeCalculatorViewModel"
+        />
+</data>
+
+<LinearLayout
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLinearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@{typeCalculatorViewModel.backgroundColor}"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context=".TypeCalculatorFragment"
+    tools:ignore="InvalidId"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <ImageView
+            android:id="@+id/app_logo"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="3"
+            android:contentDescription="@string/pok_mon_type_calculator_app_logo"
+            android:padding="5dp"
+            android:src="@drawable/p_t_one_line_cropped"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20sp"
+        android:paddingVertical="5sp"
+        >
+
+        <TextView
+            android:id="@+id/initialPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/pov"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="italic"
+            />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/povSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:text="@{typeCalculatorViewModel.povSwitchText}"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/secondPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@{typeCalculatorViewModel.promptText}"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal"
+        >
+
+        <LinearLayout
+            android:id="@+id/defendingType1SpinnerAndLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="@{typeCalculatorViewModel.defendingSpinnersVisibility}"
+            >
+
+            <TextView
+                android:id="@+id/type1Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="10sp"
+                android:text="@string/first_type"
+                android:textSize="16sp"
+                />
+
+            <Spinner
+                android:id="@+id/type1Spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10sp"
+                android:spinnerMode="dropdown"
+                android:entries="@{typeCalculatorViewModel.defendingSpinner1Options}"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/defendingType2SpinnerAndLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="@{typeCalculatorViewModel.defendingSpinnersVisibility}"
+            >
+
+            <TextView
+                android:id="@+id/type2Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="10sp"
+                android:text="@string/second_type"
+                android:textSize="16sp"
+                />
+
+            <Spinner
+                android:id="@+id/type2Spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10sp"
+                android:spinnerMode="dropdown"
+                android:entries="@{typeCalculatorViewModel.defendingSpinner2Options}"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/attackingTypeSpinnerAndLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="@{typeCalculatorViewModel.attackingSpinnerVisibility}"
+            >
+
+            <TextView
+                android:id="@+id/attackingTypeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="10sp"
+                android:text="@string/move_type"
+                android:textSize="16sp"
+                />
+
+            <Spinner
+                android:id="@+id/attackingTypeSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10sp"
+                android:spinnerMode="dropdown"
+                android:entries="@{typeCalculatorViewModel.attackingSpinnerOptions}"
+                />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/doesNotExistDisclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:text="@string/does_not_exist_disclaimer"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:visibility="@{typeCalculatorViewModel.doesNotExistVisibility}"
+        tools:ignore="RtlCompat" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/gameSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:paddingStart="10dp"
+                android:paddingLeft="10dp"
+                android:textSize="20sp"
+                android:visibility="@{typeCalculatorViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+                tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+            <TextView
+                android:id="@+id/gameSwitchText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingStart="10dp"
+                android:paddingLeft="10dp"
+                android:text="@{typeCalculatorViewModel.gameSwitchText}"
+                android:textAlignment="center"
+                android:textColor="@{typeCalculatorViewModel.gameSwitchTextColor}"
+                android:textSize="20sp"
+                android:visibility="@{typeCalculatorViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+                tools:ignore="RtlHardcoded,RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/iceJiceSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:paddingEnd="10dp"
+            android:paddingRight="10dp"
+            android:text="@{typeCalculatorViewModel.jiceSwitchText}"
+            android:textAlignment="textEnd"
+            android:textSize="20sp"
+            android:visibility="@{typeCalculatorViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+            android:layout_weight="1"
+            tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tableHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:padding="8sp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="@{typeCalculatorViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+        android:text="@{typeCalculatorViewModel.tableHeaderText}"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/typeTableRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="12dp"
+        android:paddingBottom="30dp"
+        android:visibility="@{typeCalculatorViewModel.visibilityOfTableHeaderSwitchesAndRecyclerView}"
+        />
+
+    <!--Type table-->
+
+    <ImageView
+        android:id="@+id/infoButton"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="-30dp"
+        android:contentDescription="@string/info_button"
+        android:src="@drawable/info_button_transparent"
+        />
+
+</LinearLayout>
+
+</layout>
