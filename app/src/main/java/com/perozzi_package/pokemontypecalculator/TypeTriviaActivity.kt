@@ -5,8 +5,6 @@ import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
-//TODO Activity more like fragment am I right?
 class TypeTriviaActivity : AppCompatActivity() {
 
     private var layoutManager: RecyclerView.LayoutManager? = null
