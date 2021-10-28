@@ -25,8 +25,6 @@ class FunFactFragment : Fragment() {
     // Do non graphical initializations here
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // setContentView(R.layout.activity_type_trivia)
-
         val funFactTitles: Array<String> = resources.getStringArray(R.array.fun_fact_titles)
         val funFactContents: Array<String> = resources.getStringArray(R.array.fun_fact_contents)
 
@@ -39,7 +37,6 @@ class FunFactFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         val binding = FragmentFunFactBinding.inflate(layoutInflater)
         val recyclerView = binding.recyclerView
         val backButton = binding.backButton
@@ -49,16 +46,12 @@ class FunFactFragment : Fragment() {
 
         typeCalculatorViewModel = TypeCalculatorViewModel(resources, requireActivity().application)
         binding.typeCalculatorViewModel = typeCalculatorViewModel
+
         layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = funFactAdapter
 
         (requireActivity() as AppCompatActivity).supportActionBar?.hide()
-
-        /*val actionBar = (activity as AppCompatActivity).supportActionBar
-        actionBar?.show()
-        actionBar!!.title = resources.getString(R.string.trivia_action_bar_title)
-        actionBar.setDisplayHomeAsUpEnabled(true)*/
 
         // Inflate the layout for this fragment
         return binding.root

@@ -25,10 +25,8 @@ class TypeCalculatorFragment : Fragment() , View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentTypeCalculatorBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
-
         return binding.root
     }
 
@@ -36,11 +34,10 @@ class TypeCalculatorFragment : Fragment() , View.OnClickListener {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
         (requireActivity() as AppCompatActivity).supportActionBar?.hide()
-
         typeCalculatorViewModel = TypeCalculatorViewModel(resources, requireActivity().application)
-        binding.typeCalculatorViewModel = typeCalculatorViewModel
 
         // Bindings
+        binding.typeCalculatorViewModel = typeCalculatorViewModel
         val povSwitch = binding.povSwitch
         povSwitch.isChecked = false
         val gameSwitch = binding.gameSwitch
@@ -183,6 +180,4 @@ class TypeCalculatorFragment : Fragment() , View.OnClickListener {
         spinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerOptions)
         spinner.setSelection(0, false)
     }
-
-
 }
