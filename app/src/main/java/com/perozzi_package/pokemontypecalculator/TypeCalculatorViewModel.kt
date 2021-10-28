@@ -244,17 +244,13 @@ class TypeCalculatorViewModel(private val resources: Resources, private val app:
             }
         }
 
-    var doesNotExistVisibility =
+    var typeCombinationExists =
         defendType1.switchMap { def1 ->
             defendType2.map { def2 ->
                 val currentTypingPair: List<String> = listOf(def1, def2)
-                if (currentTypingPair in listOfNonexistentTypeCombinations) {
-                    View.VISIBLE
-                } else {
-                    View.INVISIBLE
-                }
+                currentTypingPair !in listOfNonexistentTypeCombinations
             }
-        } as MutableLiveData<Int>
+        } as MutableLiveData<Boolean>
 
     private var arrayOfTypeIcons: MutableLiveData<MutableList<Int>> = jiceTime.map { jiceTime ->
         mutableListOf(

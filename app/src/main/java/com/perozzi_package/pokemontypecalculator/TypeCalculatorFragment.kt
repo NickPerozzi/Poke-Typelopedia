@@ -1,6 +1,5 @@
 package com.perozzi_package.pokemontypecalculator
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -46,7 +46,6 @@ class TypeCalculatorFragment : Fragment() , View.OnClickListener {
         val gameSwitch = binding.gameSwitch
         val clickableGameSwitchText = binding.gameSwitchText
         val iceJiceSwitch = binding.iceJiceSwitch
-        val infoButton = binding.infoButton
 
         val attackingTypeSpinner = binding.attackingTypeSpinner
         attackingTypeSpinner.setSelection(0)
@@ -88,6 +87,11 @@ class TypeCalculatorFragment : Fragment() , View.OnClickListener {
 
         typeCalculatorViewModel.arrayForTypeGrid.observe(viewLifecycleOwner, { data ->
             listAdapter.submitList(data)
+        })
+        
+        typeCalculatorViewModel.typeCombinationExists.observe(viewLifecycleOwner, {
+            if (!it) {
+                Toast.makeText(requireContext(), R.string.does_not_exist_disclaimer, Toast.LENGTH_LONG).show()}
         })
 
         povSwitch.setOnCheckedChangeListener { _, onSwitch ->
@@ -162,11 +166,6 @@ class TypeCalculatorFragment : Fragment() , View.OnClickListener {
 
         iceJiceSwitch.setOnCheckedChangeListener { _, onSwitch ->
             typeCalculatorViewModel.jiceTime.value = onSwitch
-        }
-
-        infoButton.setOnClickListener {
-            val intent = Intent(requireContext(), TypeTriviaActivity::class.java)
-            startActivity(intent)
         }
 
         binding.infoButton.setOnClickListener(this)

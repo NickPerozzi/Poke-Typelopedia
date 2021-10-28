@@ -20,12 +20,10 @@
 
         <ImageView
             android:id="@+id/fun_fact_text_image"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="3"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
             android:contentDescription="@string/pok_mon_type_calculator_app_logo"
             android:padding="5dp"
-            android:paddingBottom="-5dp"
             android:src="@drawable/fun_facts_one_line"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

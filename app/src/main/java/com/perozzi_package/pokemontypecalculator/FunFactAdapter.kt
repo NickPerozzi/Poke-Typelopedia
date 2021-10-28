@@ -11,7 +11,7 @@ class FunFactAdapter(private var arrayListForFunFacts: ArrayList<FunFact>):
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FunFactAdapter.ItemHolder {
         val itemHolder = LayoutInflater.from(parent.context)
-            .inflate(R.layout.activity_type_trivia_layout, parent, false)
+            .inflate(R.layout.fun_fact_item_layout, parent, false)
         return ItemHolder(itemHolder)
     }
 

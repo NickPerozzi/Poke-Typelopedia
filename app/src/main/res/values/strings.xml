@@ -37,8 +37,7 @@
     <string name="pov">POV:</string>
     <string name="multiplier">x\u0020</string>
     <string name="x">x ?</string>
-    <string name="does_not_exist_disclaimer">Just as a heads up, there are currently no mons with this
-        type combination.</string>
+    <string name="does_not_exist_disclaimer">Just as a heads up, this typing is 1 of 17 nonexistent type combinations. Neat!</string>
     <string name="pogo">PoGo</string>
     <string name="mainGame">Main Game</string>
     <string name="pok_mon_type_calculator_app_logo">Poke Type Calculator app logo</string>
@@ -48,26 +47,28 @@
     <string name="pov_switch_to_defending">Defender (1 or 2 types)</string>
     <string name="trivia_action_bar_title">Fun Facts About Types!</string>
     <string-array name="fun_fact_contents">
+        <item name="nonexistent_type_combinations">There are currently 17 dual-type combinations that do not exist yet. If you input one of these combinations, the app will tell you. Try finding them all!</item>
         <item name="dual_type_main_game_vs_pogo">In the main game, any dual type with immunity to the attacking type would take no damage, regardless of the second type. In PoGo, the method of calculating damage is to multiply by (8/5) for super effective, (5/8) for not very effective, and (5/8)^2 for does not effect. With dual typing, the two respective coefficients are multiplied. For examples of these differences, switch between "Main Game" and "PoGo" when defending with Steel and Fairy dual typing.</item>
+        <item name="bug_poison_fun_fact">In Generation I, Bug-type moves were super effective against Poison types and vice versa. Starting in Generation II, Bug-type moves were not very effective, and Poison-type moves would do neutral damage in return.</item>
+        <item name="fire_ice_fun_fact">In Generation I, Ice-type moves were neutral against Fire types. In Generation II onwards, they were not very effective.</item>
         <item name="gen_i_ghost_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic types, but due to a coding error they instead did not effect them.</item>
         <item name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the defender would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</item>
         <item name="gen_i_third_error_fun_fact">In Generation I, if an attack was super effective or not very effective against one type but did no damage against another type (eg. Dig against Charizard), the defender would never receive any damage but the game will erroneously state that the attack "missed".</item>
         <item name="dark_steel_fun_fact">Dark and Steel types were introduced in 2000 with Generation II (Gold/Silver/Crystal).</item>
-        <item name="bug_poison_fun_fact">In Generation I, Bug-type moves were super effective against Poison types and vice versa. Starting in Generation II, Bug-type moves were not very effective, and Poison-type moves would do neutral damage in return.</item>
-        <item name="fire_ice_fun_fact">In Generation I, Ice-type moves were neutral against Fire types. In Generation II onwards, they were not very effective.</item>
         <item name="fairy_fun_fact">Fairy type was introduced in 2013 with Generation VI (X/Y).</item>
         <item name="ghost_dark_steel_fun_fact">In Generations II through V, Ghost-type and Dark-type moves were not very effective against Steel types. From Generation VI onward, these types do neutral damage.</item>
         <item name="credits_yeah">This app was created by Nick Perozzi. This is my first coding endeavor, and I am always open to ways to improve the app. If you have any questions, concerns, or potential employment opportunities, feel free to reach out to me at perozzi.n@gmail.com. Thanks for your time, and I hope this app can be useful to you!</item>
     </string-array>
 
     <string-array name="fun_fact_titles">
+        <item>Nonexistent type combinations</item>
         <item>PoGo: Dual-type Interactions</item>
+        <item>Gen I: Bug-Poison interactions</item>
+        <item>Gen I: Fire-Ice interactions</item>
         <item>Gen I: Ghost-type coding error</item>
         <item>Gen I: Displayed text error 1</item>
         <item>Gen I: Displayed text error 2</item>
         <item>Gen II: Dark and Steel types added</item>
-        <item>Gen II: Bug-Poison interactions changed</item>
-        <item>Gen II: Fire-Ice interactions changed</item>
         <item>Gen VI: Fairy type added</item>
         <item>Gen VI: Ghost-Steel and Dark-Steel interactions changed</item>
         <item>About this app</item>

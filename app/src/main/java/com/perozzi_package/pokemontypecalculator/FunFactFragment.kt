@@ -72,7 +72,7 @@ class FunFactFragment : Fragment() {
     private fun setDataInFunFactList(funFactTitles: Array<String>, funFactText: Array<String>):
             ArrayList<FunFact> {
         val items: ArrayList<FunFact> = ArrayList()
-        for (i in 0 until 10) {
+        for (i in funFactTitles.indices) {
             items.add(
                 FunFact(
                     funFactTitles[i],
