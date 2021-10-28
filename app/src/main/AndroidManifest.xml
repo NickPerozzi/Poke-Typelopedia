@@ -15,12 +15,6 @@
         android:theme="@style/Theme.PokemonTypeCalculator"
         >
         <activity
-            android:name="com.perozzi_package.pokemontypecalculator.TypeTriviaActivity"
-            android:exported="true"
-            android:parentActivityName="com.perozzi_package.pokemontypecalculator.MainActivity"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
-        <activity
             android:name="com.perozzi_package.pokemontypecalculator.MainActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
