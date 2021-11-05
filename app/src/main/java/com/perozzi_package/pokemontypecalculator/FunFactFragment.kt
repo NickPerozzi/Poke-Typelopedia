@@ -41,7 +41,7 @@ class FunFactFragment : Fragment() {
         val recyclerView = binding.recyclerView
         val backButton = binding.backButton
         backButton.setOnClickListener {
-            navController.navigate(R.id.action_funFactFragment_to_typeCalculatorFragment)
+            navController.popBackStack()
         }
 
         typeCalculatorViewModel = TypeCalculatorViewModel(resources, requireActivity().application)

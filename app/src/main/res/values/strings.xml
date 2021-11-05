@@ -59,7 +59,6 @@
         <item name="ghost_dark_steel_fun_fact">In Generations II through V, Ghost-type and Dark-type moves were not very effective against Steel types. From Generation VI onward, these types do neutral damage.</item>
         <item name="credits_yeah">This app was created by Nick Perozzi. This is my first coding endeavor, and I am always open to ways to improve the app. If you have any questions, concerns, or potential employment opportunities, feel free to reach out to me at perozzi.n@gmail.com. Thanks for your time, and I hope this app can be useful to you!</item>
     </string-array>
-
     <string-array name="fun_fact_titles">
         <item>Nonexistent type combinations</item>
         <item>PoGo: Dual-type Interactions</item>

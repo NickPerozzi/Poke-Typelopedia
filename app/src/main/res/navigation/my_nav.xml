@@ -25,16 +25,6 @@
         android:id="@+id/funFactFragment"
         android:name="com.perozzi_package.pokemontypecalculator.FunFactFragment"
         android:label="fragment_fun_fact"
-        tools:layout="@layout/fragment_fun_fact" >
-
-        <action
-            android:id="@+id/action_funFactFragment_to_typeCalculatorFragment"
-            app:destination="@id/typeCalculatorFragment"
-            app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/slide_out_to_right"
-            app:popEnterAnim="@anim/slide_in_from_right"
-            app:popExitAnim="@anim/slide_out_to_left" />
-
-    </fragment>
+        tools:layout="@layout/fragment_fun_fact" />
 
 </navigation>
