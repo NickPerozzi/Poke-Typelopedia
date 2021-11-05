@@ -54,6 +54,7 @@
         <item name="gen_i_ghost_error_fun_fact">In Generation I, Ghost-type moves were intended to be super effective against Psychic types, but due to a coding error they instead did not effect them.</item>
         <item name="gen_i_second_error_fun_fact">In Generation I, if an attack was super effective against one type but not very effective against the other (eg. Dig against Venusaur), the defender would receive neutral damage, but the game would erroneously display "not very effective" or "super effective".</item>
         <item name="gen_i_third_error_fun_fact">In Generation I, if an attack was super effective or not very effective against one type but did no damage against another type (eg. Dig against Charizard), the defender would never receive any damage but the game will erroneously state that the attack "missed".</item>
+        <item name="bird_type">If you happen to catch the famous glitch MissingNo. in Generation I, it will register as Bird type (not Flying type). There are no official Bird types, nor are there any official Bird-type moves. Bird type is speculated to be from an earlier draft of the game before it was eventually replaced with Flying.</item>
         <item name="dark_steel_fun_fact">Dark and Steel types were introduced in 2000 with Generation II (Gold/Silver/Crystal).</item>
         <item name="fairy_fun_fact">Fairy type was introduced in 2013 with Generation VI (X/Y).</item>
         <item name="ghost_dark_steel_fun_fact">In Generations II through V, Ghost-type and Dark-type moves were not very effective against Steel types. From Generation VI onward, these types do neutral damage.</item>
@@ -67,6 +68,7 @@
         <item>Gen I: Ghost-type coding error</item>
         <item>Gen I: Displayed text error 1</item>
         <item>Gen I: Displayed text error 2</item>
+        <item>Gen I: Bird type</item>
         <item>Gen II: Dark and Steel types added</item>
         <item>Gen VI: Fairy type added</item>
         <item>Gen VI: Ghost-Steel and Dark-Steel interactions changed</item>
