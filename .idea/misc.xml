@@ -15,9 +15,13 @@
         <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/activity_main.xml" value="0.2578947368421053" />
         <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/activity_type_trivia.xml" value="0.3328125" />
         <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/activity_type_trivia_layout.xml" value="0.315625" />
-        <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/fragment_fun_fact.xml" value="0.3223958333333333" />
+        <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/fragment_fun_fact.xml" value="0.23275862068965517" />
         <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/fragment_type_calculator.xml" value="0.34010416666666665" />
+        <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/fun_fact_item_layout.xml" value="0.3223958333333333" />
         <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/layout/type_table_grid_layout.xml" value="0.33" />
+        <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.36041666666666666" />
+        <entry key="..\:/Users/peroz/AndroidStudioProjects/Pokemon-Typelopedia/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.36041666666666666" />
+        <entry key="..\:/Users/peroz/AppData/Local/Android/Sdk/platforms/android-31/data/res/layout/simple_spinner_item.xml" value="0.15520833333333334" />
       </map>
     </option>
   </component>

@@ -5,7 +5,7 @@
 <data>
     <variable
         name="typeCalculatorViewModel"
-        type="com.perozzi_package.pokemontypecalculator.TypeCalculatorViewModel"
+        type="com.perozzi_package.pokemontypecalculator.ui.TypeCalculatorViewModel"
         />
 </data>
 
@@ -17,7 +17,7 @@
     android:background="@{typeCalculatorViewModel.backgroundColor}"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context=".TypeCalculatorFragment"
+    tools:context=".ui.TypeCalculatorFragment"
     tools:ignore="InvalidId"
     >
 

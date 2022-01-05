@@ -6,16 +6,16 @@
 
     <data>
         <variable
-            name="typeCalculatorViewModel"
-            type="com.perozzi_package.pokemontypecalculator.TypeCalculatorViewModel" />
+            name="funFactViewModel"
+            type="com.perozzi_package.pokemontypecalculator.ui.FunFactViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/triviaCardView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@{typeCalculatorViewModel.backgroundColor}"
-        tools:context=".FunFactFragment"
+        android:background="@{funFactViewModel.backgroundColor}"
+        tools:context=".ui.FunFactFragment"
         tools:ignore="InvalidId">
 
         <ImageView

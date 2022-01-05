@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/typeCalculatorFragment"
-        android:name="com.perozzi_package.pokemontypecalculator.TypeCalculatorFragment"
+        android:name="com.perozzi_package.pokemontypecalculator.ui.TypeCalculatorFragment"
         android:label="fragment_type_calculator"
         tools:layout="@layout/fragment_type_calculator" >
 
@@ -23,7 +23,7 @@
 
     <fragment
         android:id="@+id/funFactFragment"
-        android:name="com.perozzi_package.pokemontypecalculator.FunFactFragment"
+        android:name="com.perozzi_package.pokemontypecalculator.ui.FunFactFragment"
         android:label="fragment_fun_fact"
         tools:layout="@layout/fragment_fun_fact" />
 
